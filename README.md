@@ -5,6 +5,10 @@ MotionBuilder Extensions Pack
 
  I'm using many nvidia extensions, so to make the morenderer work properly, you should have nVidia card (with gpu chipset Kepler or later)
 
+## Source Code Project ##
+
+ I'm using Visual Studio 2010 64bit for compiling the source code and libraries.
+
 ## Dependencies ##
 
  There are several projects that I'm using in MoPlugs.

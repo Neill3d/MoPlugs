@@ -30,6 +30,44 @@
 * FacialRIG \ FacialRIG_SetupConstraints2.py
 * FacialRIG \ StabilizationScenario.py
 
+### Script to work with a DataGlove device and it's recorded result ###
+
+* ShapeHand \ ShapeHand_CorrParentChildConstraints.py
+* ShapeHand \ ShapeHand_CorrRelationConstraint.py
+* ShapeHand \ ShapeHand_CreateAnIntermediateHandsChar.py
+* ShapeHand \ ShapeHand_printHeirarchy.py
+* ShapeHand \ ShapeHand_RelationConnections.py
+* ShapeHand \ ShapeHand_Rename_DeviceSet_toBVH.py
+* ShapeHand \ ShapeHand_RenameBVH_to_DeviceSet.py
+* ShapeHand \ ShapeHand_RenameSkeleton.py
+
+### Others ###
+
+* AssignUISet.py
+* ComputeAcceleration.py
+* CopyBlendShapeAnimation.py
+* DuplicateUnderTheRoot.py
+* ExtractTrajectoryPath.py
+* FromLayeredToSingleTexture.py
+* GroupedUnderNull.py
+* InsertParent.py
+* Lights_HardTurnOnOff.py
+* Lights_TurnOnOff.py
+* MainCar_WindowsSetup.py
+* MakeCircle.py
+* ModelAndLTCDevice.py
+* Physics_MakeJointChain.py
+* RefreshModelsTextures.py
+* RefreshTextures.py
+* RefreshTextures2015.py
+* RemoveGPUCacheDuplicates.py
+* SaveLocalPositions.py
+* SelCharAndCR_ByModelSelection.py
+* SelectAllCharacterNodes_ByModelSelection.py
+* StoreRelationInConnections.py
+* Story_ReplaceMediaInTrackClips.py
+* StoryTrackFromSelection.py
+
 ## Lib ##
 
  Special startup scripts with special logic classes

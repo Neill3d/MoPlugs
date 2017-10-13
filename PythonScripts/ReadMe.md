@@ -1,11 +1,14 @@
 
 # MoPlugs Scripts #
 
+For more information, please have a look at wiki pages.
+Note! Most of scripts and tools have been developed in MoBu 2014 
+
 ## Action ##
 
  Scripts that have a single execution scenario
  
-* CarSim \ ReConnectJoystick.py
+* CarSim \ ReConnectJoystick.py - the script helps to fix an issue with a missing or stucked joystick device after scene reloading in mobu
 
 ### Scripts for the Wall Bricks Constraints and building blocks logic ###
 
@@ -83,8 +86,8 @@
 * CameraAndGroupLinkingTool
 * CameraRIGTool
 * CharacterSelectionTool
-* CleanUpManager
-* ExtendedRenderingTool
+* **CleanUpManager.py**
+* **ExtendedRenderingTool.py**
 * FacialRIG_HelperTool
 * FacialRIG_PrepStarter
 * FacialRIG_Selector
@@ -95,7 +98,7 @@
 * Renamer.py
 * StoreRelationInConnections.py
 * StoryIOTool.py
-* TexturesManager.py
+* **TexturesManager.py**
 * UnitTestsTool.py
 * ViewportGrabberTool.py
  
@@ -104,4 +107,4 @@
  Tool for a physics simulation
  
 * Ball Toss Tool
-* Wheel Motion Tool
+* **Wheel Motion Tool** - computing wheel rolling and steering rotation by using a root motion and geometry radius

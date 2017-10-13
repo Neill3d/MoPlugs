@@ -14,6 +14,10 @@ MotionBuilder Extensions Pack
 * Cleanup Manager
 * Texture Manager
 
+## Documentation ##
+
+ You can find some articles and notes in repository wiki.
+
 ## Hardware requirenments ##
 
  I'm using many nvidia extensions, so to make the morenderer work properly, you should have nVidia card (with gpu chipset Kepler or later)

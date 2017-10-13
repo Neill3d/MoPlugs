@@ -62,6 +62,8 @@ MotionBuilder Extensions Pack
 
 ## About ##
 
- Plugins and scripts have been developed during working on The Wall film for Canadian Film Board.
+ Plugins and scripts have been developed during my work on The Wall film for Canadian Film Board.
+ 
  Author Sergey Solokhin (Neill3d)
+ 
   Author of ideas and supervising by Cam Christiansen (Anlanda Studio)

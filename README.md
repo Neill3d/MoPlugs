@@ -3,16 +3,17 @@ MotionBuilder Extensions Pack
 
 ## Content ##
 
+### Pre compiled binaries ###
+
+In progress
+
 ### Plugins ###
 
-* BlendShape Toolkit
-* Sculpt Brush
-* MoRenderer
+In progress
 
 ### Scripts ###
 
-* Cleanup Manager
-* Texture Manager
+Full list of scripts you can find in the PythonScripts \ ReadMe.md
 
 ## Documentation ##
 

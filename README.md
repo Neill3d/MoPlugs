@@ -1,7 +1,20 @@
 # MoPlugs
 MotionBuilder Extensions Pack
 
-## MoRenderer ##
+## Content ##
+
+### Plugins ###
+
+* BlendShape Toolkit
+* Sculpt Brush
+* MoRenderer
+
+### Scripts ###
+
+* Cleanup Manager
+* Texture Manager
+
+## Hardware requirenments ##
 
  I'm using many nvidia extensions, so to make the morenderer work properly, you should have nVidia card (with gpu chipset Kepler or later)
 
@@ -9,25 +22,36 @@ MotionBuilder Extensions Pack
 
  I'm using Visual Studio 2010 64bit for compiling the source code and libraries.
 
-## Dependencies ##
+### Dependencies ###
 
  There are several projects that I'm using in MoPlugs.
 
-### glew ###
+#### glew ####
+ The OpenGL Extension Wrangler Library
+ https://github.com/nigels-com/glew
 
-### glm ###
+#### glm ####
+ OpenGL Mathematics
+ https://glm.g-truc.net/0.9.8/index.html
 
-### NVFX ###
+#### NVFX ####
 
  I like that project a lot. Very powerful, and it's a pity that Tristan stops updating it. That's what OpenGL was missing - to have a flexible and powerful effect system.
  I'm using nvFX statis libraries with some small modifications, you can find it in my repositories. 
  
-### OpenColor IO ###
+ https://github.com/Neill3d/nvFX
+ 
+#### OpenColor IO ####
 
  That extension is used by Composition Effect (3d LUT's)
+ https://github.com/imageworks/OpenColorIO
  
-### Newton Physics Engine ###
+#### Newton Physics Engine ####
+ https://github.com/MADEAPPS/newton-dynamics
 
-### rapidjson and Streetview-Explorer ###
+#### rapidjson and Streetview-Explorer ####
 
  That libraries are used by CubeMap from street view functionality.
+
+ https://github.com/Tencent/rapidjson
+ https://github.com/PaulWagener/Streetview-Explorer

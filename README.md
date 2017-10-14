@@ -31,6 +31,11 @@ Full list of scripts you can find in the PythonScripts \ ReadMe.md
 
  There are several projects that I'm using in MoPlugs.
 
+#### MoPlugs Framework ####
+
+ Once I've done a code refactoring and move some part of code out of OR SDK (MotionBuilder) dependencies
+ https://github.com/Neill3d/MoPlugs_Framework
+
 #### glew ####
  The OpenGL Extension Wrangler Library
  https://github.com/nigels-com/glew

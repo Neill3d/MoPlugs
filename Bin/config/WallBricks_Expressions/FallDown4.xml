@@ -1,0 +1,2 @@
+<Header comments="Saved from Wall Bricks constraint" version="1" />
+<Expressions PositionX="0" PositionY="var x:=select(f, 0.0,0.8); var y:=select(f, 0.8,1.0); 50(1-x*x*x) + 2*abs(sin(y*pi))" PositionZ="var x:=select(f, 0.0,0.8); 50*sin(x*pi)*(1-x*x*x)" RotationX="0.0" RotationY="0.0" RotationZ="0.0" ScalingX="exp(f-1)" ScalingY="exp(f-1)" ScalingZ="exp(f-1)" />

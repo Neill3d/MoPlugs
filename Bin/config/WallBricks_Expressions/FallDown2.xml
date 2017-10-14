@@ -1,0 +1,2 @@
+<Header comments="Saved from Wall Bricks constraint" version="1" />
+<Expressions PositionX="0.0" PositionY="50.0-(f*f*f*50.0)+50.0*sin(2.5*(1.0-f))" PositionZ="0.0" RotationX="0.0" RotationY="0.0" RotationZ="0.0" ScalingX="1.0" ScalingY="1.0" ScalingZ="1.0" />

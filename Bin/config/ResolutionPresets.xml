@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<Presets Default="WALL (2274 x 967)">
+	<preset Name="Custom" Width="0" Height="0"/>
+	<preset Name="720p (16:9)" Width="1280" Height="720"/>
+	<preset Name="720p (2.35:1)" Width="1280" Height="545"/>
+	<preset Name="1080p (16:9)" Width="1920" Height="1080"/>
+	<preset Name="1080p (2.35:1)" Width="1920" Height="817"/>
+	<preset Name="2K (16:9)" Width="2048" Height="1152"/>
+	<preset Name="2K (2.35:1)" Width="2048" Height="871"/>
+	<preset Name="4K HD (2.35:1)" Width="3840" Height="1634"/>
+	<preset Name="4K (2.35:1)" Width="4096" Height="1679"/>
+	<preset Name="WALL (2274 x 967)" Width="2274" Height="967"/>
+</Presets>

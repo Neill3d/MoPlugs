@@ -1,5 +1,5 @@
 
-## Python extension for bake projectors ##
+## Python extension to bake projectors ##
 
 Author Sergey Solokhin (Neill3d) 2016
 	e-mail to: s@neill3d.com

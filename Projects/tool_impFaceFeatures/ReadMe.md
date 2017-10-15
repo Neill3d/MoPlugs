@@ -4,9 +4,9 @@
 
 Import 2d tracked data from
 
-1 - Campbridge features tracker
-2 - Shake shade data (tracked in Mocha)
-3 - Faceware landmarks data (from Analyzer)
+- Campbridge features tracker
+- Shake shade data (tracked in Mocha)
+- Faceware landmarks data (from Analyzer)
 
 TODO:
  - add batch import !!!

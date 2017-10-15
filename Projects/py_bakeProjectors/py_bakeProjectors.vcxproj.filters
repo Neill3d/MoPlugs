@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{cb72c3ee-32c6-4aa5-b79e-2df24a154208}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{404440ff-28ed-4ae1-9e57-bcfe75c32c95}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Script">
+      <UniqueIdentifier>{e9313123-1ee5-4aed-82ad-e7c3f392e2d2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="py_bakeProjectors.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="py_bakeProjectors_FBView.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="py_bakeProjectors_README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="py_bakeProjectors_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="py_bakeProjectors_FBView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

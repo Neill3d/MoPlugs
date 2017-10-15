@@ -1,6 +1,6 @@
 
 
-		Bake Projectors Plugin for Autodesk MotionBuilder
+# Bake Projectors Plugin for Autodesk MotionBuilder #
 
 Dependencies - nvFX, shader - ProjectiveBaking.glslfx
 

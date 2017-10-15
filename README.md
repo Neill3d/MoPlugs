@@ -1,6 +1,8 @@
 # MoPlugs
 MotionBuilder Extensions Pack
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/neill3d)
+
 ## Content ##
 
 ### Plugins ###

@@ -3,13 +3,14 @@ MotionBuilder Extensions Pack
 
 ## Content ##
 
-### Pre compiled binaries ###
-
-In progress
-
 ### Plugins ###
 
-In progress
+Precompiled version of plugins you can find in "bin" folder.
+
+Source code is inside Projects folder.
+ In projects I'm using shared static libraries
+ - without OR SDK dependecies - https://github.com/Neill3d/MoPlugs_Framework
+ - with OR SDK dependencies - MotionCodeLibrary folder
 
 ### Scripts ###
 
@@ -35,6 +36,12 @@ Full list of scripts you can find in the PythonScripts \ ReadMe.md
 
  Once I've done a code refactoring and move some part of code out of OR SDK (MotionBuilder) dependencies
  https://github.com/Neill3d/MoPlugs_Framework
+
+#### Motion Code Library ####
+
+ That's a shared classes based on MoPlugs Framework but extends it specificly for MotionBuilder tasks.
+ 
+Code and project is inside MotionCodeLibrary folder in the repository.
 
 #### glew ####
  The OpenGL Extension Wrangler Library

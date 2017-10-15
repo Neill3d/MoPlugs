@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "interactive_pack", "interactive_pack\interactive_pack.vcxproj", "{67C89902-400C-4A8D-AD18-A038CB49A1DE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "library_MoCode", "..\MotionCodeLibrary\Projects\MoCodeLibrary.vcxproj", "{A17CA844-DD7F-4522-A2B2-D8C7F6308818}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release 2015|Win32 = Release 2015|Win32
+		Release 2015|x64 = Release 2015|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Debug|Win32.ActiveCfg = Debug|x64
+		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Debug|x64.ActiveCfg = Debug|x64
+		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Debug|x64.Build.0 = Debug|x64
+		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release 2015|Win32.ActiveCfg = Release 2015|x64
+		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release 2015|x64.ActiveCfg = Release 2015|x64
+		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release 2015|x64.Build.0 = Release 2015|x64
+		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release|Win32.ActiveCfg = Release|x64
+		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release|x64.ActiveCfg = Release|x64
+		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release|x64.Build.0 = Release|x64
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Debug|Win32.Build.0 = Debug|Win32
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Debug|x64.ActiveCfg = Debug|x64
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Debug|x64.Build.0 = Debug|x64
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release 2015|Win32.ActiveCfg = Release 2015|Win32
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release 2015|Win32.Build.0 = Release 2015|Win32
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release 2015|x64.ActiveCfg = Release 2015|x64
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release 2015|x64.Build.0 = Release 2015|x64
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release|Win32.ActiveCfg = Release|Win32
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release|Win32.Build.0 = Release|Win32
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release|x64.ActiveCfg = Release|x64
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

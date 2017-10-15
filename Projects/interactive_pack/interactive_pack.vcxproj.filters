@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{eb567eae-fe74-46c6-a05d-f9d87f87b039}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{4c4001bd-b233-4341-be10-35f9418810f4}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="system_box.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="perlin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="shortcut_box.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="transport_advance_box.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="interactive_manager.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="orcommand_pack_command.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Common.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="camera_boxes.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="system_box.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="perlin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shortcut_box.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="transport_advance_box.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="interactive_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="orcommand_pack_command.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="camera_boxes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="InteractivePack_README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="interactive_pack.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

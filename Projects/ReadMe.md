@@ -14,7 +14,13 @@ Folders
 
 ## Facial Solution ##
 
- Importing 2d data from 
+Import 2d tracked data from
+
+- Campbridge features tracker
+- Shake shade data (tracked in Mocha)
+- Faceware landmarks data (from Analyzer)
+
+Retargeting constraint to drive 3d face joints by 2d tracked data
 
 Solution - facial.sln
 

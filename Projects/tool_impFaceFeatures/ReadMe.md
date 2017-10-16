@@ -1,12 +1,12 @@
 
 
-FaceTool
+# FaceTool #
 
-Import from
+Import 2d tracked data from
 
-1 - Campbridge features tracker
-2 - Shake shade data (tracked in Mocha)
-3 - Faceware landmarks data (from Analyzer)
+- Campbridge features tracker
+- Shake shade data (tracked in Mocha)
+- Faceware landmarks data (from Analyzer)
 
 TODO:
  - add batch import !!!
@@ -19,7 +19,7 @@ NOTE!
  2d points are null objects with animated channels
  faceware landmarks imported as optical data.
 
-LOG
+## LOG ##
 
  05.05.2015
   import 2d landmarks from OpenFace application
@@ -28,7 +28,7 @@ LOG
   big update for the UI, functinality (import faceware xml), import as optical of as null objects
 
 
- == Contact ==
+## Contact ##
 	Sergey Solokhin (Neill3d)
 		e-mail to: s@neill3d.com
 			www.neill3d.com

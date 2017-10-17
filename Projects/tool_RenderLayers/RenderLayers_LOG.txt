@@ -1,0 +1,29 @@
+
+	Render Layers plugin for Autodesk MotionBuilder
+
+LOG
+
+16.03.2017
+ + updated cmd line rendering (added more features + support to switch renderer callback)
+
+21.07.2014
+ + add command line render feature
+
+31.03.2014
+	+ compile under 2011, 2012, 2013, 2014 versions
+
+21.04.2013 ­ 
+	+ added a layer state. Now you can hold information about materials, shaders and textures in each layer.
+
+12.04.2013 ­
+­	+ installation package
+­ 	* fixed group loading/saving
+­ 	* fixed file new to clear render layers
+­ 	* fixed cameras loading/saving
+­ 	* put TIF format as a default
+
+26.03.2013 ­ 
+	+ added a feature to matte all objects outside a layer group. It close to contribution maps in Maya.
+
+25.03.2013 ­ 
+	+ first beta version for the MotionBuilder 2013 (64 bits)

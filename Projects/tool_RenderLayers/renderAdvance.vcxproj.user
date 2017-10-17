@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LocalDebuggerCommand>C:\Program Files\Autodesk\MotionBuilder 2012\bin\x64\motionbuilder.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2010|Win32'">
+    <LocalDebuggerCommand>C:\Program Files\Autodesk\MotionBuilder 2012\bin\x64\motionbuilder.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerCommand>C:\Program Files\Autodesk\MotionBuilder Danko (64-bit)\bin\x64\motionbuilder.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2010|x64'">
+    <LocalDebuggerCommand>$(ADSK_MOBU_2010_64)\bin\x64\motionbuilder.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2014|x64'">
+    <LocalDebuggerCommand>$(ADSK_MOBU_2014_64)\bin\$(Platform)\motionbuilder.exe</LocalDebuggerCommand>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2014|x64'">
+    <LocalDebuggerCommandArguments>-console -suspendMessages --sdk-begin --r offscreen --aa 0 --rr "MoRendererCallback" --cam "A:LOW SHAKE CAMERA" --stt 28 --stp 38 --step 1 --pctFrm HD --c xvid --oFmt .avi --of "D:\Output.avi" --close --sdk-end D:\Work\TheWALL_012\012_HIGH_RES_WALL_DUST.002.fbx</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+</Project>

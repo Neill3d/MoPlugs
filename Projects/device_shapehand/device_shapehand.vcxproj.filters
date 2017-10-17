@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{f1b0fa19-90ca-490f-b0f2-fc8a1230f4a9}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{3ee6f0a0-5927-4e56-8825-596f9b3d95d0}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="device_shapehand.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="device_shapehand_device.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="device_shapehand_hardware.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="device_shapehand_layout.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="device_shapehand_device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="device_shapehand_hardware.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="device_shapehand_layout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="skeletondevicetester\DeviceBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+</Project>

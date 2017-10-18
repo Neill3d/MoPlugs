@@ -1,0 +1,24 @@
+
+== Dynamic masking plugin for Autodesk MotionBuilder ==
+
+ Uses nVidia extension NV_path_rendering.
+
+=== TODO ===
+
+- рендер камеры не работает в offline рендере
+
+1 - add shape circle and custom shape manipulators
+2 - posibility to specify the channel index for the projector
+ mean not as a rule R - 1, G -2, B -3, A-4
+  but make it custom
+
+=== LOG ===
+
+https://docs.google.com/document/d/1Uc-FPFulLXHnwYVcNMbKQvH7SUBw2Myy_IHXw8i0Glo/edit?usp=sharing
+
+
+=== About ===
+
+Author Sergey Solokhin (Neill3d) 2013
+ e-mail to: s@neill3d.com
+  www.neill3d.com

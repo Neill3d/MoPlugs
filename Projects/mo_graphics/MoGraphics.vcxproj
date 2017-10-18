@@ -1,0 +1,846 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release 2015|Win32">
+      <Configuration>Release 2015</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release 2015|x64">
+      <Configuration>Release 2015</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release 2017|Win32">
+      <Configuration>Release 2017</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release 2017|x64">
+      <Configuration>Release 2017</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>mo_graphics</ProjectName>
+    <ProjectGuid>{D2892D3D-084D-440A-AC0D-CE165B9E90D9}</ProjectGuid>
+    <RootNamespace>Dynamic Lighting</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2015|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2017|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release 2015|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release 2017|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ADSK_MOBU_2014_64)\bin\$(Platform)\plugins\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|Win32'">$(ADSK_MOBU_2014_64)\bin\$(Platform)\plugins\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2017|Win32'">$(ADSK_MOBU_2014_64)\bin\$(Platform)\plugins\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ADSK_MOBU_2014_64)\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|Win32'">$(ADSK_MOBU_2014_64)\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2017|Win32'">$(ADSK_MOBU_2014_64)\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</IgnoreImportLibrary>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release 2015|Win32'">true</IgnoreImportLibrary>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release 2017|Win32'">true</IgnoreImportLibrary>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release 2015|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release 2017|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\_plugins\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\_plugins\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">..\..\_plugins\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">..\..\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</IgnoreImportLibrary>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</IgnoreImportLibrary>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">true</IgnoreImportLibrary>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ADSK_MOBU_2014_64)\bin\$(Platform)\plugins\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ADSK_MOBU_2014_64)\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</IgnoreImportLibrary>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\_plugins\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IgnoreImportLibrary>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\MotionCodeLibrary;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include\fbsdk;D:\PROGRAMMING\nvFX-master\glew-1.10.0\include;D:\PROGRAMMING\nvFX-master\nvFX-master\include;D:\PROGRAMMING\nvFX-master\nvFX-master\samples\shared\nv_math;D:\PROGRAMMING\OpenGL\glm-0.9.5.3;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\MotionCodeLibrary\Include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include\fbsdk;..\..\glew-1.11.0\include;..\..\nvFX-master\nvFX-master\include;..\..\glm-0.9.6.3\glm;..\..\nvFX-master\nvFX-master\samples\shared\nv_dds;..\..\OpenColorIO-master\export;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include\boost-1.46.1\include;..\..\nvFX-master\nvFX-master\samples\shared\nvImage;..\..\SceneGraph_Shared\code;..\..\Projects\Common_graphics_exchange;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\MotionCodeLibrary;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include\fbsdk;D:\PROGRAMMING\nvFX-master\glew-1.10.0\include;D:\PROGRAMMING\nvFX-master\nvFX-master\include;D:\PROGRAMMING\nvFX-master\nvFX-master\samples\shared\nv_math;D:\PROGRAMMING\OpenGL\glm-0.9.5.3;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2015|Win32'">..\..\MotionCodeLibrary;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include\fbsdk;D:\PROGRAMMING\nvFX-master\glew-1.10.0\include;D:\PROGRAMMING\nvFX-master\nvFX-master\include;D:\PROGRAMMING\nvFX-master\nvFX-master\samples\shared\nv_math;D:\PROGRAMMING\OpenGL\glm-0.9.5.3;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2017|Win32'">..\..\MotionCodeLibrary;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include\fbsdk;D:\PROGRAMMING\nvFX-master\glew-1.10.0\include;D:\PROGRAMMING\nvFX-master\nvFX-master\include;D:\PROGRAMMING\nvFX-master\nvFX-master\samples\shared\nv_math;D:\PROGRAMMING\OpenGL\glm-0.9.5.3;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\MotionCodeLibrary\include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include\fbsdk;..\..\glew-1.11.0\include;..\..\nvFX-master\nvFX-master\include;..\..\nvFX-master\nvFX-master\samples\shared\nv_math;..\..\glm-0.9.6.3\glm;..\..\nvFX-master\nvFX-master\samples\shared\nv_dds;..\..\OpenColorIO-master\export;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include\boost-1.46.1\include;..\..\nvFX-master\nvFX-master\samples\shared\nvImage;..\..\SceneGraph_Shared\code;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\MotionCodeLibrary\include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include\fbsdk;..\..\glew-1.11.0\include;..\..\nvFX-master\nvFX-master\include;..\..\nvFX-master\nvFX-master\samples\shared\nv_math;..\..\glm-0.9.6.3\glm;..\..\nvFX-master\nvFX-master\samples\shared\nv_dds;..\..\OpenColorIO-master\export;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include\boost-1.46.1\include;..\..\nvFX-master\nvFX-master\samples\shared\nvImage;..\..\SceneGraph_Shared\code;..\..\Projects\Common_graphics_exchange;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">..\..\MotionCodeLibrary\include;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include\fbsdk;..\..\glew-1.11.0\include;..\..\nvFX-master\nvFX-master\include;..\..\nvFX-master\nvFX-master\samples\shared\nv_math;..\..\glm-0.9.6.3\glm;..\..\nvFX-master\nvFX-master\samples\shared\nv_dds;..\..\OpenColorIO-master\export;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include\boost-1.55.0\;..\..\nvFX-master\nvFX-master\samples\shared\nvImage;..\..\SceneGraph_Shared\code;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);D:\PROGRAMMING\nvFX-master\glew-1.10.0\lib\Release\x64;D:\PROGRAMMING\nvFX-master\nvFX-master\lib\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);..\..\glew-1.11.0\lib\Debug\x64;..\..\nvFX-master\nvFX-master\build2\lib\Release;D:\Work\MOPLUGS\_Plugins;..\..\OpenColorIO-master\src\core\Release;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);D:\PROGRAMMING\nvFX-master\glew-1.10.0\lib\Release\x64;D:\PROGRAMMING\nvFX-master\nvFX-master\lib\Release;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2015|Win32'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);D:\PROGRAMMING\nvFX-master\glew-1.10.0\lib\Release\x64;D:\PROGRAMMING\nvFX-master\nvFX-master\lib\Release;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2017|Win32'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);D:\PROGRAMMING\nvFX-master\glew-1.10.0\lib\Release\x64;D:\PROGRAMMING\nvFX-master\nvFX-master\lib\Release;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);..\..\glew-1.11.0\lib\Release\x64;D:\Work\MOPLUGS\nvFX-master\nvFX-master\build2\lib\Release;D:\Work\MOPLUGS\_Plugins_backup;..\..\OpenColorIO-master\src\core\Release;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">$(ADSK_MOBU_2015_64)\OpenRealitySDK\lib\$(Platform);..\..\glew-1.11.0\lib\Release\x64;..\..\nvFX-master\nvFX-master\build2\lib\Release;..\..\MOPLUGS\_Plugins;..\..\OpenColorIO-master\src\core\Release;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">$(ADSK_MOBU_2017_64)\OpenRealitySDK\lib\$(Platform);..\..\glew-1.11.0\lib\Release\x64;D:\Work\MOPLUGS\nvFX-master\nvFX-master\build2\lib\Release;D:\Work\MOPLUGS\_Plugins_backup;..\..\OpenColorIO-master\src\core\Release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>
+      </TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc80.pdb</ProgramDataBaseFileName>
+      <BrowseInformation>
+      </BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>fbsdk.lib;opengl32.lib;glu32.lib;glew32s.lib;FxLib64D.lib;FxLibGL64D.lib;FxParser64D.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(ADSK_MOBU_2014_64)/bin\$(Platform)/plugins/$(ProjectName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>libcpmt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(ADSK_MOBU_2014_64)\bin\$(Platform)\plugins\$(ProjectName).dll" "..\..\bin_2014\$(Platform)\plugins\$(ProjectName).dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release 2015|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>
+      </TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc80.pdb</ProgramDataBaseFileName>
+      <BrowseInformation>
+      </BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>fbsdk.lib;opengl32.lib;glu32.lib;glew32s.lib;FxLib64D.lib;FxLibGL64D.lib;FxParser64D.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(ADSK_MOBU_2014_64)/bin\$(Platform)/plugins/$(ProjectName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>libcpmt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(ADSK_MOBU_2014_64)\bin\$(Platform)\plugins\$(ProjectName).dll" "..\..\bin_2014\$(Platform)\plugins\$(ProjectName).dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release 2017|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>
+      </TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc80.pdb</ProgramDataBaseFileName>
+      <BrowseInformation>
+      </BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>fbsdk.lib;opengl32.lib;glu32.lib;glew32s.lib;FxLib64D.lib;FxLibGL64D.lib;FxParser64D.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(ADSK_MOBU_2014_64)/bin\$(Platform)/plugins/$(ProjectName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>libcpmt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(ADSK_MOBU_2014_64)\bin\$(Platform)\plugins\$(ProjectName).dll" "..\..\bin_2014\$(Platform)\plugins\$(ProjectName).dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>
+      </TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG_RENDERBUG_;SHADOW_MSAA;GLM_FORCE_SSE4;TIXML_USE_STL;NOMINMAX;NDEBUG;WIN32;GLEW_STATIC;BUILD_DLL;BT_USE_DOUBLE_PRECISION;_NEWTON_STATIC_LIB;_CUSTOM_JOINTS_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc80.pdb</ProgramDataBaseFileName>
+      <BrowseInformation>
+      </BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>fbsdk.lib;opengl32.lib;glu32.lib;glew32s.lib;FxLib64.lib;FxLibGL64.lib;FxParser64.lib;version.lib;OpenColorIO.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>..\..\_Plugins_backup\$(ProjectName).lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>libcpmt.lib;LIBCMT.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>
+      </TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG_RENDERBUG_;SHADOW_MSAA;GLM_FORCE_SSE4;TIXML_USE_STL;NOMINMAX;NDEBUG;WIN32;GLEW_STATIC;BUILD_DLL;MOBU_DLL;BT_USE_DOUBLE_PRECISION;_NEWTON_STATIC_LIB;_CUSTOM_JOINTS_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc80.pdb</ProgramDataBaseFileName>
+      <BrowseInformation>
+      </BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>fbsdk.lib;opengl32.lib;glu32.lib;glew32s.lib;FxLib64.lib;FxLibGL64.lib;FxParser64.lib;version.lib;OpenColorIO.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>..\..\_Plugins\$(ProjectName).lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>libcpmt.lib;LIBCMT.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>
+      </TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG_RENDERBUG_;SHADOW_MSAA;GLM_FORCE_SSE4;TIXML_USE_STL;NOMINMAX;NDEBUG;WIN32;GLEW_STATIC;BUILD_DLL;BT_USE_DOUBLE_PRECISION;_NEWTON_STATIC_LIB;_CUSTOM_JOINTS_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc80.pdb</ProgramDataBaseFileName>
+      <BrowseInformation>
+      </BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>fbsdk.lib;opengl32.lib;glu32.lib;glew32s.lib;FxLib64.lib;FxLibGL64.lib;FxParser64.lib;version.lib;OpenColorIO.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>..\..\_Plugins_backup\$(ProjectName).lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>libcpmt.lib;LIBCMT.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>
+      </TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\include\fbsdk;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc80.pdb</ProgramDataBaseFileName>
+      <BrowseInformation>
+      </BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>fbsdk.lib;opengl32.lib;glu32.lib;cg.lib;cgGL.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\..\..\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(ADSK_MOBU_2014_64)/bin\$(Platform)/plugins/$(ProjectName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)Shaders\LightingVS.cg" "$(OutDir)LightingVS.cg"
+copy "$(ProjectDir)Shaders\LightingPS.cg" "$(OutDir)LightingPS.cg"
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>
+      </TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG_RENDERBUG_;SHADOW_MSAA;TIXML_USE_STL;NOMINMAX;_DEBUG;WIN32;GLEW_STATIC;BUILD_DLL;_NEWTON_USE_DOUBLE;MOBU_DLL;GLM_FORCE_SSE4;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>
+      </AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc80.pdb</ProgramDataBaseFileName>
+      <BrowseInformation>
+      </BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>fbsdk.lib;opengl32.lib;glu32.lib;glew32sd.lib;glut32.lib;FxLib64.lib;FxLibGL64.lib;FxParser64.lib;version.lib;OpenColorIO.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>..\..\_Plugins\$(ProjectName).lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuildStep Include="Shaders\LightingPS.cg">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CustomBuildStep>
+    <CustomBuildStep Include="Shaders\LightingVS.cg">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CustomBuildStep>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Common_graphics_exchange\mographics_common.cpp" />
+    <ClCompile Include="..\Common_Projectors\bakeProjectors_projectors.cpp" />
+    <ClCompile Include="applymanagerrule.cxx" />
+    <ClCompile Include="callbacks_binded.cpp" />
+    <ClCompile Include="callbacks_bindless.cpp" />
+    <ClCompile Include="callbacks_particles.cpp" />
+    <ClCompile Include="callback_factory.cpp" />
+    <ClCompile Include="Common_FBComponent_UpdateProps.cpp" />
+    <ClCompile Include="compositeMaster_association.cxx" />
+    <ClCompile Include="compositeMaster_background.cpp" />
+    <ClCompile Include="compositeMaster_common.cxx" />
+    <ClCompile Include="compositeMaster_computeShaders.cpp" />
+    <ClCompile Include="compositeMaster_objectDecalFilter.cpp" />
+    <ClCompile Include="compositeMaster_objectDOFFilter.cpp" />
+    <ClCompile Include="compositeMaster_objectFinal.cpp" />
+    <ClCompile Include="compositeMaster_objectFogFilter.cpp" />
+    <ClCompile Include="compositeMaster_objectLUTFilter.cpp" />
+    <ClCompile Include="compositeMaster_objectFilters.cpp" />
+    <ClCompile Include="compositeMaster_fbshader.cxx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_objectLayers.cpp" />
+    <ClCompile Include="compositeMaster_object.cxx" />
+    <ClCompile Include="compositeMaster_objectShadowFilter.cpp" />
+    <ClCompile Include="compositeMaster_shaders.cpp" />
+    <ClCompile Include="ContentInspector.cpp" />
+    <ClCompile Include="dynamicmask_common.cxx" />
+    <ClCompile Include="dynamicmask_object.cxx" />
+    <ClCompile Include="dynamicmask_tool.cxx" />
+    <ClCompile Include="dynamicmask_view.cxx" />
+    <ClCompile Include="dynamicmask_viewTools.cxx" />
+    <ClCompile Include="FX_shader.cxx" />
+    <ClCompile Include="GPUCaching_layout.cxx" />
+    <ClCompile Include="GPUCaching_model_display.cxx" />
+    <ClCompile Include="GPUCaching_shader.cxx" />
+    <ClCompile Include="grabber_cubemap.cpp" />
+    <ClCompile Include="graphics_framebuffer.cpp" />
+    <ClCompile Include="MB_IBL_shader.cpp" />
+    <ClCompile Include="MB_object_blendSolver.cpp" />
+    <ClCompile Include="MB_object_cubeMap.cpp" />
+    <ClCompile Include="MB_renderer_global.cpp" />
+    <ClCompile Include="MB_renderer_mainmenu.cpp" />
+    <ClCompile Include="GUI.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="MB_renderer_events.cpp" />
+    <ClCompile Include="model_3d_decal.cpp" />
+    <ClCompile Include="model_3d_shadow.cxx" />
+    <ClCompile Include="model_cubemap_rendering.cxx" />
+    <ClCompile Include="model_3d_fog.cxx" />
+    <ClCompile Include="ProjTex_layout.cxx" />
+    <ClCompile Include="ProjTex_shader.cxx" />
+    <ClCompile Include="render_conveyer.cpp" />
+    <ClCompile Include="render_layer_info.cpp" />
+    <ClCompile Include="shaderCallbacks_blendshapeCompute.cpp" />
+    <ClCompile Include="shaderCallbacks_character.cpp" />
+    <ClCompile Include="shared_content_events.cpp" />
+    <ClCompile Include="shared_content_geomcache.cpp" />
+    <ClCompile Include="shared_content_lights.cpp" />
+    <ClCompile Include="shared_content_rendering.cpp" />
+    <ClCompile Include="shared_content_rendering_depricated.cpp" />
+    <ClCompile Include="shared_content_shadows.cpp" />
+    <ClCompile Include="shared_models_newton.cpp" />
+    <ClCompile Include="main.cxx" />
+    <ClCompile Include="ShaderModelInfo.cpp" />
+    <ClCompile Include="shared_content.cpp" />
+    <ClCompile Include="textures_effect.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="textures_tool.cxx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="textures_view.cxx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="MB_renderer.cpp" />
+    <ClCompile Include="MB_renderer_layout.cxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Common\Common_shader.h" />
+    <ClInclude Include="..\Common_graphics_exchange\mographics_common.h" />
+    <ClInclude Include="..\Common_Projectors\bakeProjectors_projectors.h" />
+    <ClInclude Include="applymanagerrule.h" />
+    <ClInclude Include="callbacks.h" />
+    <ClInclude Include="callbacks_binded.h" />
+    <ClInclude Include="callbacks_bindless.h" />
+    <ClInclude Include="callbacks_particles.h" />
+    <ClInclude Include="callback_factory.h" />
+    <ClInclude Include="Common_FBComponent_UpdateProps.h" />
+    <ClInclude Include="compositeMaster_association.h" />
+    <ClInclude Include="compositeMaster_background.h" />
+    <ClInclude Include="compositeMaster_common.h" />
+    <ClInclude Include="compositeMaster_computeShaders.h" />
+    <ClInclude Include="compositeMaster_objectDecalFilter.h" />
+    <ClInclude Include="compositeMaster_objectDOFFilter.h" />
+    <ClInclude Include="compositeMaster_objectFinal.h" />
+    <ClInclude Include="compositeMaster_objectFogFilter.h" />
+    <ClInclude Include="compositeMaster_objectLUTFilter.h" />
+    <ClInclude Include="compositeMaster_objectFilters.h" />
+    <ClInclude Include="compositeMaster_fbshader.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_objectLayers.h" />
+    <ClInclude Include="compositeMaster_object.h" />
+    <ClInclude Include="compositeMaster_objectShadowFilter.h" />
+    <ClInclude Include="compositeMaster_shaders.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="ContentInspector.h" />
+    <ClInclude Include="dynamicmask_common.h" />
+    <ClInclude Include="dynamicmask_object.h" />
+    <ClInclude Include="dynamicmask_tool.h" />
+    <ClInclude Include="dynamicmask_view.h" />
+    <ClInclude Include="dynamicmask_viewTools.h" />
+    <ClInclude Include="FX_shader.h" />
+    <ClInclude Include="gpucache_saver_mobu.h" />
+    <ClInclude Include="GPUCaching_layout.h" />
+    <ClInclude Include="GPUCaching_model_display.h" />
+    <ClInclude Include="GPUCaching_shader.h" />
+    <ClInclude Include="grabber_cubemap.h" />
+    <ClInclude Include="graphics_framebuffer.h" />
+    <ClInclude Include="GUI.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="MB_IBL_shader.h" />
+    <ClInclude Include="MB_object_blendSolver.h" />
+    <ClInclude Include="MB_object_cubeMap.h" />
+    <ClInclude Include="model_3d_decal.h" />
+    <ClInclude Include="model_3d_shadow.h" />
+    <ClInclude Include="model_cubemap_rendering.h" />
+    <ClInclude Include="model_3d_fog.h" />
+    <ClInclude Include="ProjTex_layout.h" />
+    <ClInclude Include="ProjTex_shader.h" />
+    <ClInclude Include="render_conveyer.h" />
+    <ClInclude Include="render_layer_info.h" />
+    <ClInclude Include="shaderCallbacks_blendshapeCompute.h" />
+    <ClInclude Include="shared_models_newton.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="ShaderModelInfo.h" />
+    <ClInclude Include="shared_content.h" />
+    <ClInclude Include="textures_effect.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="textures_tool.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="textures_view.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="MB_renderer.h" />
+    <ClInclude Include="MB_renderer_layout.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="compositeMasteringLOG.txt" />
+    <None Include="DynamicMaskingLOG.txt" />
+    <None Include="SuperDynamicLighting_LOG.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\MotionCodeLibrary\Projects\MoCodeLibrary.vcxproj">
+      <Project>{a17ca844-dd7f-4522-a2b2-d8c7f6308818}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\newton-dynamics\coreLibrary_300\projects\windows\project_vs2010\core.vcxproj">
+      <Project>{57ac4f2d-b115-4931-8f6e-af8ad616b6aa}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\newton-dynamics\coreLibrary_300\projects\windows\project_vs2010\newton.vcxproj">
+      <Project>{68d9962c-0ec7-445a-b0fd-f87b16d43901}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\newton-dynamics\coreLibrary_300\projects\windows\project_vs2010\physics.vcxproj">
+      <Project>{39737a8f-6151-4259-8e39-25530345d4b4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\newton-dynamics\coreLibrary_300\source\pthreads.2\VS_2010\pthread.vcxproj">
+      <Project>{03bca23c-02a5-415b-a37b-26600bc2ce96}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\newton-dynamics\packages\projects\visualStudio_2010\dContainers.vcxproj">
+      <Project>{f67c4593-a914-4ddf-8cb5-c59a3ef3ece0}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\newton-dynamics\packages\projects\visualStudio_2010\dJointLibrary.vcxproj">
+      <Project>{721c99ce-4716-4146-9817-59bc2671b844}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\newton-dynamics\packages\projects\visualStudio_2010\dMath.vcxproj">
+      <Project>{cbe9e751-e58b-46c1-b6b0-873670d0f981}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\newton-dynamics\packages\projects\visualStudio_2010\dNewton.vcxproj">
+      <Project>{8a04a234-b1ca-464d-a2dd-34ceb583ba6a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SceneGraph_Shared\projects\sg_base.vcxproj">
+      <Project>{60091670-3c61-4ad8-886e-b0e4a2a56b44}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SceneGraph_Shared\projects\sg_shared.vcxproj">
+      <Project>{e248c8cb-899f-407c-b5b2-5fbb4c8486ae}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\library_NewtonPhysics\NewtonPhysicsLibrary.vcxproj">
+      <Project>{341721e7-6bfe-4ef0-ad99-cbcc374e9ae3}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

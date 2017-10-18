@@ -1,0 +1,409 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="grabber_cubemap.cpp" />
+    <ClCompile Include="main.cxx" />
+    <ClCompile Include="compositeMaster_common.cxx">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_object.cxx">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_shaders.cpp">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="dynamicmask_common.cxx">
+      <Filter>DynamicMasks</Filter>
+    </ClCompile>
+    <ClCompile Include="dynamicmask_object.cxx">
+      <Filter>DynamicMasks</Filter>
+    </ClCompile>
+    <ClCompile Include="dynamicmask_tool.cxx">
+      <Filter>DynamicMasks</Filter>
+    </ClCompile>
+    <ClCompile Include="dynamicmask_view.cxx">
+      <Filter>DynamicMasks</Filter>
+    </ClCompile>
+    <ClCompile Include="dynamicmask_viewTools.cxx">
+      <Filter>DynamicMasks</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_association.cxx">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_fbshader.cxx">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_computeShaders.cpp">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_background.cpp">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_objectFinal.cpp">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_objectFogFilter.cpp">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_objectLUTFilter.cpp">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_objectFilters.cpp">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_objectLayers.cpp">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="model_3d_fog.cxx">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics_framebuffer.cpp" />
+    <ClCompile Include="compositeMaster_objectDOFFilter.cpp">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_objectDecalFilter.cpp">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="model_3d_decal.cpp">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="FX_shader.cxx">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUCaching_layout.cxx">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUCaching_model_display.cxx">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUCaching_shader.cxx">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjTex_layout.cxx">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjTex_shader.cxx">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderModelInfo.cpp">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="model_cubemap_rendering.cxx">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="applymanagerrule.cxx">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="textures_effect.cpp">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="textures_tool.cxx">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="textures_view.cxx">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_content.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_content_rendering.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_content_shadows.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_models_newton.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="ContentInspector.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_content_events.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common_Projectors\bakeProjectors_projectors.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_content_lights.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="MB_renderer.cpp">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="MB_renderer_layout.cxx">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="MB_renderer_events.cpp">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="MB_renderer_mainmenu.cpp">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="callback_factory.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="callbacks_binded.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="callbacks_bindless.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_content_rendering_depricated.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_content_geomcache.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="model_3d_shadow.cxx">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_objectShadowFilter.cpp">
+      <Filter>CompositerMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="Common_FBComponent_UpdateProps.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="render_conveyer.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="MB_renderer_global.cpp">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="render_layer_info.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="shaderCallbacks_character.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="shaderCallbacks_blendshapeCompute.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="MB_object_blendSolver.cpp">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="MB_object_cubeMap.cpp">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="MB_IBL_shader.cpp">
+      <Filter>MB_Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="callbacks_particles.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common_graphics_exchange\mographics_common.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="grabber_cubemap.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="compositeMaster_common.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_object.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_shaders.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamicmask_common.h">
+      <Filter>DynamicMasks</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamicmask_object.h">
+      <Filter>DynamicMasks</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamicmask_tool.h">
+      <Filter>DynamicMasks</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamicmask_view.h">
+      <Filter>DynamicMasks</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamicmask_viewTools.h">
+      <Filter>DynamicMasks</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_association.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_fbshader.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_computeShaders.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_background.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_objectFinal.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_objectFogFilter.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_objectLUTFilter.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_objectFilters.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_objectLayers.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="model_3d_fog.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics_framebuffer.h" />
+    <ClInclude Include="compositeMaster_objectDOFFilter.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_objectDecalFilter.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="model_3d_decal.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="FX_shader.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUCaching_shader.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUCaching_layout.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUCaching_model_display.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjTex_shader.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjTex_layout.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderModelInfo.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="model_cubemap_rendering.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="applymanagerrule.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="textures_view.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="textures_effect.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="textures_tool.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_content.h">
+      <Filter>scenegraph_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_models_newton.h">
+      <Filter>scenegraph_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="render_conveyer.h">
+      <Filter>scenegraph_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI.h">
+      <Filter>scenegraph_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="ContentInspector.h">
+      <Filter>scenegraph_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Common_shader.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common_Projectors\bakeProjectors_projectors.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="gpucache_saver_mobu.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="MB_renderer.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="MB_renderer_layout.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="callbacks.h">
+      <Filter>scenegraph_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="callback_factory.h">
+      <Filter>scenegraph_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="callbacks_binded.h">
+      <Filter>scenegraph_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="callbacks_bindless.h">
+      <Filter>scenegraph_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="model_3d_shadow.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_objectShadowFilter.h">
+      <Filter>CompositerMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="Common_FBComponent_UpdateProps.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="render_layer_info.h">
+      <Filter>scenegraph_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="shaderCallbacks_blendshapeCompute.h">
+      <Filter>scenegraph_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="MB_object_blendSolver.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="MB_object_cubeMap.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="MB_IBL_shader.h">
+      <Filter>MB_Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="callbacks_particles.h">
+      <Filter>scenegraph_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common_graphics_exchange\mographics_common.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="compositeMasteringLOG.txt">
+      <Filter>CompositerMaster</Filter>
+    </None>
+    <None Include="DynamicMaskingLOG.txt">
+      <Filter>DynamicMasks</Filter>
+    </None>
+    <None Include="SuperDynamicLighting_LOG.txt">
+      <Filter>MB_Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CompositerMaster">
+      <UniqueIdentifier>{5aa2daaf-53f3-4949-807e-cd52c6cef519}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DynamicMasks">
+      <UniqueIdentifier>{af059a12-14cc-4ec5-942e-3b5be7ee1dd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MB_Shaders">
+      <UniqueIdentifier>{f662025e-f6c6-4863-ba87-504e7e8a6b3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scenegraph_shared">
+      <UniqueIdentifier>{2bdf8850-0c96-4e91-9380-fccf82c5d8c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{082899a8-8472-4c39-a3a6-2ad7d64901ec}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

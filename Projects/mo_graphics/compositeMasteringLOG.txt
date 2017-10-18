@@ -1,0 +1,28 @@
+
+== Composite master plugin for Autodesk MotionBuilder ==
+
+ Инструмент для 2д композитинга изображения в МоБи. Дает возможность подменять отображение в видовом окне результатом композитинга,
+ тем самым отображая композитинг в реальном времени.
+ С помощью данного плагина можно выполнять работу по композитингу сродни с AfterAffects, Nuke, но в реальном времени непосредственно в МоБи.
+
+TODO: 
+ Nnnn 1
+!!   Сейчас на каждую ноду создается по одному шейдерному ресурсу. Думаю это неправильно и более того расточительно,
+данный плагин следует перевести на glslfx, сделать отдельные техники и выполнять нужно по ситуации. При этом шейдер
+должен быть глобальным для всех композиций и нод в сцене.
+
+ - заменить deprecated рендер примитивов для экранных квадов
+
+ + проконтролировать удаление объектов и освобождение ресурсов!
+ - отмена выполненной операции (сохранение композиции в отдельную структуру для отмены удаления или частичного удаления композиции)
+
+Tech Notes - https://docs.google.com/document/d/1_V1owU4D00IZiGyyK96qf263qzgjoy-xkmmkRuFA4Lw/edit?usp=sharing
+LOG - https://docs.google.com/document/d/1dFm6TAVEhditv497f35jVw26Ec1Q2R5eBrdJxIuTROc/edit?usp=sharing
+LOG2 - https://docs.google.com/document/d/1o3byV5uSjfmJI74X7c4tZZlikWmY8fUHfEAyGvcrLig/edit?usp=sharing
+TODO - https://docs.google.com/document/d/10FMg1KBwnyqSxhL_jghCF0rpo_Wz517ge5TezBp4DEc/edit?usp=sharing
+
+=== About ===
+
+Author Sergey Solokhin (Neill3d) 2013
+ e-mail to: s@neill3d.com
+  www.neill3d.com

@@ -1,0 +1,360 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Shader Src">
+      <UniqueIdentifier>{ac245bfe-b776-4716-acd0-b3e6a8157685}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{acacd444-0c8b-4f93-923e-0688e031fb59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCL">
+      <UniqueIdentifier>{f7ebf8fa-9ea6-405f-803b-e3bd0cc88b72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="nv_math">
+      <UniqueIdentifier>{508a6338-aa95-4e9e-8703-d48b806c6686}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="nv_dds">
+      <UniqueIdentifier>{185de191-5c06-4765-9f97-c8871f8105f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager OR Src">
+      <UniqueIdentifier>{bb206888-a608-4b2a-904a-5c636b75af21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shared Src">
+      <UniqueIdentifier>{0009da7c-f1ea-4676-be0c-821b9c4b02ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MCL\utils">
+      <UniqueIdentifier>{c117f6a7-7364-4240-ba10-f920e60066b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SuperDynamicLighting">
+      <UniqueIdentifier>{56cf6a70-d30a-4a7e-b30b-982cd9f70b35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CompositeMaster">
+      <UniqueIdentifier>{5d8f804c-56f7-4fa7-9af4-7d4363d74bbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DynamicMasks">
+      <UniqueIdentifier>{ba2a2a1b-5381-4dd6-9134-4231f120de79}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Shader Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MotionCodeLibrary\ResourceUtils.cpp">
+      <Filter>MCL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MotionCodeLibrary\glewContext.cpp">
+      <Filter>MCL</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderModelInfo.cpp">
+      <Filter>Shader Src</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_content.cpp">
+      <Filter>Shared Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MotionCodeLibrary\StringUtils.cpp">
+      <Filter>MCL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MotionCodeLibrary\tinyxml.cpp">
+      <Filter>MCL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MotionCodeLibrary\tinystr.cpp">
+      <Filter>MCL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MotionCodeLibrary\tinyxmlerror.cpp">
+      <Filter>MCL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MotionCodeLibrary\tinyxmlparser.cpp">
+      <Filter>MCL</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_models.cpp">
+      <Filter>Shared Src</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_textures.cpp">
+      <Filter>Shared Src</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_io.cpp">
+      <Filter>Shared Src</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_materials.cpp">
+      <Filter>Shared Src</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_lights.cpp">
+      <Filter>Shared Src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MotionCodeLibrary\math3d.cpp">
+      <Filter>MCL</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_shaders.cpp">
+      <Filter>Shared Src</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUCaching_layout.cxx">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUCaching_shader.cxx">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjTex_layout.cxx">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjTex_shader.cxx">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClCompile>
+    <ClCompile Include="textures_tool.cxx">
+      <Filter>Manager OR Src</Filter>
+    </ClCompile>
+    <ClCompile Include="textures_view.cxx">
+      <Filter>Manager OR Src</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader_Shadowed.cpp">
+      <Filter>Shader Src</Filter>
+    </ClCompile>
+    <ClCompile Include="SuperLighting_layout.cxx">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClCompile>
+    <ClCompile Include="SuperLighting_shader.cxx">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_projectors.cpp">
+      <Filter>Shared Src</Filter>
+    </ClCompile>
+    <ClCompile Include="FX_shader.cxx">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUCaching_model_display.cxx">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MotionCodeLibrary\FileUtils.cpp">
+      <Filter>MCL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nvFX-master\nvFX-master\samples\shared\nv_dds\nv_dds.cpp">
+      <Filter>nv_dds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\nvFX-master\nvFX-master\samples\shared\nv_math\nv_math.cpp">
+      <Filter>nv_math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MotionCodeLibrary\OGL_Utils.cpp">
+      <Filter>MCL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MotionCodeLibrary\utils\Assert.cpp">
+      <Filter>MCL\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MotionCodeLibrary\utils\CheckGLError.cpp">
+      <Filter>MCL\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cxx" />
+    <ClCompile Include="compositeMaster_common.cxx">
+      <Filter>CompositeMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_object.cxx">
+      <Filter>CompositeMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_tool.cxx">
+      <Filter>CompositeMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_view.cxx">
+      <Filter>CompositeMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="compositeMaster_viewTools.cxx">
+      <Filter>CompositeMaster</Filter>
+    </ClCompile>
+    <ClCompile Include="dynamicmask_common.cxx">
+      <Filter>DynamicMasks</Filter>
+    </ClCompile>
+    <ClCompile Include="dynamicmask_object.cxx">
+      <Filter>DynamicMasks</Filter>
+    </ClCompile>
+    <ClCompile Include="dynamicmask_tool.cxx">
+      <Filter>DynamicMasks</Filter>
+    </ClCompile>
+    <ClCompile Include="dynamicmask_view.cxx">
+      <Filter>DynamicMasks</Filter>
+    </ClCompile>
+    <ClCompile Include="dynamicmask_viewTools.cxx">
+      <Filter>DynamicMasks</Filter>
+    </ClCompile>
+    <ClCompile Include="fpTexture.cpp">
+      <Filter>Shader Src</Filter>
+    </ClCompile>
+    <ClCompile Include="Framebuffer.cpp">
+      <Filter>Shader Src</Filter>
+    </ClCompile>
+    <ClCompile Include="glslShader.cpp">
+      <Filter>Shader Src</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics_manager.cxx">
+      <Filter>Manager OR Src</Filter>
+    </ClCompile>
+    <ClCompile Include="shared_misc.cpp">
+      <Filter>Shared Src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Shader.h">
+      <Filter>Shader Src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MotionCodeLibrary\ResourceUtils.h">
+      <Filter>MCL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\nvFX-master\nvFX-master\samples\shared\nv_math\nv_math.h">
+      <Filter>nv_math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MotionCodeLibrary\Types.h">
+      <Filter>MCL</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MotionCodeLibrary\glewContext.h">
+      <Filter>MCL</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderModelInfo.h">
+      <Filter>Shader Src</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_content.h">
+      <Filter>Shared Src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MotionCodeLibrary\StringUtils.h">
+      <Filter>MCL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MotionCodeLibrary\tinyxml.h">
+      <Filter>MCL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MotionCodeLibrary\tinystr.h">
+      <Filter>MCL</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_models.h">
+      <Filter>Shared Src</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_textures.h">
+      <Filter>Shared Src</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_io.h">
+      <Filter>Shared Src</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_materials.h">
+      <Filter>Shared Src</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_lights.h">
+      <Filter>Shared Src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MotionCodeLibrary\math3d.h">
+      <Filter>MCL</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="shared_shaders.h">
+      <Filter>Shared Src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\nvFX-master\nvFX-master\samples\shared\nv_dds\nv_dds.h">
+      <Filter>nv_dds</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUCaching_shader.h">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUCaching_layout.h">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjTex_shader.h">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjTex_layout.h">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClInclude>
+    <ClInclude Include="textures_view.h">
+      <Filter>Manager OR Src</Filter>
+    </ClInclude>
+    <ClInclude Include="textures_tool.h">
+      <Filter>Manager OR Src</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_projectors.h">
+      <Filter>Shared Src</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader_Shadowed.h">
+      <Filter>Shader Src</Filter>
+    </ClInclude>
+    <ClInclude Include="SuperLighting_layout.h">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClInclude>
+    <ClInclude Include="SuperLighting_shader.h">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClInclude>
+    <ClInclude Include="FX_shader.h">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClInclude>
+    <ClInclude Include="Common_shader.h">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUCaching_model_display.h">
+      <Filter>SuperDynamicLighting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MotionCodeLibrary\FileUtils.h">
+      <Filter>MCL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MotionCodeLibrary\OGL_Utils.h">
+      <Filter>MCL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MotionCodeLibrary\utils\Assert.h">
+      <Filter>MCL\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MotionCodeLibrary\utils\CheckGLError.h">
+      <Filter>MCL\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MotionCodeLibrary\utils\GlBufferObject.h">
+      <Filter>MCL\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_common.h">
+      <Filter>CompositeMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_object.h">
+      <Filter>CompositeMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_tool.h">
+      <Filter>CompositeMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_view.h">
+      <Filter>CompositeMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="compositeMaster_viewTools.h">
+      <Filter>CompositeMaster</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamicmask_common.h">
+      <Filter>DynamicMasks</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamicmask_object.h">
+      <Filter>DynamicMasks</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamicmask_tool.h">
+      <Filter>DynamicMasks</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamicmask_view.h">
+      <Filter>DynamicMasks</Filter>
+    </ClInclude>
+    <ClInclude Include="dynamicmask_viewTools.h">
+      <Filter>DynamicMasks</Filter>
+    </ClInclude>
+    <ClInclude Include="fpTexture.h">
+      <Filter>Shader Src</Filter>
+    </ClInclude>
+    <ClInclude Include="Framebuffer.h">
+      <Filter>Shader Src</Filter>
+    </ClInclude>
+    <ClInclude Include="glslShader.h">
+      <Filter>Shader Src</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics_manager.h">
+      <Filter>Manager OR Src</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_misc.h">
+      <Filter>Shared Src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SuperDynamicLighting_LOG.txt" />
+    <None Include="compositeMasteringLOG.txt" />
+    <None Include="DynamicMaskingLOG.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

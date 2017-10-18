@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{ff62d558-e1a6-4208-ab62-79c08e4fcb4c}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{e81e272a-5386-4c10-9593-0aeaea1d8db6}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{44ee9720-528b-4c63-8993-68ae1e963619}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ParticleSystem.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="model_collision_sphere.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="model_force_motor.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="model_force_wind.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="model_force_drag.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="model_collision_terrain.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader_ParticlesSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleSystem_types.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleSystem_Rendering.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MAIN.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleSystem_Generation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fb_shader_particles_association.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fb_shader_particles_layout.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fb_shader_particles_shader.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model_collision_sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model_force_motor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model_force_wind.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model_force_drag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model_collision_terrain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FBCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader_ParticleSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fb_shader_particles_association.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fb_shader_particles_layout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fb_shader_particles_shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common_graphics_exchange\mographics_common.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="shader_gpu_particles.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.md" />
+  </ItemGroup>
+</Project>

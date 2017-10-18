@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{2cb6345f-96c7-4b1f-a755-f3a0eb6f6398}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{3a22639a-d134-4819-88cc-b0498a63c15d}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="nv">
+      <UniqueIdentifier>{57c7ee52-2a22-4257-8dd4-da5d331209ba}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="impgeomcache.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gpucache_visitor_mobu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\nv_dds.cpp">
+      <Filter>nv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\nvImage.cpp">
+      <Filter>nv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\nvImageDDS.cpp">
+      <Filter>nv</Filter>
+    </ClCompile>
+    <ClCompile Include="mobu_dynamic_textures.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mobu_resource_textures.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="impgeomcache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gpucache_visitor_mobu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\nv_dds.h">
+      <Filter>nv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\nvImage.h">
+      <Filter>nv</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

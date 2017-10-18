@@ -1,6 +1,10 @@
 # MoPlugs Projects #
 
+## You should specify environment variables with your mobu version and path value ##
 
+For example, for motionbuilder 2014 the variable name is **ADSK_MOBU_2014_64**
+
+And variable value for a default motionbuilder installation path is this - C:\Program Files\Autodesk\MotionBuilder 2014
 
 ## Interactive Solution ##
 

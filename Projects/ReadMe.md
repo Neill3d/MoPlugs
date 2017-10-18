@@ -58,3 +58,9 @@ Folders
  * library_bulletPhysics (depricated)
  * library_newtonPhysics
  * solver_MoPhysics
+ 
+ 
+## Global roadmap ##
+
+- finish MoRenderer render conveyer
+- rewrite extended cubemap rendering to use new cubemap object

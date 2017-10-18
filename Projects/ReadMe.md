@@ -10,6 +10,10 @@ And variable value for a default motionbuilder installation path is this - C:\Pr
 
 ## Hardware requirenments ##
 
+Most of plugins are using nVidia oriented extensions, and it's better to use a video card on Kepler chipset or newer (for example, starting from GeForce family 6xx).
+
+- Composition Toolkit is based on OpenGL Compute Shaders (OpenGL 4.3)
+- GPU Particles shader is based on OpenGL Compute Shaders
 - Dynamic Masks Tool uses nVidia "NV_path_rendering" extension.
 - GPU Cache uses bindless textures extension.
 

@@ -1,6 +1,8 @@
 # MoPlugs Projects #
 
-## You should specify environment variables with your mobu version and path value ##
+## You should specify environment variables ##
+
+That will help projects to locate your OR SDK.
 
 For example, for motionbuilder 2014 the variable name is **ADSK_MOBU_2014_64**
 

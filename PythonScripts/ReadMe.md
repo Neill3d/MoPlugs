@@ -8,13 +8,13 @@ Note! Most of scripts and tools have been developed in MoBu 2014
 
  Scripts that have a single execution scenario
  
-* CarSim \ ReConnectJoystick.py - the script helps to fix an issue with a missing or stucked joystick device after scene reloading in mobu
+* CarSim \ **ReConnectJoystick.py** - the script helps to fix an issue with a missing or stucked joystick device after scene reloading in mobu
 
 ### Scripts for the Wall Bricks Constraints and building blocks logic ###
 
-* DuplicateAlongACurve \ ConvertPolySpline.py
-* DuplicateAlongACurve \ DeformMeshByCurve.py
-* DuplicateAlongACurve \ DeformMeshByCurve2.py
+* DuplicateAlongACurve \ **ConvertPolySpline.py** - for imported from maya and c4d polysplines. Script helps to convert it into 3d Path Model. 
+* DuplicateAlongACurve \ **DeformMeshByCurve.py** - to bend geometry model by 3d Path
+* DuplicateAlongACurve \ **DeformMeshByCurve2.py**
 * DuplicateAlongACurve \ DuplicateAlongACurve_DeformMesh.py
 * DuplicateAlongACurve \ DuplicateAlongACurve_HardPlot.py
 * DuplicateAlongACurve \ DuplicateAlongACurve_RotateBy90.py
@@ -33,7 +33,7 @@ Note! Most of scripts and tools have been developed in MoBu 2014
 * FacialRIG \ FacialRIG_SetupConstraints2.py
 * FacialRIG \ StabilizationScenario.py
 
-### Script to work with a DataGlove device and it's recorded result ###
+### Script to work with a Measurand ShapeHand glove and it's recorded animation result ###
 
 * ShapeHand \ ShapeHand_CorrParentChildConstraints.py
 * ShapeHand \ ShapeHand_CorrRelationConstraint.py

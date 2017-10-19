@@ -46,10 +46,10 @@ Note! Most of scripts and tools have been developed in MoBu 2014
 
 ### Others ###
 
-* AssignUISet.py
-* ComputeAcceleration.py
-* CopyBlendShapeAnimation.py
-* DuplicateUnderTheRoot.py
+* AssignUISet.py - by default, in a texture UVSet name is locked in motionbuilder UI, but you can assign a value by using the script
+* ComputeAcceleration.py - compute translation acceleration, helps to see issues on the motion
+* CopyBlendShapeAnimation.py - select source model, then destination model, execute the script and it will copy animation FCurves for the same named shapes. 
+* DuplicateUnderTheRoot.py -
 * ExtractTrajectoryPath.py
 * FromLayeredToSingleTexture.py
 * GroupedUnderNull.py

@@ -81,30 +81,32 @@ Note! Most of scripts and tools have been developed in MoBu 2014
 
  Scripts that have a UI and could be found under Python Tools menu
  
-* ArrayTool
-* BatchRender
-* CameraAndGroupLinkingTool
-* CameraRIGTool
-* CharacterSelectionTool
-* **CleanUpManager.py**
-* **ExtendedRenderingTool.py**
-* FacialRIG_HelperTool
-* FacialRIG_PrepStarter
-* FacialRIG_Selector
-* GoogleStreetViewGrabberTool.py
-* MoPlugsSettingsTool.py
-* ProjectTool.py
-* PropertyViewTracking.py
-* Renamer.py
-* StoreRelationInConnections.py
-* StoryIOTool.py
-* **TexturesManager.py**
-* UnitTestsTool.py
-* ViewportGrabberTool.py
+* **ArrayTool** - something like Array Tool in 3dsMax, clone selected models or merge copies from file
+* **BatchRender** - render file by file from a specified file list
+* **CameraAndGroupLinkingTool** - for camera linkvis plugin, UI to manage camera and group visibility connection
+* **CameraRIGTool** - UI for making an animatable camera RIG
+* **CharacterSelectionTool** - from selected models, try to select an affected character
+* **CleanUpManager.py** - check for dublicated, unused resources (shaders, materials, textures, video clips)
+* **CmdLineRenderingTool.py** - UI to prepare a bat file for a mobu command line rendering
+* **CompositionPropertyView.py** - property views for composition toolkit objects
+* **CompositionTree.py** - UI for Composition Toolkit plugin
+* **ExtendedRenderingTool.py** - for mo_graphics plugin, UI for making render from camera into a texture and render into cubemap
+* **FacialRIG_HelperTool** - this is for 2d into 3d points pipeline, script for manage switch between Stance (live facial retargeting) and Animation (plot on joints)
+* **FacialRIG_PrepStarter** - this is for 2d into 3d points pipeline, prepare facial starter scene
+* **FacialRIG_Selector** - this is for 2d into 3d points pipeline, UI to select facial rig control elements
+* **GoogleStreetViewGrabberTool.py** - needs a pyskybox plugin, script to extract google streetview cubemap
+* **LightVisorTool.py** - information about scene lights and affected light lists for each ProjTex shader (local lights)
+* **MoPlugsSettingsTool.py** - add more items to main menu
+* **Renamer.py** - advanced rename tool, like in 3dsMax
+* **StoreRelationInConnections.py** - text file store/retrieve relation boxes connections
+* **StoryIOTool.py** - Story XML IO Tool
+* **TexturesManager.py** - rellocate textures and video clips, collect them into some specified folder
+* **UnitTestsTool.py** - run a list of scene files and save stats, do a sceenshot and a video preview
+* **ViewportGrabberTool.py** - needs a pyskybox plugin, grabs a skybox from current camera position
  
 ## Startup_Physics ##
 
  Tool for a physics simulation
  
-* Ball Toss Tool
+* **Ball Toss Tool** - compute a ball toss trajectory between two keyframes (for example, girl drops up a ball)
 * **Wheel Motion Tool** - compute wheel rolling and steering rotation by using a root motion and geometry radius

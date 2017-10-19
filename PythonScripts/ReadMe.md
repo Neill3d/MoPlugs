@@ -46,36 +46,36 @@ Note! Most of scripts and tools have been developed in MoBu 2014
 
 ### Others ###
 
-* AssignUISet.py - by default, in a texture UVSet name is locked in motionbuilder UI, but you can assign a value by using the script
-* ComputeAcceleration.py - compute translation acceleration, helps to see issues on the motion
-* CopyBlendShapeAnimation.py - select source model, then destination model, execute the script and it will copy animation FCurves for the same named shapes. 
-* DuplicateUnderTheRoot.py -
-* ExtractTrajectoryPath.py
-* FromLayeredToSingleTexture.py
-* GroupedUnderNull.py
-* InsertParent.py
-* Lights_HardTurnOnOff.py
-* Lights_TurnOnOff.py
-* MainCar_WindowsSetup.py
-* MakeCircle.py
-* ModelAndLTCDevice.py
-* Physics_MakeJointChain.py
-* RefreshModelsTextures.py
-* RefreshTextures.py
-* RefreshTextures2015.py
-* RemoveGPUCacheDuplicates.py
-* SaveLocalPositions.py
-* SelCharAndCR_ByModelSelection.py
-* SelectAllCharacterNodes_ByModelSelection.py
-* StoreRelationInConnections.py
-* Story_ReplaceMediaInTrackClips.py
-* StoryTrackFromSelection.py
+* **AssignUISet.py** - by default, in a texture UVSet name is locked in motionbuilder UI, but you can assign a value by using the script
+* **ComputeAcceleration.py** - compute translation acceleration, helps to see issues on the motion
+* **CopyBlendShapeAnimation.py** - select source model, then destination model, execute the script and it will copy animation FCurves for the same named shapes. 
+* **DuplicateUnderTheRoot.py** - helpful for the SpriteSheet Solver sprites preparation, populate models under the root (sprite planes)
+* **ExtractTrajectoryPath.py** - make a 3D Curve model from selected model translation trajectory
+* **FromLayeredToSingleTexture.py** - helpful for scene, imported from maya. A lot of textures with single layer are represented as FBLayeredTexture. To optimize performance and memory usage, you can use the script to replace layered textures with simple one.
+* **GroupedUnderNull.py** - this simular to Maya grouping for selection
+* **InsertParent.py** - insert parent for each selected model and keep the same animation trajectory
+* **Lights_HardTurnOnOff.py** - script to convert lights into template objects and do a back convertation
+* **Lights_TurnOnOff.py** - turn on/off "CastLightOnObject" property
+* **MainCar_WindowsSetup.py** - example how to setup ProjTex shader for each car window element 
+* **MakeCircle.py** - 4 knots 3d Path model
+* **ModelAndLTCDevice.py** - small and test script (nothing interesting)
+* **Physics_MakeJointChain.py** - script helps to do a physics setup for joints chain (make nulls, marker capsule for collision and physics joint and connections)
+* **RefreshModelsTextures.py** - reload selected models textures
+* **RefreshTextures.py** - reload all scene video clips
+* **RefreshTextures2015.py** - 
+* **RemoveGPUCacheDuplicates.py** - check for GPUCache Shader path and remove dublicates
+* **SaveLocalPositions.py** - for all the timeline frames, save selected models local translation into a text file 
+* **SelCharAndCR_ByModelSelection.py** - from selected geometry, try to find to which character it's belong to
+* **SelectAllCharacterNodes_ByModelSelection.py** - similar to SelCharAndCR_ByModelSelection, but this one script selects all connected resources (textures, materials, constraints, etc.)
+* **StoreRelationInConnections.py** - store/retrive connections between relation constraint boxes 
+* **Story_ReplaceMediaInTrackClips.py** - XML store/retrieve Story tracks and clips
+* **StoryTrackFromSelection.py** - script to create a generic animation story track from selected models
 
 ## Lib ##
 
  Special startup scripts with special logic classes
 
-* libDuplicateAlongACurve
+* **libDuplicateAlongACurve**
  
 ## Startup ##
 

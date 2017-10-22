@@ -57,10 +57,7 @@ Folders
  Commands for story editor and boxes for relation constraints.
 Plugin adds functinality to play camera effects (shake, zoom), to control timeline slider, etc. 
 
-Solution - interactive_pack.sln
-
-Folders
-* interactive_pack
+* [Interactive Pack](InteractivePack.md)
 
 ## Facial Solution ##
 

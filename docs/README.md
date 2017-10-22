@@ -1,4 +1,6 @@
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/neill3d)
+
 # Content
 
 [How To Install](HowToInstall.md)

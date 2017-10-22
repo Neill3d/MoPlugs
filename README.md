@@ -8,7 +8,8 @@ MotionBuilder Extensions Pack
 
 ## Documentation ##
 
-User Guide - https://neill3d.github.io/MoPlugs/
+**User Guide** - https://neill3d.github.io/MoPlugs/
+
 Tech Notes and Dev Log you can find in repository wiki.
 
 ### Plugins ###

@@ -1,5 +1,7 @@
 # MoPlugs Projects #
 
+[User Guide](https://neill3d.github.io/MoPlugs/Plugins.html)
+
 Please check wiki pages about plugins - [Plugins Source Code](https://github.com/Neill3d/MoPlugs/wiki/Plugins-Source-Code)
 
 ## MoPlugs Solution ##

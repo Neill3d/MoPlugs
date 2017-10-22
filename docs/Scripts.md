@@ -84,7 +84,7 @@ Note! Most of scripts and tools have been developed in MoBu 2014
  
 * **ArrayTool** - something like Array Tool in 3dsMax, clone selected models or merge copies from file
 * **BatchRender** - render file by file from a specified file list
-* **CameraAndGroupLinkingTool** - for camera linkvis plugin, UI to manage camera and group visibility connection
+* [CameraAndGroupLinkingTool](CameraLinkVisTool.md) - for camera linkvis plugin, UI to manage camera and group visibility connection
 * **CameraRIGTool** - UI for making an animatable camera RIG
 * **CharacterSelectionTool** - from selected models, try to select an affected character
 * **CleanUpManager.py** - check for dublicated, unused resources (shaders, materials, textures, video clips)
@@ -109,5 +109,5 @@ Note! Most of scripts and tools have been developed in MoBu 2014
 
  Tool for a physics simulation
  
-* **Ball Toss Tool** - compute a ball toss trajectory between two keyframes (for example, girl drops up a ball)
+* [Ball Toss Tool](BallTossTool.md) - compute a ball toss trajectory between two keyframes (for example, girl drops up a ball)
 * [Wheel Motion Tool](WheelMotionTool.md) - compute wheel rolling and steering rotation by using a root motion and geometry radius

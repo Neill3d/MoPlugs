@@ -1,5 +1,5 @@
 
-# Autodesk MotionBuilder extensions pack #
+# Content #
 
 Information about scripts - [Scripts](Scripts.md)
 

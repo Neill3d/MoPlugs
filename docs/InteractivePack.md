@@ -10,10 +10,14 @@
 
     Common command properties could be changed from property view window.
 
+![](Images/interactive_image2.jpg)
+
 ### Limitations
 
 * Razor operation applyed to any command clip in Story crashes the whole application
 * Command StartFrame should be rounded to integer value, otherwise command could be skipped
+
+![](Images/interactive_image1.jpg)
 
 ### List of commands
 * Color - special marker to make reference to (go to frame)
@@ -25,6 +29,8 @@
 ## Relation boxes
 
 Boxes you can find in the Relation constraint under the “Interactive” category.
+
+![](Images/interactive_image3.jpg)
 
 ### Limitations
 

@@ -1,4 +1,4 @@
-[![MoPlugs](https://github.com/Neill3d/MoPlugs/blob/master/Documentation/Images/MoP.jpg)]()
+[![MoPlugs](https://github.com/Neill3d/MoPlugs/blob/master/docs/Images/MoP.jpg)]()
 
 MotionBuilder Extensions Pack
 

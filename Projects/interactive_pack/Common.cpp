@@ -20,7 +20,7 @@
 
 #include "orcommand_pack_command.h"
 #include "perlin.h"
-#include "algorithm\math3d.h"
+#include "algorithm\math3d_mobu.h"
 
 std::vector<FBCommand*>		gCommands;
 

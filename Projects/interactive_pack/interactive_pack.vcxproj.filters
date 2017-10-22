@@ -69,11 +69,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="InteractivePack_README.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="interactive_pack.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.md" />
   </ItemGroup>
 </Project>

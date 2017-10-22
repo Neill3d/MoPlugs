@@ -225,17 +225,17 @@
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">
-    <IncludePath>..\include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include;..\..\glew-1.11.0\include;..\..\Cg\include;..\..\Include;..\..\SceneGraph_Shared\code;$(IncludePath)</IncludePath>
+    <IncludePath>..\include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include;..\..\..\glew\include;..\..\Cg\include;..\..\Include;..\..\..\MoPlugs_Framework\code;$(IncludePath)</IncludePath>
     <OutDir>..\lib\</OutDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">
-    <IncludePath>..\include;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include;..\..\glew-1.11.0\include;..\..\Cg\include;..\..\Include;..\..\SceneGraph_Shared\code;$(IncludePath)</IncludePath>
+    <IncludePath>..\include;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include;..\..\..\glew\include;..\..\Cg\include;..\..\Include;..\..\..\MoPlugs_Framework\code;$(IncludePath)</IncludePath>
     <OutDir>..\lib\</OutDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">
-    <IncludePath>..\include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include;..\..\glew-1.11.0\include;..\..\Cg\include;..\..\Include;..\..\SceneGraph_Shared\code;$(IncludePath)</IncludePath>
+    <IncludePath>..\include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;..\..\..\glew\include;..\..\Cg\include;..\..\Include;..\..\..\MoPlugs_Framework\code;$(IncludePath)</IncludePath>
     <OutDir>..\lib\</OutDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
   </PropertyGroup>

@@ -1,7 +1,7 @@
 
 # Content
 
-[How To Install](HowToIntall.md)
+[How To Install](HowToInstall.md)
 
 [Scripts User Guide](Scripts.md)
 

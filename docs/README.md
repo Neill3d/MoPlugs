@@ -1,9 +1,12 @@
 
 # Content
 
-Information about scripts - [Scripts](Scripts.md)
+[How To Install](HowToIntall.md)
 
-Information about plugins - [Plugins](Plugins.md)
+[Scripts User Guide](Scripts.md)
+
+[Plugins User Guide](Plugins.md)
+
 
 ## License
 

@@ -6,8 +6,6 @@
 
 Tools that helps to manage layer of objects with assigned shaders, materials and textures. Similar to Maya display layers.
 
-< TODO: put some beautiful picture>
-
 ## Overview
 
 What is this tool for ?
@@ -29,7 +27,9 @@ One more important thing about layer. It has it’s own layer state of objects, 
 ## Reference
 
 ### Main tool
- 
+
+![](Images/rendLay_image3.jpg)()
+
 #### User interface
 * Add - add a new layer
 * Rmv - remove a selected layer
@@ -48,6 +48,8 @@ One more important thing about layer. It has it’s own layer state of objects, 
 
 ### Options panel
 
+![](Images/rendLay_image10.jpg)()
+
 There are 3 tabs of options - common, display и audio.
 
 #### Notes
@@ -58,6 +60,8 @@ There are 3 tabs of options - common, display и audio.
 5) If a cameras list is empty, it means that the current scene camera will be used.
 
 For each layer you can attach a group of objects or hold a scene state.
+
+![](Images/rendLay_image2.jpg)()
 
 #### Group
 If group is assigned then this group of objects will be only visible during the rendering process
@@ -82,29 +86,38 @@ When you switch between layers, you switch between states also. It means each ti
 Let’s start from scratch with a new MoBu scene and make several steps to setup a scene objects and two render layers.
 
 1. Put 3 objects into the scene. Let it be cube, conus and torus.
-
+![](Images/rendLay_image5.jpg)
 
 2. Lets assign 3 different materials with different colors corresponding to our 3 new shapes
-
+![](Images/rendLay_image12.jpg)
 
 3. Lets open Render Layer Tool window. You can find it in the MoPlugs main menu or in OpenReality->Tools menu.
 
+![](Images/rendLay_image1.jpg)
 
 4. By default in render layers we have one Master Layer which is undeletable. This layer store in himself options to render a scene. You can enter this options by selecting a Master Layer in the listbox and press button “Prs” on top. You can specify there a path for rendering and make a test movie by pressing “Render Movie!” button in the Render Layers Tool window.
 
+![](Images/rendLay_image11.jpg)
 
 4. But our next step will be to learn more about layer state assignment. It’s very interesting possibility to store scene objects and assignment materials in layer. Then you can return back to that layout by activating that layer in layers listbox. So lets store scene state by pressing button “>>” and choosing “Store Layer State” item in the context menu.
 
+![](Images/rendLay_image8.jpg)
 
 5. We always can check what is holding in our layer state by choosing item “Show State Info” in the context menu. In our example case master layer should store 4 materials and 3 objects with correspondent materials assignment.
 
+![](Images/rendLay_image4.jpg)
 
 6. Now let’s make a new layer, by pressing button “Add” in the Render Layers Tool window. Lets enter “WHITE_BOX” as the name of this new layer. Note that you always have a possibility to rename layers by double click on them in the listbox.
 
+![](Images/rendLay_image9.jpg)
 
 7. Lets assign a new material for all our 3 objects in the scene and make it white. Then lets store layer information for our “WHITE_BOX” layer. Now we can simply switch between layers to change state of our scene (assignment materials to objects).
 
+![](Images/rendLay_image7.jpg)
+
 8. To render our “WHITE_BOX” layer to an another filename, we need to open first of all layer properties, by selecting layer and pressing “Prs” button. Then put a flag in front of option “Name” to override it parameter from Master Layer. And enter some file name.
+
+![](Images/rendLay_image6.jpg)
 
 So we setup two layers with unique scene state assignment and we can press “Render Movie!” button to render two movies. Tool will automaticaly switch between states for each movie.
 

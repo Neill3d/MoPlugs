@@ -2,6 +2,8 @@
 
 [Back To Scripts Page](Scripts.md)
 
+# Motion Wheel Tool
+
 ![](./Images/wheelMotionTool.jpg)
 
 Python tool for computing wheel roll and steer angles according to itself motion trajectory or parent motion trajectory. With a tool there is also a helper file - **SteeringConstraint.fbx** that contains relation constraint for entering tool Live mode.

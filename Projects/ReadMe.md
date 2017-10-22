@@ -1,5 +1,7 @@
 # MoPlugs Projects #
 
+All projects I've developed in VS 2010 SP1.
+
 ## You should specify environment variables ##
 
 That will help projects to locate your OR SDK.
@@ -16,6 +18,37 @@ Most of plugins are using nVidia oriented extensions, and it's better to use a v
 - GPU Particles shader is based on OpenGL Compute Shaders
 - Dynamic Masks Tool uses nVidia "NV_path_rendering" extension.
 - GPU Cache uses bindless textures extension.
+
+## MoPlugs Solution ##
+
+Solution - moplugs.sln
+
+Folders
+* cmdFBX
+* constraint_AimSprite
+* constraint_ColumnPlay
+* constraint_wallBricks
+* device_shapeHand_test
+* device_shapeHand
+* manager_CameraLinkVis
+* manager_ImageSequencePack
+* misc_FileSizeChecker
+* py_editing
+* tool_BlendShape
+* tool_RenderLayers
+
+## MoGraphics Solution ##
+
+Solution - mo_graphics.sln
+
+Folders
+* ImportGeomCache
+* **mo_graphics**
+* py_bakeProjectors
+* render_colors
+* shader_GPU_Particles
+* shader_SkyBox
+* texture_advanceBlend
 
 ## Interactive Solution ##
 

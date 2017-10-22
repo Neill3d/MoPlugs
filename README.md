@@ -92,7 +92,9 @@ Code and project is inside MotionCodeLibrary folder in the repository.
 ## About ##
 
  Plugins and scripts have been developed during my work on The Wall film for Canadian Film Board.
- 
- Author Sergey Solokhin (Neill3d)
- 
+
   Author of ideas and supervising by Cam Christiansen (Anlanda Studio)
+
+ Developed by Sergey Solokhin (Neill3d)
+ 
+

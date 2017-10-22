@@ -6,6 +6,11 @@ MotionBuilder Extensions Pack
 
 ## Content ##
 
+## Documentation ##
+
+User Guide - https://neill3d.github.io/MoPlugs/
+Tech Notes and Dev Log you can find in repository wiki.
+
 ### Plugins ###
 
 Precompiled version of plugins you can find in "bin" folder.
@@ -18,10 +23,6 @@ Source code is inside Projects folder.
 ### Scripts ###
 
 Full list of scripts you can find in the PythonScripts \ ReadMe.md
-
-## Documentation ##
-
- You can find some articles and notes in repository wiki.
 
 ## How to Install ##
 

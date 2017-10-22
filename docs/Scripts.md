@@ -109,5 +109,5 @@ Note! Most of scripts and tools have been developed in MoBu 2014
 
  Tool for a physics simulation
  
-* [Ball Toss Tool](BallTossTool.md) - compute a ball toss trajectory between two keyframes (for example, girl drops up a ball)
+* [Ball Toss Tool](ComputeBallTossTool.md) - compute a ball toss trajectory between two keyframes (for example, girl drops up a ball)
 * [Wheel Motion Tool](WheelMotionTool.md) - compute wheel rolling and steering rotation by using a root motion and geometry radius

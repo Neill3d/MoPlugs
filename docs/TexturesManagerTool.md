@@ -4,6 +4,8 @@
 
 # Textures Manager Tool
 
+![](Images/texturesManTool_image1.jpg)
+
 Main features of the tool
 * Collect all media resources (video clips) into specified folder.
 * Locate media resources (video clips) from the specified path.

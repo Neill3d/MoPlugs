@@ -2,15 +2,9 @@
 
 # MoPlugs Projects #
 
-All projects I've developed in VS 2010 SP1.
+Plugins are developed in VS 2010 SP1 and for running them you need to have installed Microsoft Visual C++ 2010 SP1 Redistributable Package (x64). If you don't have one, please check an official microsoft [download center](https://www.microsoft.com/en-us/download/details.aspx?id=13523)
 
-## You should specify environment variables ##
-
-That will help projects to locate your OR SDK.
-
-For example, for motionbuilder 2014 the variable name is **ADSK_MOBU_2014_64**
-
-And variable value for a default motionbuilder installation path is this - C:\Program Files\Autodesk\MotionBuilder 2014
+To manage loading scripts and plugins from a custom directory, I have a useful [configuration application](https://github.com/Neill3d/MoBu_ConfigApp)
 
 ## Hardware requirenments ##
 
@@ -23,7 +17,9 @@ Most of plugins are using nVidia oriented extensions, and it's better to use a v
 
 ## MoPlugs Solution ##
 
-Solution - moplugs.sln
+Topics
+* [tool_RenderLayers](RenderLayersTool.md) - Tools that helps to manage layer of objects with assigned shaders, materials and textures. Similar to Maya display layers.
+* [render from a command line](RenderFromCmdLine.md) - this is a part of tool_RenderLayers functionality, you can use command line to start a render process with a specified parameters
 
 Folders
 * cmdFBX
@@ -37,11 +33,8 @@ Folders
 * misc_FileSizeChecker
 * py_editing
 * tool_BlendShape
-* tool_RenderLayers
 
 ## MoGraphics Solution ##
-
-Solution - mo_graphics.sln
 
 Folders
 * ImportGeomCache
@@ -69,8 +62,6 @@ Import 2d tracked data from
 
 Retargeting constraint to drive 3d face joints by 2d tracked data
 
-Solution - facial.sln
-
 Folders
 * common_Projectors
 * constraint_facialRetarget
@@ -82,8 +73,6 @@ Folders
 ## MoPhysics Solution ##
 
  Advanced car simulation
- 
- Solution - mophysics.sln
  
  Folders
  * Common_Physics

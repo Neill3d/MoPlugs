@@ -68,12 +68,7 @@ Import 2d tracked data from
 
 Retargeting constraint to drive 3d face joints by 2d tracked data
 
-Folders
-* common_Projectors
-* constraint_facialRetarget
-* py_bakeProjectors
-* test_stabilization
-* tool_impFaceFeatures
+[Facial Notes](Facial.md)
 
 ## MoPhysics Solution ##
 

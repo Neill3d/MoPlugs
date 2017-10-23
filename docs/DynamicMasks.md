@@ -6,12 +6,15 @@
 
 Tool for working with dynamic textures, creating animated masks
 
+## Hardware requirements
+
+Dynamic Masks Tool uses nVidia "NV_path_rendering" extension.
+
 ## Overview
 
 ![](Images/dynamicMasks_image1.jpg)
 
-This tool gives your posibility to prepare some texture masks that you can use for alpha blending or masking projections for example. Another interesting feature of that plugin is that you can render from camera view and use it as a texture.
-With dynamic mask you can get a dynamic texture view from a specified camera.
+This tool gives your posibility to prepare some texture masks that you can use for alpha blending or masking projections for example.
 
 Plugin supports MotionBuilder starting from version 2014.
 

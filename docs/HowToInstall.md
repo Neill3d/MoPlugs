@@ -4,7 +4,7 @@
 
 I have a very useful application to configurate motionbuilder startup paths for plugins and scripts - [ConfigApp](ConfigApp.md)
 
-You have to clone a repository on your computer or just download a zip copy, then specify startup paths for plugins and scripts accroding to your motionbuilder version (plugins_2017 for motionbuilder 2017, etc.)
+You have to download or clone a repository on your computer, then specify startup paths for plugins and scripts accroding to your motionbuilder version (plugins_2017 for motionbuilder 2017, etc.)
 
 Scripts startup folders are:
 - Lib

@@ -38,6 +38,7 @@ Folders
 
 ## MoGraphics Solution ##
 
+* [Bake Projectors](BakeProjectors.md) - bake dynamic projected textures back into uv-based textures
 * [Composition Toolkit](CompositionToolkit.md) - real-time composing (for morenderer only)
 * [Dynamic Masks](DynamicMasks.md) - Tool for working with dynamic textures, creating animated masks
 * [GPU Geometry Cache](GPUGeometryCache.md)
@@ -45,11 +46,9 @@ Folders
 * [ProjTex Shader](ProjTexShader.md) - It's a shader plugin, that has been developed to support projected textures on a mesh with masking and special features of composition toolkit and moRenderer
 
 Folders
-* py_bakeProjectors
 * render_colors
 * shader_SkyBox
 * texture_advanceBlend
-* tool_bakeProjectors
 
 ## Interactive Solution ##
 

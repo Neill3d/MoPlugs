@@ -101,7 +101,7 @@ Note! Most of scripts and tools have been developed in MoBu 2014
 * **Renamer.py** - advanced rename tool, like in 3dsMax
 * **StoreRelationInConnections.py** - text file store/retrieve relation boxes connections
 * **StoryIOTool.py** - Story XML IO Tool
-* **TexturesManager.py** - rellocate textures and video clips, collect them into some specified folder
+* [TexturesManager.py](TexturesManagerTool.md) - rellocate textures and video clips, collect them into some specified folder
 * **UnitTestsTool.py** - run a list of scene files and save stats, do a sceenshot and a video preview
 * **ViewportGrabberTool.py** - needs a pyskybox plugin, grabs a skybox from current camera position
  

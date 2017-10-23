@@ -2,7 +2,7 @@
 
 [Back To Plugins Page](Plugins.md)
 
-# Rendering from command line
+# Rendering from a command line
 
 This is a part of tool_RenderLayers functionality, you can use command line to start a render process with a specified parameters.
 

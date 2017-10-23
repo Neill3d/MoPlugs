@@ -1,6 +1,6 @@
 [Back To Main Page](README.md)
 
-[Back To Plugins Page)(Plugins.md)
+[Back To Plugins Page](Plugins.md)
 
 # GPU Particles Shader
 

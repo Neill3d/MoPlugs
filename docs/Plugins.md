@@ -25,7 +25,7 @@ Topics
 * [render from a command line](RenderFromCmdLine.md) - this is a part of tool_RenderLayers functionality, you can use command line to start a render process with a specified parameters
 * [Wall Bricks](WallBricks.md) - constraint and scripts to make an animation of raising down blocks along a curve 
 
-Folders
+In progress
 * constraint_ColumnPlay
 
 ## MoGraphics Solution ##
@@ -38,7 +38,7 @@ Folders
 * [MoPlugs Renderer](MoRenderer.md) - High Quality Render System
 * [ProjTex Shader](ProjTexShader.md) - It's a shader plugin, that has been developed to support projected textures on a mesh with masking and special features of composition toolkit and moRenderer
 
-Folders
+In Progress
 * render_colors
 * shader_SkyBox
 * texture_advanceBlend

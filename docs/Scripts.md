@@ -27,6 +27,9 @@ Note! Most of scripts and tools have been developed in MoBu 2014
 * DuplicateAlongACurve \ FixInstanceGeometry.py
 
 ### Scripts for work with FaceWare 2d tracked data and my retargeting rig ###
+
+[Facial Notes](Facial.md)
+
 * FacialRIG \ CHECK_FacialData_VideoPlane.py
 * FacialRIG \ FacialRIG_connectJoints.py
 * FacialRIG \ FacialRIG_CreateVideoPlane.py

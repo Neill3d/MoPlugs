@@ -75,11 +75,7 @@ Folders
 
  Advanced car simulation
  
- Folders
- * Common_Physics
- * library_bulletPhysics (depricated)
- * library_newtonPhysics
- * solver_MoPhysics
+ [MoPhysics Solver](MoPhysicsSolver.md)
  
  
 ## Global roadmap ##

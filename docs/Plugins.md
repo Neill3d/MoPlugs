@@ -38,6 +38,7 @@ Folders
 
 ## MoGraphics Solution ##
 
+* [Composition Toolkit](CompositionToolkit.md) - real-time composing (for morenderer only)
 * [Dynamic Masks](DynamicMasks.md) - Tool for working with dynamic textures, creating animated masks
 * [GPU Geometry Cache](GPUGeometryCache.md)
 * [GPU Particles Shader](GPUParticlesShader.md)

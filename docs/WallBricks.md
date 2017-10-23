@@ -39,7 +39,13 @@ There is a possibility to create instances (share the same geometry) and copies.
 
  Better to create a constraint from the **DuplicateAlongACurve_Setup** script.
 
+![](Images/WallBricks/Capture2.jpg)
+
 Maximum number of nodes in the constraint - 16384
+
+## Wall Bricks Expressions
+
+![](Images/WallBricks/overview_constraint_layout.jpg)
 
 ### Expression special variables
 

@@ -38,12 +38,13 @@ Folders
 
 ## MoGraphics Solution ##
 
+* [GPU Particles Shader](GPUParticlesShader.md)
+
 Folders
 * ImportGeomCache
 * **mo_graphics**
 * py_bakeProjectors
 * render_colors
-* shader_GPU_Particles
 * shader_SkyBox
 * texture_advanceBlend
 

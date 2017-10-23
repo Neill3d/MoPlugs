@@ -4,6 +4,6 @@
 
 # Column Play Constraint
 
-![](Images/columnPlay.md)
+![](Images/columnPlay.jpg)
 
 Test scene - testColumnPlay.fbx

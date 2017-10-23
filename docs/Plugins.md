@@ -41,9 +41,9 @@ Folders
 * [Dynamic Masks](DynamicMasks.md) - Tool for working with dynamic textures, creating animated masks
 * [GPU Geometry Cache](GPUGeometryCache.md)
 * [GPU Particles Shader](GPUParticlesShader.md)
+* [ProjTex Shader](ProjTexShader.md) - It's a shader plugin, that has been developed to support projected textures on a mesh with masking and special features of composition toolkit and moRenderer
 
 Folders
-* **mo_graphics**
 * py_bakeProjectors
 * render_colors
 * shader_SkyBox

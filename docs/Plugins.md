@@ -20,13 +20,11 @@ Most of plugins are using nVidia oriented extensions, and it's better to use a v
 Topics
 * [Aim Sprite Constraint And Sprite Sheet Solver](SpriteSheetSolver.md) - constraint to make billboards from planes and solver to animate atlas sprite textures
 * [BlendShape Toolkit](BlendShapeToolkit.md) - Toolkit for adding and editing geometry blendshapes.
+* [Column Play Constraint](ColumnPlay.md) - 
 * [manager_CameraLinkVis](CameraLinkVisPlugin.md) - Plugin connect a group visibility to the specified camera. The group showing up when camera is current.
 * [tool_RenderLayers](RenderLayersTool.md) - Tools that helps to manage layer of objects with assigned shaders, materials and textures. Similar to Maya display layers.
 * [render from a command line](RenderFromCmdLine.md) - this is a part of tool_RenderLayers functionality, you can use command line to start a render process with a specified parameters
 * [Wall Bricks](WallBricks.md) - constraint and scripts to make an animation of raising down blocks along a curve 
-
-In progress
-* constraint_ColumnPlay
 
 ## MoGraphics Solution ##
 

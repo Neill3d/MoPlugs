@@ -91,7 +91,7 @@ Note! Most of scripts and tools have been developed in MoBu 2014
 * **CmdLineRenderingTool.py** - UI to prepare a bat file for a mobu command line rendering
 * **CompositionPropertyView.py** - property views for composition toolkit objects
 * **CompositionTree.py** - UI for Composition Toolkit plugin
-* **ExtendedRenderingTool.py** - for mo_graphics plugin, UI for making render from camera into a texture and render into cubemap
+* [OffscreenRenderingTool.py](OffscreenRenderingTool.md) - for mo_graphics plugin, UI for making render from camera into a texture and render into cubemap
 * **FacialRIG_HelperTool** - this is for 2d into 3d points pipeline, script for manage switch between Stance (live facial retargeting) and Animation (plot on joints)
 * **FacialRIG_PrepStarter** - this is for 2d into 3d points pipeline, prepare facial starter scene
 * **FacialRIG_Selector** - this is for 2d into 3d points pipeline, UI to select facial rig control elements

@@ -13,6 +13,8 @@ Note! Most of scripts and tools have been developed in MoBu 2014
 
 ### Scripts for the Wall Bricks Constraints and building blocks logic ###
 
+[User Guide](WallBricks.md)
+
 * DuplicateAlongACurve \ **ConvertPolySpline.py** - for imported from maya and c4d polysplines. Script helps to convert it into 3d Path Model. 
 * DuplicateAlongACurve \ **DeformMeshByCurve.py** - to bend geometry model by 3d Path
 * DuplicateAlongACurve \ **DeformMeshByCurve2.py**

@@ -25,4 +25,4 @@ The App works with environment variables
 
 ### Download
 
- Compiled windows binary you can find in [ConfigApp repository](https://github.com/Neill3d/MoBu_ConfigApp)
+ Source code and compiled windows binary you can find in [ConfigApp repository](https://github.com/Neill3d/MoBu_ConfigApp)

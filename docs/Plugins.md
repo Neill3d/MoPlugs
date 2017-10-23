@@ -4,7 +4,7 @@
 
 Plugins are developed in VS 2010 SP1 and for running them you need to have installed Microsoft Visual C++ 2010 SP1 Redistributable Package (x64). If you don't have one, please check an official microsoft [download center](https://www.microsoft.com/en-us/download/details.aspx?id=13523)
 
-To manage loading scripts and plugins from a custom directory, I have a useful [configuration application](https://github.com/Neill3d/MoBu_ConfigApp)
+To manage loading scripts and plugins from a custom directory, I have a useful [configuration application](ConfigApp.md)
 
 ## Hardware requirements ##
 
@@ -27,8 +27,6 @@ Topics
 
 Folders
 * constraint_ColumnPlay
-* misc_FileSizeChecker
-* py_editing
 
 ## MoGraphics Solution ##
 
@@ -50,7 +48,7 @@ Folders
  Commands for story editor and boxes for relation constraints.
 Plugin adds functinality to play camera effects (shake, zoom), to control timeline slider, etc. 
 
-* [Interactive Pack](InteractivePack.md)
+[Interactive Pack](InteractivePack.md)
 
 ## Facial Solution ##
 

@@ -4,6 +4,8 @@
 
 # Rendering from command line
 
+This is a part of tool_RenderLayers functionality, you can use command line to start a render process with a specified parameters.
+
 First of all you need to enter that block
 ```
 --sdk-begin <put custom cmds here> --sdk-end
@@ -56,3 +58,7 @@ start /d "C:\Program Files\Autodesk\MotionBuilder 2014\bin\x64\" motionbuilder.e
 ```
 start /d "C:\Program Files\Autodesk\MotionBuilder 2014\bin\x64\" motionbuilder.exe -console -suspendMessages --sdk-begin --render window --close --sdk-end X:\_MB_UNIT_TEST_SCENES\Reflections.fbx
 ```
+
+## Python Utility to help preparing command line parameters
+
+There is a python tool - [CmdLineRenderingTool](https://github.com/Neill3d/MoPlugs/blob/master/PythonScripts/Startup/CmdLineRenderingTool.py)

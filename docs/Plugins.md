@@ -26,13 +26,7 @@ Topics
 * [Wall Bricks](WallBricks.md) - constraint and scripts to make an animation of raising down blocks along a curve 
 
 Folders
-* cmdFBX
 * constraint_ColumnPlay
-* constraint_wallBricks
-* device_shapeHand_test
-* device_shapeHand
-* manager_CameraLinkVis
-* manager_ImageSequencePack
 * misc_FileSizeChecker
 * py_editing
 
@@ -49,6 +43,7 @@ Folders
 * render_colors
 * shader_SkyBox
 * texture_advanceBlend
+* morenderer
 
 ## Interactive Solution ##
 

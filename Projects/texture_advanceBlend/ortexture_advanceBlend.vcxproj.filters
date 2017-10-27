@@ -12,6 +12,9 @@
     <Filter Include="Compositing">
       <UniqueIdentifier>{c2213c81-daa3-4651-8680-9f2ee218299c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GLSL_Shaders">
+      <UniqueIdentifier>{5c522760-b2ab-4a4d-8b00-8067fafd3b1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ortexture_advanceBlend.cxx">
@@ -29,7 +32,7 @@
     <ClCompile Include="ortexture_paramBlend_texture.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\mo_graphics_backup\compositeMaster_shaders.cpp">
+    <ClCompile Include="..\mo_graphics\compositeMaster_shaders.cpp">
       <Filter>Compositing</Filter>
     </ClCompile>
   </ItemGroup>
@@ -43,11 +46,17 @@
     <ClInclude Include="ortexture_advanceBlend_texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\mo_graphics_backup\compositeMaster_shaders.h">
+    <ClInclude Include="..\mo_graphics\compositeMaster_shaders.h">
       <Filter>Compositing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="README_AdvanceBlend.txt" />
+    <None Include="ReadMe.txt" />
+    <None Include="..\mo_graphics\GLSL\compositeBlend.fsh">
+      <Filter>GLSL_Shaders</Filter>
+    </None>
+    <None Include="..\mo_graphics\GLSL\simple.vsh">
+      <Filter>GLSL_Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

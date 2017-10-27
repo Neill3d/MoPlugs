@@ -15,6 +15,13 @@
 #include "graphics\checkglerror_MOBU.h"
 #include <Windows.h>
 
+//
+#define DEFORMATIONS_COMPUTE_SHADER			"\\GLSL_CS\\computeDeformation.cs"
+
+#define SHADER_NORMALS_ZERO			"\\GLSL_CS\\recomputeNormalsZero.cs"
+#define SHADER_NORMALS_COMPUTE		"\\GLSL_CS\\recomputeNormals.cs"
+#define SHADER_NORMALS_NORM			"\\GLSL_CS\\recomputeNormalsNorm.cs"
+
 /** Class implementation.
 *   This should be placed in the source code file for a class that derives
 *   from FBComponent.
@@ -482,7 +489,7 @@ bool ObjectBlendSolver::RunComputeProgram(FBModel *pModel)
 	}
 
 	// check for a compute shader
-	if (false == mComputeProgram.PrepProgram("\\GLSL_CS\\computeDeformation.cs") )
+	if (false == mComputeProgram.PrepProgram(DEFORMATIONS_COMPUTE_SHADER) )
 		return false;
 
 	//
@@ -591,13 +598,13 @@ bool ObjectBlendSolver::RunReComputeNormals(FBModel *pModel)
 	}
 
 	// check for a compute shader
-	if (false == mProgramZero.PrepProgram("\\GLSL_CS\\recomputeNormalsZero.cs") )
+	if (false == mProgramZero.PrepProgram(SHADER_NORMALS_ZERO) )
 		return false;
 
-	if (false == mProgramRecomputeNormals.PrepProgram("\\GLSL_CS\\recomputeNormals.cs") )
+	if (false == mProgramRecomputeNormals.PrepProgram(SHADER_NORMALS_COMPUTE) )
 		return false;
 	
-	if (false == mProgramNorm.PrepProgram("\\GLSL_CS\\recomputeNormalsNorm.cs") )
+	if (false == mProgramNorm.PrepProgram(SHADER_NORMALS_NORM) )
 		return false;
 
 	//

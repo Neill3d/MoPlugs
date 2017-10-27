@@ -23,6 +23,9 @@
 #define FILTER3DFOG__CLASSSTR				"ObjectFilter3dFog"
 #define FILTER3DFOG__ASSETNAME				"3d Fog Filter"
 
+#define FILTER3DFOG__LABEL					"3d Fog"
+#define FILTER3DFOG__SHADER					"\\GLSL_CS\\FilterFog.cs"
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 3D FOG
 
@@ -91,10 +94,10 @@ public:
 protected:
 
 	virtual const char *MixedProgramLabel() override {
-		return "3d Fog";
+		return FILTER3DFOG__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterFog.cs";
+		return FILTER3DFOG__SHADER;
 	}
 	virtual void OnSetProgramDefines( const CCompositionInfo *pInfo, const CProcessingInfo &prInfo, FBString &defineLine ) override
 	{

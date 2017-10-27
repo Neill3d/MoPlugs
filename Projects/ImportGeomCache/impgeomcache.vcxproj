@@ -19,29 +19,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Common\nvImage.cpp" />
-    <ClCompile Include="..\Common\nvImageDDS.cpp" />
-    <ClCompile Include="..\Common\nv_dds.cpp" />
     <ClCompile Include="gpucache_visitor_mobu.cpp" />
     <ClCompile Include="impgeomcache.cxx" />
     <ClCompile Include="mobu_dynamic_textures.cpp" />
     <ClCompile Include="mobu_resource_textures.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Common\nvImage.h" />
-    <ClInclude Include="..\Common\nv_dds.h" />
     <ClInclude Include="gpucache_visitor_mobu.h" />
     <ClInclude Include="impgeomcache.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MotionCodeLibrary\Projects\MoCodeLibrary.vcxproj">
-      <Project>{a17ca844-dd7f-4522-a2b2-d8c7f6308818}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\SceneGraph_Shared\projects\sg_base.vcxproj">
+    <ProjectReference Include="..\..\..\MoPlugs_Framework\projects\sg_base.vcxproj">
       <Project>{60091670-3c61-4ad8-886e-b0e4a2a56b44}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\SceneGraph_Shared\projects\sg_shared.vcxproj">
+    <ProjectReference Include="..\..\..\MoPlugs_Framework\projects\sg_shared.vcxproj">
       <Project>{e248c8cb-899f-407c-b5b2-5fbb4c8486ae}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MotionCodeLibrary\Projects\MoCodeLibrary.vcxproj">
+      <Project>{a17ca844-dd7f-4522-a2b2-d8c7f6308818}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -90,10 +85,10 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\_plugins\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\_plugins\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\bin\x64\plugins_2015\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">..\..\_plugins\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\..\obj\$(Configuration)\$(Platform)\plugins\$(ProjectName)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">..\..\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</IgnoreImportLibrary>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</IgnoreImportLibrary>
@@ -108,10 +103,10 @@
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\MotionCodeLibrary\Include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;..\..\glew-1.11.0\include;..\..\SceneGraph_Shared\code;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);..\..\glew-1.11.0\lib\Release\x64;..\..\MotionCodeLibrary\Lib;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\MotionCodeLibrary\Include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;..\..\glew-1.11.0\include;..\..\SceneGraph_Shared\code;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\MotionCodeLibrary\Include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;..\..\glew-1.11.0\include;..\..\SceneGraph_Shared\code;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\MotionCodeLibrary\Include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include\fbsdk;$(MOPLUGS_EXTERNAL)\glm-0.9.5.3;$(MOPLUGS_EXTERNAL)\glew\include;$(MOPLUGS_FRAMEWORK)\code;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">..\..\MotionCodeLibrary\Include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;..\..\glew-1.11.0\include;..\..\SceneGraph_Shared\code;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);..\..\glew-1.11.0\lib\Release\x64;..\..\MotionCodeLibrary\Lib;$(LibraryPath)</LibraryPath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);..\..\glew-1.11.0\lib\Release\x64;..\..\MotionCodeLibrary\Lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">$(ADSK_MOBU_2015_64)\OpenRealitySDK\lib\$(Platform);$(MOPLUGS_EXTERNAL)\glew\lib\Release\x64;$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);..\..\glew-1.11.0\lib\Release\x64;..\..\MotionCodeLibrary\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

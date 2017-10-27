@@ -1,0 +1,167 @@
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+// Composite Master FX Shader
+//
+// shader effects for 2d composition with images
+//
+// Author Sergey Solokhin (Neill3d) 2014. Based on nvFX library
+//
+//	GitHub page - https://github.com/Neill3d/MoPlugs
+//	Licensed under BSD 3-Clause - https://github.com/Neill3d/MoPlugs/blob/master/LICENSE
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+#extension GL_ARB_separate_shader_objects : enable
+
+//////////////////////////////////////////////////////////
+
+uniform mat4		MVP;
+
+uniform sampler2D	sampler0;
+uniform sampler2D	sampler1;
+uniform sampler2D	sampler2;
+uniform sampler2D	sampler3;
+uniform sampler2D	sampler4;
+uniform sampler2D	sampler5;
+uniform sampler2D	sampler6;
+uniform sampler2D	sampler7;
+
+GLSLShader 
+{
+    #version 430 compatibility
+	#extension GL_NV_shader_buffer_load : enable
+	#extension GL_NV_shader_atomic_float : enable
+	#extension GL_ARB_shader_storage_buffer_object : require
+	#extension GL_ARB_bindless_texture : require
+	#extension GL_ARB_shader_draw_parameters : require
+}
+
+///////////////////////////////////////////////////////////////////////////
+//
+namespace Compose
+{
+	GLSLShader VS
+	{
+		layout(location=0) in vec2 position;
+		
+		out gl_PerVertex {
+			vec4 gl_Position;		// 16 bytes
+		};
+		
+		layout(location=0) smooth out vec2 outTC;	// 8 bytes
+		
+		void main()
+		{
+			gl_Position = vec4( (position.x-0.5)*2.0, (position.y-0.5)*2.0, 0.0, 1.0);
+			outTC = position;
+		}
+	}
+
+	GLSLShader FS
+	{
+		layout(location=0) in vec2 tc;
+		
+		layout(location=0) out vec4 	color0;
+		layout(location=1) out vec4 	color1;
+		layout(location=2) out vec4 	color2;
+		layout(location=3) out vec4 	color3;
+		layout(location=4) out vec4 	color4;
+		layout(location=5) out vec4 	color5;
+		layout(location=6) out vec4 	color6;
+		layout(location=7) out vec4 	color7;
+		
+		void main()
+		{
+			color0 = texture( sampler0, tc );
+			color1 = texture( sampler1, tc );
+			color2 = texture( sampler2, tc );
+			color3 = texture( sampler3, tc );
+			color4 = texture( sampler4, tc );
+			color5 = texture( sampler5, tc );
+			color6 = texture( sampler6, tc );
+			color7 = texture( sampler7, tc );
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+//
+namespace Shadows
+{
+	GLSLShader VS
+	{
+		layout(location=0) in vec2					UV;
+		
+		out gl_PerVertex {
+			vec4 gl_Position;
+		};
+		
+		out vec2 uvCoords;
+		flat out float layerId;
+		
+		void main()
+		{
+			float width = 320.0;
+			float height = 240.0;
+			vec4 Position = vec4(width * UV.x, height * UV.y, 0.0, 1.0);
+			gl_Position = MVP * Position;
+			
+			uvCoords = UV;
+			layerId = (float) gl_InstanceID;
+		}
+	}
+
+	GLSLShader FS
+	{
+		layout(location=0) out vec4 		color;
+		//uniform sampler2DArray 				shadowsSampler;
+		uniform sampler2DMSArray 				shadowsSampler;
+		//uniform sampler2D 				shadowsSampler;
+		
+		in vec2		uvCoords;
+		flat in float layerId;
+		
+		float LinearizeDepth(in float z, in float zNear, in float zFar)
+		{
+		  float z_b = z;
+		  float z_n = 2.0 * z_b - 1.0;
+		  float z_e = 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
+		  return z_e;
+		}
+		
+		void main()
+		{
+			//float texDepth = texture( shadowsSampler, vec3(uvCoords.xy, layerId) ).x;
+			//float depth = LinearizeDepth( texDepth, 10.0, 4000.0 );
+			//vec3 texColor = texture( shadowsSampler, vec3(uvCoords.st, layerId) ).rgb;
+			vec2 ShadowSize = vec2(2048.0, 2048.0);
+			vec3 coords = vec3(ShadowSize.x * uvCoords.s, ShadowSize.y * uvCoords.t, layerId);
+			vec3 texColor = texelFetch( shadowsSampler, ivec3(coords), 0 ).rgb;
+			color = vec4(texColor.r, texColor.g, texColor.b, 1.0);
+		}
+	}
+}
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+// Material Technique
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+	
+Technique Projections
+{
+	Pass p0
+	{
+		VertexProgram = { Compose::VS };
+		FragmentProgram = { Compose::FS };
+	}
+}
+
+Technique ShadowsDisplay
+{
+	Pass p0
+	{
+		VertexProgram = { Shadows::VS };
+		FragmentProgram = { Shadows::FS };
+	}
+}

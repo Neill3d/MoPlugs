@@ -1,0 +1,100 @@
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// file: shared_projectors.glslfxh
+//
+// this a functions for operate with a projective mapping from several projectors
+//
+//	Author Sergey Solokhin (Neill3d)
+//
+//	GitHub page - https://github.com/Neill3d/MoPlugs
+//	Licensed under BSD 3-Clause - https://github.com/Neill3d/MoPlugs/blob/master/LICENSE
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+GLSLShader
+{
+	#define		MAX_SHADER_PROJECTORS	6
+
+	struct ProjectorDATA
+	{
+		mat4	matrix;
+	
+		float	textureLayer;	// layer in 2d array
+		float	maskLayer;		// layer in 2d array
+		int		maskChannel;	// x,y,z,w from a mask sampler
+		float	blendOpacity;
+		
+		float	blendMode;
+		
+		float	dummyPRJ1;
+		float	dummyPRJ2;
+		float	dummyPRJ3;
+	};
+
+	//
+	// Prototypes
+	//
+	
+	void ComputeProjectorMask(in float maskId, in int maskChannelId, in vec2 tc, in vec4 projCoords, inout vec4 color);	
+
+}
+
+namespace Projectors <programTarget="grProjectors";>
+{
+	//////////////////////////////////////////////////// Vertex shaders
+	
+
+	/////////////////////////////////////////////// Fragment shaders
+	GLSLShader EmptyFS
+	{
+		void ComputeProjectorMask(in float maskId, in int maskChannelId, in vec2 tc, in vec4 projCoords, inout vec4 color)
+		{
+		}
+	}
+	
+	GLSLShader FS
+	{
+		uniform	sampler2D	projectorMaskA;
+		uniform	sampler2D	projectorMaskB;
+		
+		void ComputeProjectorMask(in float maskId, in int maskChannelId, in vec2 tc, in vec4 projCoords, inout vec4 color)
+		{
+			vec4 maskColor = vec4(1.0);
+			float maskValue = 1.0;	
+			if (maskId == 6.0)
+			{
+				maskColor = texture( projectorMaskA, tc.st );
+			}
+			else if (maskId == 7.0)
+			{
+				maskColor = texture( projectorMaskB, tc.st );	
+			}
+			maskValue = maskColor[maskChannelId];
+			
+			float s;
+			float t;
+			// use projection alpha if exist
+			maskValue *= color.w;
+			
+			//s = texCoords.s / texCoords.q;
+			//t = texCoords.t / texCoords.q;
+			s = projCoords.s;
+			t = projCoords.t;
+
+			if (s < 0.05) s *= 20.0;
+			else if (s > 0.95) s = (1.0-s) * 20.0;
+			else s = 1.0;
+
+			if (t < 0.05) t *= 20.0;
+			else if (t > 0.95) t = (1.0-t) * 20.0;
+			else t = 1.0;
+
+			maskValue = min( (s+t) * 0.5, maskValue );
+			maskValue = clamp( maskValue, 0.0, 1.0 );
+			
+			color = vec4(color.rgb, maskValue);
+		}
+	}
+}

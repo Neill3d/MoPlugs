@@ -19,6 +19,9 @@
 #define FILTERLUT__CLASSSTR					"ObjectFilterLUT"
 #define FILTERLUT__ASSETNAME				"3d LUT Filter"
 
+#define FILTERLUT__LABEL					"3d LUT"
+#define FILTERLUT__SHADER					"\\GLSL_CS\\FilterLUT.cs"
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 enum EFilterLUTPreset
@@ -76,10 +79,10 @@ public:
 protected:
 
 	virtual const char *MixedProgramLabel() override {
-		return "3d LUT";
+		return FILTERLUT__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterLUT.cs";
+		return FILTERLUT__SHADER;
 	}
 	virtual void OnApplyFilter(EApplyFilterStage stage, const CCompositionInfo *pInfo, const CProcessingInfo &prInfo, CompositeFinalStats &stats, const GLuint sourceTexId, const GLuint dstTexId) override 
 	{

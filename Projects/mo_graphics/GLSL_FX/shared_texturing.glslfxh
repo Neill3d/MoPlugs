@@ -1,0 +1,283 @@
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// file: shared_texturing.glslfxh
+//
+// shared_texturing (none, binded and bindless)
+//
+//	Author Sergey Solokhin (Neill3d)
+//
+//	GitHub page - https://github.com/Neill3d/MoPlugs
+//	Licensed under BSD 3-Clause - https://github.com/Neill3d/MoPlugs/blob/master/LICENSE
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//
+// GLSL Globals : meaning that all the GLSL domains (vertex, fragments etc.) will have a copy
+// of these data
+//
+GLSLShader
+{
+	
+	struct TTexture
+	{
+		mat4		transform;
+		uvec2		address;
+		float		width;
+		float		height;
+		//vec4		format;
+		
+		// 80 bytes in total
+	};
+	
+	// prototype
+	void getAmbientTexture(in int textureId, in vec4 coords, out vec4 texColor);
+	void getDiffuseTexture(in int textureId, in vec4 coords, out vec4 texColor);
+	void getTransparencyTexture(in int textureId, in vec4 coords, out float texColor);
+	void getSpecularityTexture(in int textureId, in vec4 coords, out vec3 texColor);
+	void getReflectivityTexture(in int textureId, in vec4 coords, out vec3 texColor);
+	void getNormalMapTexture(in int textureId, in vec4 coords, out vec3 normal);
+	
+	// TODO: get matcap texture, get projector texture, get rim texture
+	//			get mask texture, get shadow texture !
+}
+
+////////////////////////////////////////////
+
+namespace NoneTextures <programTarget="texturing";>
+{
+	GLSLShader global texturing
+	{
+		void getAmbientTexture(in int textureId, in vec4 coords, out vec4 texColor)
+		{
+			texColor = vec4(1.0, 1.0, 1.0, 1.0);
+		}
+		void getDiffuseTexture(in int textureId, in vec4 coords, out vec4 texColor)
+		{
+			texColor = vec4(1.0, 1.0, 1.0, 1.0);
+		}
+		void getTransparencyTexture(in int textureId, in vec4 coords, out float texColor)
+		{
+			texColor = 1.0;
+		}
+		void getSpecularityTexture(in int textureId, in vec4 coords, out vec3 texColor)
+		{
+			texColor = vec3(1.0);
+		}
+		void getReflectivityTexture(in int textureId, in vec4 coords, out vec3 texColor)
+		{
+			texColor = vec3(0.0, 0.0, 0.0);
+		}
+		void getNormalMapTexture(in int textureId, in vec4 coords, out vec3 normal)
+		{
+			normal = vec3(0.0, 1.0, 0.0);
+		}
+	}
+}
+
+namespace BindedTextures <programTarget="texturing";>
+{
+	GLSLShader global texturing
+	{
+		uniform TTexture			*allTheTextures;
+		
+		uniform sampler2D 	ambientSampler;
+		uniform sampler2D	diffuseSampler;
+		uniform sampler2D	transparencySampler;
+		uniform sampler2D	specularitySampler;
+		uniform sampler2D	reflectivitySampler;
+		uniform sampler2D	normalMapSampler;
+		//uniform samplerCube	cubeMapSampler;
+	
+		void getAmbientTexture(in int textureId, in vec4 coords, out vec4 texColor)
+		{
+		
+			TTexture *tex = allTheTextures + textureId;
+			vec4 tc = tex->transform * coords;
+			//tc = tc * textureScaling + textureOffset;
+			texColor = texture( ambientSampler, tc.st );
+			
+		}
+		void getDiffuseTexture(in int textureId, in vec4 coords, out vec4 texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			vec4 tc = tex->transform * coords;
+			tc = tc * textureScaling + textureOffset;
+			texColor = texture( diffuseSampler, tc.st );
+			/*
+			if (tex->format.a == 0.0)
+			{
+				color.a = color.r;
+				color = vec4(0.0);
+			}
+			texColor = color;
+			*/
+			//float mipmapLevel = mip_map_level(tc.st * textureSize(diffuseSampler, 0));
+			//texColor = textureLod(diffuseSampler, tc.st, mipmapLevel);
+			//texColor = BiCubic(diffuseSampler, tc.st );
+			//texColor = pow(texColor.rgb, vec3(2.2) );
+			//texColor = vec4(mipmapLevel*0.1, mipmapLevel*0.1, mipmapLevel*0.1, 1.0);
+		}
+		void getTransparencyTexture(in int textureId, in vec4 coords, out float texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			vec4 tc = tex->transform * coords;
+			texColor = texture( transparencySampler, tc.st ).a;
+			// texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+		void getSpecularityTexture(in int textureId, in vec4 coords, out vec3 texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			vec4 tc = tex->transform * coords;
+			texColor = texture( specularitySampler, tc.st ).rgb;
+			// texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+		void getReflectivityTexture(in int textureId, in vec4 coords, out vec3 texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			vec4 tc = tex->transform * coords;
+			
+			float w = fwidth(tc.x);
+			w = 1.0;
+			if (w > 0.01)
+			{
+				texColor = vec3(0.0, 0.0, 0.0);
+			}
+			else
+			{
+				texColor = texture( reflectivitySampler, tc.st ).rgb;
+			}
+			//texColor = texture( cubeMapSampler, coords.xyz ).rgb;
+			// texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+		void getNormalMapTexture(in int textureId, in vec4 coords, out vec3 normal)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			vec4 tc = tex->transform * coords;
+			normal = texture(normalMapSampler, tc.st).rgb;
+		}
+	}
+	
+	GLSLShader global texturingGamma
+	{
+		uniform TTexture			*allTheTextures;
+		
+		uniform sampler2D	ambientSampler;
+		uniform sampler2D	diffuseSampler;
+		uniform sampler2D	transparencySampler;
+		uniform sampler2D	specularitySampler;
+		uniform sampler2D	reflectivitySampler;
+		uniform sampler2D	normalMapSampler;
+		//uniform samplerCube	cubeMapSampler;
+	
+		void getAmbientTexture(in int textureId, in vec4 coords, out vec4 texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			vec4 tc = tex->transform * coords;
+			tc = tc * textureScaling + textureOffset;
+			texColor = texture( ambientSampler, tc.st );
+		}
+		void getDiffuseTexture(in int textureId, in vec4 coords, out vec4 texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			vec4 tc = tex->transform * coords;
+			tc = tc * textureScaling + textureOffset;
+			texColor = texture( diffuseSampler, tc.st );
+			texColor.rgb = pow(texColor.rgb, vec3(2.2) );
+		}
+		void getTransparencyTexture(in int textureId, in vec4 coords, out float texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			vec4 tc = tex->transform * coords;
+			texColor = texture( transparencySampler, tc.st ).a;
+			texColor = pow(texColor, 2.2 );
+		}
+		void getSpecularityTexture(in int textureId, in vec4 coords, out vec3 texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			vec4 tc = tex->transform * coords;
+			texColor = texture( specularitySampler, tc.st ).rgb;
+			texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+		void getReflectivityTexture(in int textureId, in vec4 coords, out vec3 texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			vec4 tcoords = tex->transform * coords;
+			
+			float dst = tcoords.x;
+			float aaf = fwidth(dst);
+			float radius = 0.05;
+			
+			if (aaf < 0.03)
+				aaf = 0.03;
+			if (aaf > 0.05)
+				aaf = 0.05;
+			
+			float dist = 1.0 - clamp(200.0 * (aaf-0.03), 0.0, 1.0); // clamp(  10.0 * (radius - aaf - 0.03), 0.0, 1.0);
+			
+			float alpha = smoothstep(0.0, 1.0, dist);
+			
+			texColor = texture( reflectivitySampler, tcoords.st ).rgb;
+			texColor = texColor * alpha;
+			//texColor = vec3(1.0);
+			
+			//texColor = texture( reflectivitySampler, tc.st ).rgb;
+			//texColor = texture( cubeMapSampler, coords.xyz ).rgb;
+			// texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+		void getNormalMapTexture(in int textureId, in vec4 coords, out vec3 normal)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			vec4 tc = tex->transform * coords;
+			normal = texture(normalMapSampler, tc.st).rgb;
+		}
+	}
+}
+
+
+namespace BindlessTextures <programTarget="texturing";>
+{
+	GLSLShader global texturing
+	{
+		uniform TTexture			*allTheTextures;
+	
+		void getAmbientTexture(in int textureId, in vec4 coords, out vec4 texColor)
+		{
+			texColor = vec4(1.0, 1.0, 1.0, 1.0);
+		}
+		void getDiffuseTexture(in int textureId, in vec4 coords, out vec4 texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			sampler2D sm = sampler2D(tex->address);
+			vec4 tc = tex->transform * coords;
+			
+			texColor = texture( sm, tc.xy );
+			// texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+		void getTransparencyTexture(in int textureId, in vec4 coords, out float texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			sampler2D sm = sampler2D(tex->address);
+			vec4 tc = tex->transform * coords;
+			texColor = texture( sm, tc.st ).a;
+			// texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+		void getSpecularityTexture(in int textureId, in vec4 coords, out vec3 texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			sampler2D sm = sampler2D(tex->address);
+			vec4 tc = tex->transform * coords;
+			texColor = texture( sm, tc.st ).rgb;
+			// texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+		void getReflectivityTexture(in int textureId, in vec4 coords, out vec3 texColor)
+		{
+			TTexture *tex = allTheTextures + textureId;
+			sampler2D sm = sampler2D(tex->address);
+			vec4 tc = tex->transform * coords;
+			texColor = texture( sm, tc.st ).rgb;
+			// texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+	}
+}

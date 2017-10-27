@@ -260,10 +260,10 @@ bool ObjectMask::PrepCompositeShader()
 	{
 		pNewShader = new GLSLShader();
 
-		if ( false == FindEffectLocation( "\\GLSL\\dynamicMask.fsh", effectPath, effectFullName ) )
+		if ( false == FindEffectLocation( DYNAMIC_MASK_SHADER_FRAGMENT, effectPath, effectFullName ) )
 			throw "Failed to locate shader files";
 		
-		if ( false == pNewShader->LoadShaders( FBString(effectPath, "\\GLSL\\simple.vsh"), FBString(effectPath, "\\GLSL\\dynamicMask.fsh") ) )
+		if ( false == pNewShader->LoadShaders( FBString(effectPath, DYNAMIC_MASK_SHADER_VERTEX), FBString(effectPath, DYNAMIC_MASK_SHADER_FRAGMENT) ) )
 			throw "Failed to load shaders";
 		
 		mShaderCompositeLoc.rSampler = pNewShader->findLocation( "rSampler" );
@@ -307,10 +307,10 @@ bool ObjectMask::PrepBlurShader()
 		pNewShader = new GLSLShader();
 
 		//
-		if ( false == FindEffectLocation( "\\GLSL\\blur2.fsh", effectPath, effectFullName ) )
+		if ( false == FindEffectLocation( DYNAMIC_MASK_BLUR_FRAGMENT, effectPath, effectFullName ) )
 			throw "Failed to locate blur files";
 
-		if (false == pNewShader->LoadShaders( FBString(effectPath, "\\GLSL\\simple.vsh"), FBString(effectPath, "\\GLSL\\blur2.fsh") ) )
+		if (false == pNewShader->LoadShaders( FBString(effectPath, DYNAMIC_MASK_BLUR_VERTEX), FBString(effectPath, DYNAMIC_MASK_BLUR_FRAGMENT) ) )
 			throw "Failed to load blur shaders";
 				
 		mShaderBlurLoc.sampler = pNewShader->findLocation( "mainTex" );

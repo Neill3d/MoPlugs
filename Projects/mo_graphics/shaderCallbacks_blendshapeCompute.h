@@ -24,6 +24,8 @@
 #include <functional>
 #include <algorithm>
 
+#define BLENDSHAPE_COMPUTE_SHADER		"\\GLSL_CS\\computeNormals.cs"
+
 //////////////////////////////////////////////////////////////////////////////////////
 // store main shader pipeline functionality
 class CComputeProgram
@@ -40,7 +42,7 @@ public:
 
 
 
-	bool PrepProgram(const char *filename = "\\GLSL_CS\\computeNormals.cs");
+	bool PrepProgram(const char *filename = BLENDSHAPE_COMPUTE_SHADER);
 
 	void CreateGLObjects();
 	void ReCreateShaderObject();

@@ -17,8 +17,8 @@
 #include "graphics\CheckGLError_MOBU.h"
 #include "graphics\ParticlesDrawHelper.h"
 #include "shared_content.h"
-#include "nvImage.h"
-#include "nv_dds.h"
+#include "nvImage\nvImage.h"
+#include "nv_dds\nv_dds.h"
 #include "FBCommon.h"
 
 #include "MB_renderer.h"

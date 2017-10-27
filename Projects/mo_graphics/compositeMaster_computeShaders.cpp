@@ -24,6 +24,12 @@ using namespace CompositeComputeShader;
 
 #define	STR_PART_IDENT			"//-- PART:"
 
+#define DRAW_LOG_SHADER_VERTEX		"\\GLSL\\drawLog.vsh"
+#define DRAW_LOG_SHADER_FRAGMENT	"\\GLSL\\drawLog.fsh"
+
+#define DRAW_CUBEMAP_SHADER_VERTEX		"\\GLSL\\drawCubeMap.vsh"
+#define DRAW_CUBEMAP_SHADER_FRAGMENT	"\\GLSL\\drawCubeMap.fsh"
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
@@ -1067,12 +1073,12 @@ GLSLShader *CMixedProgramManager::QueryLogDrawShader()
 		// try to load a new shader
 
 		FBString effectPath, effectFullName;
-		if (true == FindEffectLocation( "\\GLSL\\drawLog.vsh", effectPath, effectFullName ) )
+		if (true == FindEffectLocation( DRAW_LOG_SHADER_VERTEX, effectPath, effectFullName ) )
 		{
 			GLSLShader *pNewShader = new GLSLShader();
 
-			FBString vertexPath( effectPath, "\\GLSL\\drawLog.vsh" );
-			FBString fragmentPath( effectPath, "\\GLSL\\drawLog.fsh" );
+			FBString vertexPath( effectPath, DRAW_LOG_SHADER_VERTEX );
+			FBString fragmentPath( effectPath, DRAW_LOG_SHADER_FRAGMENT );
 
 			if (false == pNewShader->LoadShaders( vertexPath, fragmentPath ) )
 			{
@@ -1095,12 +1101,12 @@ GLSLShader *CMixedProgramManager::QueryCubeMapShader()
 		// try to load a new shader
 
 		FBString effectPath, effectFullName;
-		if (true == FindEffectLocation( "\\GLSL\\drawCubeMap.vsh", effectPath, effectFullName ) )
+		if (true == FindEffectLocation( DRAW_CUBEMAP_SHADER_VERTEX, effectPath, effectFullName ) )
 		{
 			GLSLShader *pNewShader = new GLSLShader();
 
-			FBString vertexPath( effectPath, "\\GLSL\\drawCubeMap.vsh" );
-			FBString fragmentPath( effectPath, "\\GLSL\\drawCubeMap.fsh" );
+			FBString vertexPath( effectPath, DRAW_CUBEMAP_SHADER_VERTEX );
+			FBString fragmentPath( effectPath, DRAW_CUBEMAP_SHADER_FRAGMENT );
 
 			if (false == pNewShader->LoadShaders( vertexPath, fragmentPath ) )
 			{

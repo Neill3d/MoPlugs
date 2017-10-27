@@ -17,45 +17,85 @@
 #include "graphics\OGL_Utils.h"
 #include "graphics\UniformBuffer.h"
 
+// color correction
 #define FILTERCSB__CLASSNAME				ObjectFilterColorCorrection
 #define FILTERCSB__CLASSSTR					"ObjectFilterColorCorrection"
 #define FILTERCSB__ASSETNAME				"Color Correction Filter"
 
+#define FILTERCSB__LABEL					"color correction"
+#define FILTERCSB__SHADER					"\\GLSL_CS\\FilterColor.cs"
+
+// blur
 #define FILTERBLUR__CLASSNAME				ObjectFilterBlur
 #define FILTERBLUR__CLASSSTR				"ObjectFilterBlur"
 #define FILTERBLUR__ASSETNAME				"Blur Filter"
 
+#define FILTERBLUR__LABEL					"blur"
+#define FILTERBLUR__SHADER					"\\GLSL_CS\\FilterBlur.cs"
+
+// halftone
 #define FILTERHALFTONE__CLASSNAME			ObjectFilterHalfTone
 #define FILTERHALFTONE__CLASSSTR			"ObjectFilterHalfTone"
 #define FILTERHALFTONE__ASSETNAME			"HalfTone Filter"
 
+#define FILTERHALFTONE__LABEL				"halftone"
+#define FILTERHALFTONE__SHADER				"\\GLSL_CS\\FilterHalfTone.cs"
+
+// posterization
 #define FILTERPOSTERIZATION__CLASSNAME		ObjectFilterPosterization
 #define FILTERPOSTERIZATION__CLASSSTR		"ObjectFilterPosterization"
 #define FILTERPOSTERIZATION__ASSETNAME		"Posterization Filter"
 
+#define FILTERPOSTERIZATION__LABEL			"posterization"
+#define FILTERPOSTERIZATION__SHADER			"\\GLSL_CS\\FilterPosterization.cs"
+
+// change color
 #define FILTERCHANGECOLOR__CLASSNAME		ObjectFilterChangeColor
 #define FILTERCHANGECOLOR__CLASSSTR			"ObjectFilterChangeColor"
 #define FILTERCHANGECOLOR__ASSETNAME		"Change Color Filter"
 
+#define FILTERCHANGECOLOR__LABEL			"change color"
+#define FILTERCHANGECOLOR__SHADER			"\\GLSL_CS\\FilterChangeColor.cs"
+
+// film grain
 #define FILTERFILMGRAIN__CLASSNAME			ObjectFilterFilmGrain
 #define FILTERFILMGRAIN__CLASSSTR			"ObjectFilterFilmGrain"
 #define FILTERFILMGRAIN__ASSETNAME			"Film Grain Filter"
 
+#define FILTERFILMGRAIN__LABEL				"film grain"
+#define FILTERFILMGRAIN__SHADER				"\\GLSL_CS\\FilterFilmGrain.cs"
+
+// cross hatch
 #define FILTERCROSSHATCH__CLASSNAME			ObjectFilterCrosshatch
 #define FILTERCROSSHATCH__CLASSSTR			"ObjectFilterCrosshatch"
 #define FILTERCROSSHATCH__ASSETNAME			"Crosshatch Filter"
 
+#define FILTERCROSSHATCH__LABEL				"crosshatch"
+#define FILTERCROSSHATCH__SHADER			"\\GLSL_CS\\FilterCrosshatch.cs"
+
+// cross stitch
 #define FILTERCROSSSTITCH__CLASSNAME		ObjectFilterCrossStitching
 #define FILTERCROSSSTITCH__CLASSSTR			"ObjectFilterCrossStitching"
 #define FILTERCROSSSTITCH__ASSETNAME		"Cross Stitching Filter"
 
+#define FILTERCROSSSTITCH__LABEL			"cross-stitching"
+#define FILTERCROSSSTITCH__SHADER			"\\GLSL_CS\\FilterCrossStitching.cs"
+
+// Toon lines
 #define FILTERTOONLINES__CLASSNAME			ObjectFilterToonLines
 #define FILTERTOONLINES__CLASSSTR			"ObjectFilterToonLines"
 #define FILTERTOONLINES__ASSETNAME			"Outline Filter"
 
+#define FILTERTOONLINES__LABEL				"toon lines"
+#define FILTERTOONLINES__SHADER				"\\GLSL_CS\\FilterToonLines.cs"
+
+// SSAO
 #define FILTERSSAO__CLASSNAME				ObjectFilterSSAO
 #define FILTERSSAO__CLASSSTR				"ObjectFilterSSAO"
 #define FILTERSSAO__ASSETNAME				"SSAO Filter"
+
+#define FILTERSSAO__LABEL					"SSAO"
+#define FILTERSSAO__SHADER					"\\GLSL_CS\\FilterSSAO.cs"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ObjectFilterColorCorrection
@@ -93,10 +133,10 @@ protected:
 	}
 
 	virtual const char *MixedProgramLabel() override {
-		return "color correction";
+		return FILTERCSB__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterColor.cs";
+		return FILTERCSB__SHADER;
 	}
 
 	virtual void OnApplyFilter(EApplyFilterStage stage, const CCompositionInfo *pInfo, const CProcessingInfo &prInfo, CompositeFinalStats &stats, const GLuint sourceTexId, const GLuint dstTexId) override 
@@ -272,10 +312,10 @@ public:
 	}
 
 	static const char *MixedProgramLabel() {
-		return "blur";
+		return FILTERBLUR__LABEL;
 	}
 	static const char *MixedProgramPath() {
-		return "\\GLSL_CS\\FilterBlur.cs";
+		return FILTERBLUR__SHADER;
 	}
 
 	static bool CheckIfShaderIsReady(const CCompositionInfo *pInfo, const Data &data, CacheData &cacheData);
@@ -335,10 +375,10 @@ protected:
 	}
 
 	virtual const char *MixedProgramLabel() override {
-		return "blur";
+		return FILTERBLUR__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterBlur.cs";
+		return FILTERBLUR__SHADER;
 	}
 	
 protected:
@@ -377,10 +417,10 @@ protected:
 	}
 
 	virtual const char *MixedProgramLabel() override {
-		return "halftone";
+		return FILTERHALFTONE__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterHalfTone.cs";
+		return FILTERHALFTONE__SHADER;
 	}
 	
 	virtual void OnApplyFilter(EApplyFilterStage stage, const CCompositionInfo *pInfo, const CProcessingInfo &prInfo, CompositeFinalStats &stats, const GLuint sourceTexId, const GLuint dstTexId) override {
@@ -452,10 +492,10 @@ protected:
 	}
 
 	virtual const char *MixedProgramLabel() override {
-		return "posterization";
+		return FILTERPOSTERIZATION__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterPosterization.cs";
+		return FILTERPOSTERIZATION__SHADER;
 	}
 	
 	virtual void OnApplyFilter(EApplyFilterStage stage, const CCompositionInfo *pInfo, const CProcessingInfo &prInfo, CompositeFinalStats &stats, const GLuint sourceTexId, const GLuint dstTexId) override {
@@ -548,10 +588,10 @@ protected:
 	}
 
 	virtual const char *MixedProgramLabel() override {
-		return "change color";
+		return FILTERCHANGECOLOR__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterChangeColor.cs";
+		return FILTERCHANGECOLOR__SHADER;
 	}
 	
 	virtual void OnApplyFilter(EApplyFilterStage stage, const CCompositionInfo *pInfo, const CProcessingInfo &prInfo, CompositeFinalStats &stats, const GLuint sourceTexId, const GLuint dstTexId) override
@@ -634,10 +674,10 @@ protected:
 	}
 
 	virtual const char *MixedProgramLabel() override {
-		return "film grain";
+		return FILTERFILMGRAIN__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterFilmGrain.cs";
+		return FILTERFILMGRAIN__SHADER;
 	}
 	
 	virtual void OnApplyFilter(EApplyFilterStage stage, const CCompositionInfo *pInfo, const CProcessingInfo &prInfo, CompositeFinalStats &stats, const GLuint sourceTexId, const GLuint dstTexId) override 
@@ -745,10 +785,10 @@ protected:
 	}
 
 	virtual const char *MixedProgramLabel() override {
-		return "crosshatch";
+		return FILTERCROSSHATCH__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterCrosshatch.cs";
+		return FILTERCROSSHATCH__SHADER;
 	}
 };
 
@@ -776,10 +816,10 @@ protected:
 	}
 
 	virtual const char *MixedProgramLabel() override {
-		return "cross-stitching";
+		return FILTERCROSSSTITCH__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterCrossStitching.cs";
+		return FILTERCROSSSTITCH__SHADER;
 	}
 };
 
@@ -813,10 +853,10 @@ protected:
 	}
 
 	virtual const char *MixedProgramLabel() override {
-		return "toon lines";
+		return FILTERTOONLINES__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterToonLines.cs";
+		return FILTERTOONLINES__SHADER;
 	}
 	virtual bool HasMultiSamplingSupport() override {
 		return true;
@@ -921,10 +961,10 @@ protected:
 	}
 
 	virtual const char *MixedProgramLabel() override {
-		return "SSAO";
+		return FILTERSSAO__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterSSAO.cs";
+		return FILTERSSAO__SHADER;
 	}
 	virtual bool HasMultiSamplingSupport() override {
 		return true;

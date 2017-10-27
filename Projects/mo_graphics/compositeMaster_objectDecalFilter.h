@@ -23,6 +23,11 @@
 #define FILTER3DDECAL__CLASSSTR					"ObjectFilter3dDecal"
 #define FILTER3DDECAL__ASSETNAME				"3d Decal Filter"
 
+#define FILTER3DDECAL__LABEL					"3d Decal"
+#define FILTER3DDECAL__SHADER					"\\GLSL_CS\\FilterDecal.cs"
+
+#define COPY_COMPUTE_SHADER						"\\GLSL_CS\\copy.cs"
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 3D DECAL
 
@@ -81,10 +86,10 @@ public:
 protected:
 
 	virtual const char *MixedProgramLabel() override {
-		return "3d Decal";
+		return FILTER3DDECAL__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterDecal.cs";
+		return FILTER3DDECAL__SHADER;
 	}
 	virtual void OnSetProgramExtension( FBString &strHeader ) override
 	{

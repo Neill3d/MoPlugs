@@ -19,6 +19,9 @@
 #include "IO\FileUtils.h"
 #include "shared_misc.h"
 
+//
+#define BLEND_COMPUTE_SHADER		"\\GLSL_CS\\blend.cs"
+
 
 /** Class implementation.
 *   This should be placed in the source code file for a class that derives
@@ -791,7 +794,7 @@ bool ObjectCompositeLayer::ReadyToApply(const CCompositionInfo *pInfo, const CPr
 			"blend",
 			strHeader,
 			strDefine, 
-			"\\GLSL_CS\\blend.cs", 
+			BLEND_COMPUTE_SHADER, 
 			"");
 		
 		if (true == mNeedProgramReload && nullptr != mBlendProgram)

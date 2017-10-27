@@ -2110,7 +2110,7 @@ void MoRendererCallback::LoadResolutionPresets()
 	// TODO: load a xml file and fillup the resolution preset property
 
 	FBString effectPath, effectFullName;
-	if (true == FindEffectLocation( "\\System\\resolutionPresets.xml", effectPath, effectFullName ) )
+	if (true == FindEffectLocation( "resolutionPresets.xml", effectPath, effectFullName ) )
 	{
 		TiXmlDocument	doc;
 

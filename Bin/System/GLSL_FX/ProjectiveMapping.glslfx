@@ -1,0 +1,2804 @@
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+// Projective Mapping FX Shader
+//
+// Projective Mapping Shader plugin for the Autodesk MotionBuilder
+//
+// Author Sergey Solokhin (Neill3d) 2014-2016. Based on nvFX library
+//
+//	GitHub page - https://github.com/Neill3d/MoPlugs
+//	Licensed under BSD 3-Clause - https://github.com/Neill3d/MoPlugs/blob/master/LICENSE
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+#extension GL_ARB_separate_shader_objects : enable
+
+//////////////////////////////////////////////////////////
+
+#include "shared_globals.glslfxh"
+
+
+uniform float	AlphaPass = 0.0f;
+uniform float	normal_length = 10.0f;
+uniform int 	numProjectors = 0;
+//uniform float	depthDisplacement = 0.0f;
+
+uniform int		gMeshIndex = 0;
+
+uniform vec4	textureOffset;
+uniform vec4	textureScaling;
+//uniform vec4	shaderMask;
+
+//uniform float	useRim = 1.0;
+//uniform float	rimPower = 1.0;
+//uniform vec4 	gRimOptions;			// x - useRim, y-rimPower, z-useRimSampler
+//uniform vec4	gRimColor;			// w - rim blend mode
+
+// its very important for clustering lights
+uniform vec4	SCREEN_SIZE;	// contains offsets and 1.0/width(height)
+
+uniform float	softParticles = 0.0f;
+
+//////////////////////////////////////////////////////////
+
+GLSLShader 
+{
+    #version 430 compatibility
+	#extension GL_ARB_bindless_texture : enable
+	#extension GL_ARB_shader_storage_buffer_object : require
+	#extension GL_ARB_shader_draw_parameters : require
+	#extension GL_NV_shader_buffer_load : require
+	#extension GL_NV_shader_atomic_float : require
+}
+
+#include "shared_lighting.glslfxh"
+#include "shared_depth.glslfxh"
+#include "shared_projectors.glslfxh"
+#include "shared_customcolor.glslfxh"
+#include "shared_texturing.glslfxh"
+
+//////////////////////////////////////////////////////////////
+// GLSL Globals : meaning that all the GLSL domains (vertex, fragments etc.) will have a copy
+// of these data
+//
+GLSLShader 
+{
+	//! Note: all structures are aligned to 16-bit
+	
+	
+	
+	struct TMaterial
+	{
+		// textures for material channels
+		int			ambientChannel;
+		int			diffuseChannel;
+		int			specularChannel;
+		int			emissiveChannel;
+		int			transparencyChannel;
+		int			normalmapChannel;
+		int			reflectChannel;
+		
+		float		specExp;
+		
+		float 		useAmbient;
+		float		useDiffuse;
+		float		useSpecular;
+		float		useEmissive;
+		float		useTransparency;
+		float		useNormalmap;
+		float		useReflect;
+		
+		// values for PBR
+		float		roughness;
+		float 		metal;
+		float 		dummy3;
+		float 		dummy1;
+		float 		dummy2;
+		
+		//
+		/// Current material
+		//
+		vec4		emissiveColor;
+		vec4     	diffuseColor;
+		vec4     	ambientColor;
+		vec4		reflectColor;
+		vec4     	transparencyColor;
+		vec4     	specularColor;
+		
+		// 160 in total
+	};
+	
+	struct TShader
+	{
+		int			shadingType;
+		int			shaderType;
+		int			shader1;
+		int			shader2;
+		
+		int 		shader3;
+		int			shader4;
+		int			shader5;
+		float		transparency;
+	
+		//
+		/// shader parameters
+		//
+		float		toonEnabled;
+		float		toonSteps;
+		float		toonDistribution;
+		float		toonShadowPosition;
+		
+		vec4		customColor;
+		
+		float		contrast;
+		float		saturation;
+		float		brightness;
+		float		gamma;
+		
+		float		depthDisplacement;
+		float		alphaFromColor;
+		float		dummy2;
+		float		applyColorCorrection;
+		
+		//
+		vec4		mask;
+		vec4		rimOptions;	// x - useRim, y-rimPower, z-useRimSampler
+		vec4		rimColor;	// w - rim blend mode
+		
+		// 16
+		vec4		shadow; // rgb - Color;	w-intensity
+		// 16
+		
+		// total - 96 bytes
+	};
+	
+	struct TModel
+	{
+		mat4		transform;		// local mesh matrix
+		mat4		normalMatrix;	// transpose(inverse(WorldViewIT))
+		
+		// total 128 bytes
+	};
+	
+	struct TMesh
+	{
+		int				material;		// pointer to the mesh material
+		int				lightmap;		// pointer to the lightmap texture (if needed)
+		
+		int				model;			// index to the model struct	
+		int				shader;			// index to the shader struct
+		// 16
+		
+		vec4		color;			// flat color id (buffer id rendering)
+		// 16
+		
+		// total - 32 bytes
+	};
+
+
+			/*
+			apply reflections !
+			
+		vec3 reflColor = theMaterial->reflectColor.rgb;
+		if (theMaterial->useReflect > 0.0f)
+		{
+			//vec3 reflection = normalize(reflect(-normalize(Vd), normalize(n_eye)));
+			
+			vec3 reflection = normalize(reflect(-normalize(eyePos - inWV), normalize(inNw)));
+			
+			// Parallax-correction
+			if (cubeMapParallaxCorrection > 0.0)
+			{
+				vec3 CubemapPositionWS = cubeMapPosition.xyz;
+				
+				vec3 boxMax = cubeMapMax.xyz;
+				vec3 boxMin = cubeMapMin.xyz;
+				vec3 firstPlaneIntersect = (boxMax - inWV) / reflection;
+				vec3 secondPlaneIntersect = (boxMin - inWV) / reflection;
+				vec3 furthestPlane = max(firstPlaneIntersect, secondPlaneIntersect);
+				float dist = 0.2 * min(min(furthestPlane.x, furthestPlane.y), furthestPlane.z);
+				vec3 intersectPositionWS = inWV + reflection * dist;
+				reflection = normalize(intersectPositionWS - CubemapPositionWS);
+			}
+			float yaw = .5 - atan( reflection.x, -reflection.z ) / ( 2.0 * PI );
+			float pitch = .5 - asin( reflection.y ) / PI;
+			
+			TTexture *theTexture = allTheTextures + theMaterial->reflect;
+			getReflectivityTexture( theTexture, vec4(1.0-pitch, 1.0-yaw, 0.0, 1.0), reflColor );
+		}
+		
+		difColor.rgb += reflColor * theMaterial->reflectColor.w;
+		*/
+}
+
+////////////////////////////////////////////////////////////////////
+/// Main things
+////////////////////////////////////////////////////////////////////
+namespace Main
+{
+
+    ////////////////////////////////////////////////////////////////////
+    /// MAIN's VERTEX PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+	GLSLShader VS_Simple
+	{
+		layout(location=0) in vec4 inPosition;
+		layout(location=1) in vec2 inTexCoords;
+		layout(location=2) in vec4 inNormal;
+		//layout(location=5) in float inMeshIndex;
+		
+		layout(location=1) smooth out vec2 outTC;	// 8 bytes
+		layout(location=4) flat out TMesh	*fMesh;
+		
+		out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+
+		uniform TMesh			*allTheMeshes;
+		uniform	TModel			*allTheModels;
+		
+		void main(void)
+        {
+			TMesh 	*theMesh = allTheMeshes + gl_BaseInstanceARB + gMeshIndex; // + gl_DrawIDARB;
+			TModel	*theModel = allTheModels + theMesh->model;
+			
+			// Surface normal in eye coords
+			mat4 normalMatrix = theModel->normalMatrix; // m4_WorldIT; //	transpose(inverse(matrix));
+			//mat4 normalMatrix = m4_WorldIT;
+			vec4 N = normalMatrix * vec4(inNormal.xyz, 1.0);
+		
+			vec4 Po    = m4_World * theModel->transform * vec4(inPosition.xyz, 1.0);
+			vec4 vPosition4 = m4_View * Po;
+			
+			float depthDisplacement = 0.0;
+			gl_Position = m4_Proj * vPosition4;
+			gl_Position.z += depthDisplacement;
+			
+			VS_Depth( depthDisplacement, gl_Position );
+			
+			outTC           = inTexCoords;
+			fMesh = theMesh;
+        }
+	}
+	
+	GLSLShader FS_Simple
+	{
+		layout(location=1) smooth in vec2 inTC;		// input 8 bytes
+		layout(location=4) flat in TMesh *fMesh;
+	
+        layout(location=0) out vec4 	outColor;
+		
+		uniform	TMaterial			*allTheMaterials;
+		uniform TShader 			*allTheShaders;		// pointer to the array with shaders
+		
+		void main(void)
+		{
+			TShader *theShader = allTheShaders + fMesh->shader;
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			
+			vec4 difColor = vec4(theMaterial->diffuseColor.rgb, 1.0);
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			if (theMaterial->useDiffuse > 0.0f)
+			{
+				getDiffuseTexture( theMaterial->diffuseChannel, coords, difColor );
+			}
+		
+			if (theMaterial->useTransparency > 0.0f)
+			{
+				getTransparencyTexture( theMaterial->transparencyChannel, coords, difColor.a );
+			}
+			
+			outColor = vec4(fMesh->color.rgb, difColor.a);
+			
+			FS_Depth();
+		}
+	}
+	
+    GLSLShader VS
+    {
+        layout(location=0) in vec4 inPosition;
+		layout(location=1) in vec2 inTexCoords;
+		layout(location=2) in vec4 inNormal;
+		// TODO: make them as allTheMeshes, allTheModels uniforms instead of per vertex attribute
+		//layout(location=5) in TMesh*		inMesh;		// (material, shader)
+		//layout(location=6) in TModel*		inModel;	// (transformation)
+		
+		layout(location=0) smooth out vec3 outNw;	// 12 bytes
+		layout(location=1) smooth out vec2 outTC;	// 8 bytes
+		layout(location=2) smooth out vec3 outPw;	// 12 bytes
+		layout(location=3) smooth out vec3 outWV;	// 12 bytes
+		layout(location=4) flat out TMesh	*fMesh;
+		
+		out vec3	n_eye;
+		
+		
+        out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+
+		uniform TMesh			*allTheMeshes;
+		uniform	TModel			*allTheModels;
+
+        void main(void)
+        {
+			TMesh 	*theMesh = allTheMeshes + gl_BaseInstanceARB + gMeshIndex; // + gl_DrawIDARB;
+			TModel	*theModel = allTheModels + theMesh->model;
+			
+			// Surface normal in eye coords
+			mat4 normalMatrix = theModel->normalMatrix; // m4_WorldIT; //	transpose(inverse(matrix));
+			//normalMatrix = transpose(inverse(m4_World * theModel->transform));
+			//normalMatrix = transpose(inverse(m4_View * normalMatrix));
+			vec4 N = normalMatrix * vec4(inNormal.xyz, 1.0);
+			//N = vec4(1.0, 0.0, 0.0, 1.0);
+			
+			vec3 offset = inNormal.xyz * 0.0;
+			vec4 vertex = vec4(inPosition.xyz + offset, 1.0);
+			vec4 Po    = m4_World * theModel->transform * vertex;
+			vec4 vPosition4 = m4_View * Po;
+			vec3 vPosition3 = vPosition4.xyz; // / vPosition4.w;
+		
+			gl_Position = m4_Proj * vPosition4;
+			
+			// compose objects with user defined rules
+			float depthDisplacement = 0.0;
+			gl_Position.z += depthDisplacement;
+			
+			VS_Depth( depthDisplacement, gl_Position );
+			
+			outNw           = N.xyz; // / N.w;
+			outTC           = inTexCoords;
+			outPw           = vPosition3; // / vPosition4.w;
+			outWV           =  /*eyePos -*/ Po.xyz; // / Po.w; //(Po.xyz - eyePos);
+			//outPw = -m4_View[3].xyz;
+			//outPw.y = -outPw.y;
+			//n_eye = vec3(m4_View * m4_World * theModel->transform * vec4(inNormal.xyz, 0.0));
+			//normalMatrix = transpose(inverse(m4_View * m4_World * theModel->transform));
+			normalMatrix = transpose(inverse(m4_World * theModel->transform));
+			n_eye = (normalMatrix * vec4(inNormal.xyz, 1.0)).xyz; // inNormal.xyz;
+			//n_eye = inNormal.xyz;
+			
+			//n_eye = (normalMatrix * vec4(inNormal.xyz, 1.0)).xyz; // inNormal.xyz;
+			
+			fMesh = theMesh;
+        }
+    }
+	
+	////////////////////////////////////////////////////////////////////
+    /// CUBEMAP's GEOMETRY PROGRAM /////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+	GLSLShader GS_CubeMap
+	{
+		layout(triangles, invocations = 6) in;
+		layout(triangle_strip, max_vertices = 3) out;
+ 
+		in gl_PerVertex
+		{
+			vec4 gl_Position;
+		} gl_in[];
+ 
+		layout(location=0) smooth in vec3 inNw[];	// 12 bytes
+		layout(location=1) smooth in vec2 inTC[];	// 8 bytes
+		layout(location=2) smooth in vec3 inPw[];	// 12 bytes
+		layout(location=3) smooth in vec3 inWV[];	// 12 bytes
+		layout(location=4) flat in TMesh	*inMesh[];
+ 
+		in vec3	in_eye0[];
+ 
+		//
+		out int gl_Layer;
+		out gl_PerVertex
+		{
+			vec4 gl_Position;
+		};
+ 
+		layout(location=0) smooth out vec3 outNw;	// 12 bytes
+		layout(location=1) smooth out vec2 outTC;	// 8 bytes
+		layout(location=2) smooth out vec3 outPw;	// 12 bytes
+		layout(location=3) smooth out vec3 outWV;	// 12 bytes
+		layout(location=4) flat out TMesh	*fMesh;
+ 
+		out vec3 in_eye;
+ 
+		void main() {
+			 
+			for(int i=0; i<gl_in.length(); ++i) 
+			{				
+				gl_Position = cubeMapProjections[gl_InvocationID] * gl_in[i].gl_Position;
+				//gl_Position = gl_in[i].gl_Position;
+				outNw = inNw[i];
+				outTC = inTC[i];
+				outPw = inPw[i];
+				outWV = inWV[i];
+				fMesh = inMesh[i];
+				in_eye = in_eye0[i];
+				
+				gl_Layer = gl_InvocationID;
+				EmitVertex();
+			}
+			EndPrimitive();
+		}
+	}
+	
+    ////////////////////////////////////////////////////////////////////
+    /// MAIN's FRAGMENT PROGRAM ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+    GLSLShader FS
+    {
+		#define	PI	3.14159265358979323846264
+	
+		layout(location=0) smooth in vec3 inNw;
+		layout(location=1) smooth in vec2 inTC;		// input 8 bytes
+		layout(location=2) smooth in vec3 inPw;
+		layout(location=3) smooth in vec3 inWV;
+		
+		layout(location=4) flat in TMesh *fMesh;
+	
+		in vec3		n_eye;
+		
+        layout(location=0) out vec4 	color;
+		layout(location=1) out vec4		outNormal;	// output a view space normal
+		layout(location=2) out vec4		outMask;
+		layout(location=3) out vec4		outPosition;
+		
+		uniform	TMaterial			*allTheMaterials;
+		uniform TShader 			*allTheShaders;		// pointer to the array with shaders
+		uniform ProjectorDATA		*allTheProjectors;
+	
+		/////////////////////////////////////////////////////////////////////
+		
+		uniform sampler2D 	projectorsSampler[MAX_SHADER_PROJECTORS];
+		uniform	sampler2D	projectorMaskA;
+		uniform	sampler2D	projectorMaskB;
+		uniform sampler2D	backgroundSampler;	// for matte shading
+		uniform sampler2D	matCapSampler;		// for a shader matCap Shading
+		uniform sampler2D	rimSampler;
+		
+		uniform samplerCube		reflectionCubeSampler;
+		
+		// for soft particles effect
+		uniform sampler2D		mainDepthSampler;
+		////////////////////////////////////////////////////////////////////
+		
+		//
+		// Subroutine Prototype
+		//
+		subroutine vec3 BlendTYPE(vec3 base, vec3 blend);
+		
+		//
+		// 25 modes in total
+		//
+		layout(index=0) subroutine(BlendTYPE) vec3 blendNormal(vec3 base, vec3 blend) {
+			return blend;
+		}
+		
+		layout(index=1) subroutine(BlendTYPE) vec3 blendLighten(vec3 base, vec3 blend) {
+			return BlendLighten(base, blend);
+		}		
+		layout(index=2) subroutine(BlendTYPE) vec3 blendDarken(vec3 base, vec3 blend) {
+			return BlendDarken(base, blend);
+		}
+		layout(index=3) subroutine(BlendTYPE) vec3 blendMultiply(vec3 base, vec3 blend) {
+			return BlendMultiply(base, blend);
+		}
+		layout(index=4) subroutine(BlendTYPE) vec3 blendAverage(vec3 base, vec3 blend) {
+			return BlendAverage(base, blend);
+		}
+		layout(index=5) subroutine(BlendTYPE) vec3 blendAdd(vec3 base, vec3 blend) {
+			return BlendAdd(base, blend);
+		}
+		layout(index=6) subroutine(BlendTYPE) vec3 blendSubstract(vec3 base, vec3 blend) {
+			return BlendSubstract(base, blend);
+		}
+		layout(index=7) subroutine(BlendTYPE) vec3 blendDifference(vec3 base, vec3 blend) {
+			return BlendDifference(base, blend);
+		}
+		layout(index=8) subroutine(BlendTYPE) vec3 blendNegation(vec3 base, vec3 blend) {
+			return BlendNegation(base, blend);
+		}
+		layout(index=9) subroutine(BlendTYPE) vec3 blendExclusion(vec3 base, vec3 blend) {
+			return BlendExclusion(base, blend);
+		}
+		layout(index=10) subroutine(BlendTYPE) vec3 blendScreen(vec3 base, vec3 blend) {
+			return BlendScreen(base, blend);
+		}
+		layout(index=11) subroutine(BlendTYPE) vec3 blendOverlay(vec3 base, vec3 blend) {
+			return BlendOverlay(base, blend);
+		}
+		layout(index=12) subroutine(BlendTYPE) vec3 blendSoftLight(vec3 base, vec3 blend) {
+			return BlendSoftLight(base, blend);
+		}
+		layout(index=13) subroutine(BlendTYPE) vec3 blendHardLight(vec3 base, vec3 blend) {
+			return BlendHardLight(base, blend);
+		}
+		layout(index=14) subroutine(BlendTYPE) vec3 blendColorDodge(vec3 base, vec3 blend) {
+			return BlendColorDodge(base, blend);
+		}
+		layout(index=15) subroutine(BlendTYPE) vec3 blendColorBurn(vec3 base, vec3 blend) {
+			return BlendColorBurn(base, blend);
+		}
+		layout(index=16) subroutine(BlendTYPE) vec3 blendLinearDodge(vec3 base, vec3 blend) {
+			return BlendLinearDodge(base, blend);
+		}
+		layout(index=17) subroutine(BlendTYPE) vec3 blendLinearBurn(vec3 base, vec3 blend) {
+			return BlendLinearBurn(base, blend);
+		}
+		layout(index=18) subroutine(BlendTYPE) vec3 blendLinearLight(vec3 base, vec3 blend) {
+			return BlendLinearLight(base, blend);
+		}
+		layout(index=19) subroutine(BlendTYPE) vec3 blendVividLight(vec3 base, vec3 blend) {
+			return BlendVividLight(base, blend);
+		}
+		layout(index=20) subroutine(BlendTYPE) vec3 blendPinLight(vec3 base, vec3 blend) {
+			return BlendPinLight(base, blend);
+		}
+		layout(index=21) subroutine(BlendTYPE) vec3 blendHardMix(vec3 base, vec3 blend) {
+			return BlendHardMix(base, blend);
+		}
+		layout(index=22) subroutine(BlendTYPE) vec3 blendReflect(vec3 base, vec3 blend) {
+			return BlendReflect(base, blend);
+		}
+		layout(index=23) subroutine(BlendTYPE) vec3 blendGlow(vec3 base, vec3 blend) {
+			return BlendGlow(base, blend);
+		}
+		layout(index=24) subroutine(BlendTYPE) vec3 blendPhoenix(vec3 base, vec3 blend) {
+			return BlendPhoenix(base, blend);
+		}
+		
+		//
+		subroutine uniform BlendTYPE BlendWithProjector[25];	// blending with each projector
+		
+		//////////////////////////////////////////////////////////////////////
+		
+		void ApplyProjectors(inout vec4 difColor)
+		{
+			vec4 projColor;
+			vec4 projCoords;
+			float projAlpha;
+			
+			ProjectorDATA *pProj = allTheProjectors;
+			
+			for (int i=0; i<numProjectors; ++i)
+			{
+				pProj = allTheProjectors + i;
+			
+				projCoords = pProj->matrix * vec4(inWV.xyz, 1.0);
+				projCoords.xyz /= projCoords.q;		
+				
+				// TODO: clip the back projection !
+				//if (projCoords.z < -0.5 || projCoords.z > 0.5) 
+				//	continue;
+				
+				projColor = texture(projectorsSampler[i], projCoords.xy);
+				
+				ComputeProjectorMask( pProj->maskLayer, pProj->maskChannel, inTC, projCoords, projColor );	
+				projAlpha = pProj->blendOpacity * projColor.w;
+				
+				projColor.rgb = BlendWithProjector[int(pProj->blendMode)](difColor.rgb, projColor.rgb);
+				
+				difColor.rgb = mix( difColor.rgb, projColor.rgb, projAlpha );
+			}
+		}
+		
+		void ApplyLighting(in TMaterial *theMaterial, in TShader *theShader, in vec3 Vd, in vec3 Vn, in vec3 Nn, float toonShading, inout vec4 difColor)
+		{
+			//
+			// calculate lighting indices
+			
+			LIGHTINFOS lInfo;
+			lInfo.viewDistance = Vd;
+			lInfo.viewDir = Vn;
+			lInfo.normal = Nn;
+			lInfo.worldPosition = inWV;
+			lInfo.position = inPw;
+			lInfo.shininess = theMaterial->specExp;
+			
+			LIGHTRES	lResult;
+			lResult.ambientContrib = vec3(0.0);
+			lResult.diffContrib = vec3(0.0);
+			lResult.specContrib = vec3(0.0);
+			//lResult.R = vec3(0.0);
+		
+			if (numDirLights > 0)
+			{
+				evalDirLighting(lInfo, numDirLights, lResult);
+			}
+			if (numPointLights > 0)
+			{
+				evalLighting(lInfo, lResult);
+			}
+
+			/*
+			// rim lighting
+			if( useRim > 0. ) {
+				float f = rimPower * abs( dot( Nn, normalize(inPw.xyz) ) );
+				f = useRim * ( 1. - smoothstep( 0.0, 1., f ) );
+				lResult.diffContrib.rgb += mix( vec3(0.0), rimColor.rgb, f);
+			}
+			*/
+			if (toonShading > 0.0)
+			{
+				float toonF = 1.0 / theShader->toonDistribution * theShader->toonSteps;
+			
+				lResult.diffContrib = clamp(lResult.diffContrib - vec3(0.5) + theShader->toonShadowPosition, vec3(0.0), vec3(1.0));
+				lResult.diffContrib = round( lResult.diffContrib * toonF ) / theShader->toonSteps;
+			
+				lResult.specContrib = clamp(lResult.specContrib - 0.5 + theShader->toonShadowPosition, 0.0, 1.0);
+				lResult.specContrib = round( lResult.specContrib * toonF ) / theShader->toonSteps;
+			}
+			
+			// material diffuse factor and global shader transparency
+			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			
+			vec3 ambientColor = theMaterial->ambientColor.rgb * globalAmbientLight.rgb * theMaterial->ambientColor.w;
+			//difColor += vec4(ambientColor, theShader->transparency);
+			difColor *= vec4(ambientColor + lResult.diffContrib * difFactor, theShader->transparency); // ambientColor +
+			
+			//
+			difColor.rgb = /*theMaterial->emissiveColor.w * theMaterial->emissiveColor.xyz +*/ difColor.rgb + theMaterial->specularColor.w * lResult.specContrib;
+		}
+		
+		void ApplyRim(in vec3 Nn, in vec4 rimOptions, in vec4 rimColor, inout vec4 difColor)
+		{
+			if( rimOptions.x > 0. ) {
+				float f = rimOptions.y * abs( dot( Nn, normalize(inPw.xyz) ) );
+				f = rimOptions.x * ( 1. - smoothstep( 0.0, 1., f ) );
+				
+				vec3 color = rimColor.rgb;
+				if (rimOptions.z > 0.0)
+				{
+					color = texture(rimSampler, inTC.st).rgb;
+				}
+				
+				vec3 rim = BlendWithProjector[int(rimColor.w)](difColor.rgb, color);
+				difColor.rgb = mix(difColor.rgb, rim, f);
+			}
+		}
+		
+		vec3 ApplyReflection( in TMaterial *theMaterial, in vec3 Vd )
+		{
+			vec3 reflColor = theMaterial->reflectColor.rgb;
+			
+			if (theMaterial->useReflect > 0.0f)
+			{
+				
+				vec3 PositionWS = inWV;
+				vec3 NormalWS = normalize(n_eye);
+				
+				// calculations are done in eye space... so the eyePos is in vec3(0.0)
+				vec3 dirWS = normalize(PositionWS - eyePos); // PositionWS - eyePos
+				
+				vec3 reflection = normalize(reflect(dirWS, NormalWS)); // inWV - eyePos
+				
+				// Parallax-correction
+				if (cubeMapParallaxCorrection > 0.0)
+				{
+					vec3 CubemapPositionWS = cubeMapPosition.xyz;
+					
+					// Intersection with OBB convertto unit box space
+					// Transform in local unit parallax cube space (scaled and rotated)
+					mat4 worldToLocal = cubeMapWorldToLocal;
+					//worldToLocal[3] = vec4(0.0, 0.0, 0.0, 1.0);
+					
+					vec3 RayLS = mat3(worldToLocal) * reflection;
+					vec3 PositionLS = (worldToLocal * vec4(PositionWS, 1.0)).xyz;
+					
+					vec3 Unitary = vec3(1.0, 1.0, 1.0);
+					//vec3 boxMax = CubemapPositionWS + cubeMapMax.xyz;
+					//vec3 boxMin = CubemapPositionWS + cubeMapMin.xyz;
+					vec3 firstPlaneIntersect = (Unitary - PositionLS) / RayLS;
+					vec3 secondPlaneIntersect = (-Unitary - PositionLS) / RayLS;
+					
+					// Looking only for intersections in the forward direction of the ray.    
+					vec3 furthestPlane = max(firstPlaneIntersect, secondPlaneIntersect);
+					
+					float dist = min(min(furthestPlane.x, furthestPlane.y), furthestPlane.z); // 0.2 * ...
+					vec3 intersectPositionWS = PositionWS + reflection * dist;
+					reflection = intersectPositionWS - CubemapPositionWS;
+					//reflection = 0.2 * (PositionWS - CubemapPositionWS) + reflection;
+ 					//reflColor = texture( reflectionCubeSampler, refl ection ).rgb;
+				}
+				else
+				{
+					//float yaw = .5 - atan( reflection.x, -reflection.z ) / ( 2.0 * PI );
+					//float pitch = .5 - asin( reflection.y ) / PI;
+				
+					//getReflectivityTexture( theMaterial->reflectChannel, vec4(1.0-pitch, 1.0-yaw, 0.0, 1.0), reflColor );
+					
+					//reflColor = texture( reflectionCubeSampler, vec3(reflection.x, reflection.y, -reflection.z) ).rgb;
+				}
+				
+				reflColor = texture( reflectionCubeSampler, reflection ).rgb;
+				//reflColor = NormalWS;
+			}
+			
+			//difColor.rgb += reflColor * theMaterial->reflectColor.w;
+			return reflColor * theMaterial->reflectColor.w;
+		}
+		
+		//////////////////////////////////////////////////////////////////////
+	
+		// declare type of subroutine
+		subroutine vec4 ShadeTYPE();
+		
+		// declare functions
+		layout(index=25) subroutine (ShadeTYPE) vec4 PhongShade()
+		{
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			TShader *theShader = allTheShaders + fMesh->shader;
+			
+			vec3 Nn = normalize(inNw);
+			vec3 Vd = eyePos - inWV;
+			vec3 Vn = normalize(Vd);
+			
+			vec4 difColor = vec4(theMaterial->diffuseColor.rgb, 1.0);
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			if (theMaterial->useDiffuse > 0.0f)
+			{
+				getDiffuseTexture( theMaterial->diffuseChannel, coords, difColor );
+				
+				if (theShader->alphaFromColor > 0.0)
+				{
+					difColor.a = difColor.r;
+				}
+			}
+			if (theMaterial->useTransparency > 0.0f)
+			{
+				getTransparencyTexture( theMaterial->transparencyChannel, coords, difColor.a );
+			}
+			
+			// projectors are part of diffuse texturing (applied under the shading stage)
+			ApplyProjectors(difColor);
+			
+			//
+			// calculate lighting indices
+			
+			LIGHTINFOS lInfo;
+			lInfo.viewDistance = Vd;
+			lInfo.viewDir = Vn;
+			lInfo.normal = Nn;
+			lInfo.worldPosition = inWV;
+			lInfo.position = inPw;
+			lInfo.shininess = theMaterial->specExp;
+			
+			LIGHTRES	lResult;
+			lResult.ambientContrib = vec3(0.0);
+			lResult.diffContrib = vec3(0.0);
+			lResult.specContrib = vec3(0.0);
+			//lResult.R = vec3(0.0);
+			
+			if (numDirLights > 0)
+			{
+				evalDirLighting(lInfo, numDirLights, lResult);
+			}
+			if (numPointLights > 0)
+			{
+				evalLighting(lInfo, lResult);
+			}
+			
+			// material diffuse factor and global shader transparency
+			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			vec3 ambientColor = theMaterial->ambientColor.rgb * globalAmbientLight.rgb * theMaterial->ambientColor.w;
+			//difColor += vec4(ambientColor, theShader->transparency);
+			difColor *= vec4(ambientColor + lResult.diffContrib * difFactor, theShader->transparency); // ambientColor +
+			
+			//
+			/*theMaterial->emissiveColor.w * theMaterial->emissiveColor.xyz +*/
+			difColor.rgb =  difColor.rgb + theMaterial->specularColor.w * lResult.specContrib;
+			
+			ApplyRim(Nn, theShader->rimOptions, theShader->rimColor, difColor);
+			
+			vec3 reflColor = ApplyReflection(theMaterial, Vd);
+			difColor.rgb += lResult.diffContrib * reflColor;
+			//difColor.rgb = lResult.diffContrib;
+			return difColor;
+		}
+		layout(index=26) subroutine (ShadeTYPE) vec4 FlatShade()
+		{
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			TShader *theShader = allTheShaders + fMesh->shader;
+			
+			vec3 Nn = normalize(inNw);
+			vec3 Vd = eyePos - inWV;
+			vec3 Vn = normalize(Vd);
+			
+			vec4 difColor = vec4(theMaterial->diffuseColor.rgb, 1.0);
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			if (theMaterial->useDiffuse > 0.0f)
+			{
+				getDiffuseTexture( theMaterial->diffuseChannel, coords, difColor );
+				
+				if (theShader->alphaFromColor > 0.0)
+				{
+					difColor.a = difColor.r;
+				}
+				// premultiply alpha
+				//if (difColor.a > 0.0)
+				//	difColor.rgb /= difColor.a;
+			}
+			
+			if (theMaterial->useTransparency > 0.0f)
+			{
+				getTransparencyTexture( theMaterial->transparencyChannel, coords, difColor.a );
+			}
+			
+			// material diffuse factor and global shader transparency
+			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			
+			// rim lighting
+			ApplyProjectors(difColor);
+			ApplyRim(Nn, theShader->rimOptions, theShader->rimColor, difColor);
+			
+			vec3 ambientColor = theMaterial->ambientColor.rgb * globalAmbientLight.rgb * theMaterial->ambientColor.w;
+			difColor *= vec4(ambientColor + vec3(difFactor), theShader->transparency);
+			
+			vec3 reflColor = ApplyReflection(theMaterial, Vd);
+			difColor.rgb += reflColor;
+			return difColor;
+		}
+		
+		layout(index=27) subroutine (ShadeTYPE) vec4 ToonShade()
+		{
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			TShader *theShader = allTheShaders + fMesh->shader;
+			
+			vec3 Nn = normalize(inNw);
+			vec3 Vd = eyePos - inWV;
+			vec3 Vn = normalize(Vd);
+			
+			vec4 difColor = vec4(theMaterial->diffuseColor.rgb, 1.0);
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			if (theMaterial->useDiffuse > 0.0f)
+			{
+				getDiffuseTexture( theMaterial->diffuseChannel, coords, difColor );
+				
+				if (theShader->alphaFromColor > 0.0)
+				{
+					difColor.a = difColor.r;
+				}
+			}
+			if (theMaterial->useTransparency > 0.0f)
+			{
+				getTransparencyTexture( theMaterial->transparencyChannel, coords, difColor.a );
+			}
+			
+			// projectors are part of diffuse texturing (applied under the shading stage)
+			ApplyProjectors(difColor);
+			
+			//
+			// calculate lighting indices
+			
+			LIGHTINFOS lInfo;
+			lInfo.viewDistance = Vd;
+			lInfo.viewDir = Vn;
+			lInfo.normal = Nn;
+			lInfo.worldPosition = inWV;
+			lInfo.position = inPw;
+			lInfo.shininess = theMaterial->specExp;
+			
+			LIGHTRES	lResult;
+			lResult.ambientContrib = vec3(0.0);
+			lResult.diffContrib = vec3(0.0);
+			lResult.specContrib = vec3(0.0);
+			//lResult.R = vec3(0.0);
+			
+			if (numDirLights > 0)
+			{
+				evalDirLighting(lInfo, numDirLights, lResult);
+			}
+			if (numPointLights > 0)
+			{
+				evalLighting(lInfo, lResult);
+			}
+			
+			float toonF = 1.0 / theShader->toonDistribution * theShader->toonSteps;
+			
+			lResult.diffContrib = clamp(lResult.diffContrib - vec3(0.5) + theShader->toonShadowPosition, vec3(0.0), vec3(1.0));
+			lResult.diffContrib = round( lResult.diffContrib * toonF ) / theShader->toonSteps;
+		
+			lResult.specContrib = clamp(lResult.specContrib - 0.5 + theShader->toonShadowPosition, 0.0, 1.0);
+			lResult.specContrib = round( lResult.specContrib * toonF ) / theShader->toonSteps;
+			
+			// material diffuse factor and global shader transparency
+			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			vec3 ambientColor = theMaterial->ambientColor.rgb * globalAmbientLight.rgb * theMaterial->ambientColor.w;
+			//difColor += vec4(ambientColor, theShader->transparency);
+			difColor *= vec4(ambientColor + lResult.diffContrib * difFactor, theShader->transparency); // ambientColor +
+			
+			//
+			/*theMaterial->emissiveColor.w * theMaterial->emissiveColor.xyz +*/
+			difColor.rgb =  difColor.rgb + theMaterial->specularColor.w * lResult.specContrib;
+			
+			ApplyRim(Nn, theShader->rimOptions, theShader->rimColor, difColor);
+			
+			vec3 reflColor = ApplyReflection(theMaterial, Vd);
+			difColor.rgb += lResult.diffContrib * reflColor;
+			
+			return difColor;
+		}
+		layout(index=28) subroutine (ShadeTYPE) vec4 ColorIdShade()
+		{
+			vec2 backCoords = SCREEN_SIZE.xy * SCREEN_SIZE.zw + vec2(gl_FragCoord.x * SCREEN_SIZE.z, gl_FragCoord.y * SCREEN_SIZE.w);
+			vec4 backColor = texture(backgroundSampler, backCoords);
+			
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			TShader *theShader = allTheShaders + fMesh->shader;
+			
+			vec4 difColor = vec4(theMaterial->diffuseColor.rgb, 1.0);
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			if (theMaterial->useDiffuse > 0.0f)
+			{
+				getDiffuseTexture( theMaterial->diffuseChannel, coords, difColor );
+			}
+			if (theMaterial->useTransparency > 0.0f)
+			{
+				getTransparencyTexture( theMaterial->transparencyChannel, coords, difColor.a );
+			}
+	
+			return vec4(backColor.r, backColor.g, backColor.b, difColor.w * theShader->transparency);
+		}
+		layout(index=29) subroutine (ShadeTYPE) vec4 MatCapShade()
+		{
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			TShader *theShader = allTheShaders + fMesh->shader;
+			
+			vec3 Nn = normalize(inNw);
+			vec3 r = reflect( normalize(inPw.xyz), Nn );
+			float m = 2.0 * sqrt( r.x * r.x + r.y * r.y + ( r.z + 1.0 ) * ( r.z+1.0 ) );
+			vec2 vN = vec2( r.x / m + 0.5,  r.y / m + 0.5 );
+			
+			vec4 difColor = texture( matCapSampler, vN );
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			if (theMaterial->useDiffuse > 0.0f)
+			{
+				vec4 difTexColor;
+				getDiffuseTexture( theMaterial->diffuseChannel, coords, difTexColor );
+				difColor = vec4(difTexColor.x*difColor.x, difTexColor.y*difColor.y, difTexColor.z*difColor.z, difTexColor.a);
+			}
+			
+			if (theMaterial->useTransparency > 0.0f)
+			{
+				getTransparencyTexture( theMaterial->transparencyChannel, coords, difColor.a );
+			}
+			
+			// material diffuse factor and global shader transparency
+			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			
+			ApplyProjectors(difColor);
+			ApplyRim(Nn, theShader->rimOptions, theShader->rimColor, difColor);
+			
+			vec3 ambientColor = theMaterial->ambientColor.rgb * globalAmbientLight.rgb * theMaterial->ambientColor.w;
+			difColor *= vec4(ambientColor + vec3(difFactor), theShader->transparency);
+			
+			vec3 Vd = eyePos - inWV;
+			//ApplyReflection(theMaterial, Vd, difColor);
+			return difColor;
+		}
+		
+		//////////////////////////////////////////////////////////////////////////////
+		
+		subroutine uniform ShadeTYPE shadingFunctions[5];
+		
+		////////////////////////////////////////////////////////////////////
+		/*
+		void ComputeDepth(in float d, out float depth)
+		{
+			float n = 10.0;
+			float f = 4000.0;
+			
+			float lz = 2.0 * d - 1.0; 
+			depth = (2.0 * n) / (f + n - lz * (f - n));
+		}
+		*/
+		
+        void main() 
+        {
+			TShader *theShader = allTheShaders + fMesh->shader;
+			
+			// calculate shading
+			vec4 shadeColor = shadingFunctions[theShader->shadingType]();		// theShader->shadingType
+			
+			if (theShader->applyColorCorrection > 0.0)
+			{
+				// blend with custom color
+				shadeColor.rgb = BlendWithProjector[int(theShader->customColor.w)](shadeColor.rgb, theShader->customColor.rgb);
+				// color correction
+				ApplyContrastSaturationBrightness(theShader->brightness, theShader->saturation, theShader->contrast, shadeColor.rgb);
+			}
+			
+			if (softParticles > 0.0)
+			{
+				vec2 coords = vec2((gl_FragCoord.x+SCREEN_SIZE.x) * SCREEN_SIZE.z, (gl_FragCoord.y+SCREEN_SIZE.y) * SCREEN_SIZE.w);
+				float mainDepthValue = texture(mainDepthSampler, coords).z;
+				
+				if (mainDepthValue < gl_FragCoord.z)
+					discard;
+				/*
+				// convert depth values into linear space
+				float mainLinearD, fragLinearD;
+
+				ComputeDepth( mainDepthValue, mainLinearD );
+				ComputeDepth( GetFragmentZ(), fragLinearD );
+				
+				if (mainLinearD+0.005 < fragLinearD)
+					discard;
+				
+				float scale = 0.1 * farPlane; // 50.0f;
+				float fade = clamp((mainLinearD-fragLinearD)*scale, 0.0, 1.0);
+				
+				shadeColor.a *= fade;
+				*/
+				// gamma correction
+				float gamma = theShader->gamma;
+				shadeColor = pow(shadeColor.rgba, vec4(gamma));
+				shadeColor = clamp(shadeColor, vec4(0.0), vec4(1.0));
+			}
+			
+			color = shadeColor;
+			
+			outNormal = vec4( normalize(inNw), shadeColor.a );
+			//outNormal = normalize(inNw);
+			outPosition = vec4(inWV, fMesh->lightmap);
+			outMask = theShader->mask;
+			
+			FS_Depth();
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+/// Character things
+////////////////////////////////////////////////////////////////////
+namespace Character
+{
+
+	////////////////////////////////////////////////////////////////////
+    /// CHARACTER SIMPLE PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+
+	GLSLShader VS_Simple
+	{
+		layout(location=0) in vec4 inPosition;
+		layout(location=1) in vec2 inTexCoords;
+		layout(location=2) in vec4 inNormal;
+		//layout(location=5) in float inMeshIndex;
+		
+		layout(location=1) smooth out vec2 outTC;	// 8 bytes
+		layout(location=4) flat out TMesh	*fMesh;
+		
+		out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+
+		uniform TMesh			*allTheMeshes;
+		uniform	TModel			*allTheModels;
+		
+		void main(void)
+        {
+			TMesh 	*theMesh = allTheMeshes + gl_BaseInstanceARB + gMeshIndex; // + gl_DrawIDARB;
+			TModel	*theModel = allTheModels + theMesh->model;
+			
+			// Surface normal in eye coords
+			mat4 normalMatrix = theModel->normalMatrix; // m4_WorldIT; //	transpose(inverse(matrix));
+			//mat4 normalMatrix = m4_WorldIT;
+			vec4 N = normalMatrix * vec4(inNormal.xyz, 1.0);
+		
+			vec4 Po    = m4_World * theModel->transform * vec4(inPosition.xyz, 1.0);
+			vec4 vPosition4 = m4_View * Po;
+			
+			gl_Position = m4_Proj * vPosition4;
+			
+			//VS_Depth( depthDisplacement, gl_Position );
+			
+			outTC           = inTexCoords;
+			fMesh = theMesh;
+        }
+	}
+	
+	GLSLShader FS_Simple
+	{
+		layout(location=1) smooth in vec2 inTC;		// input 8 bytes
+		layout(location=4) flat in TMesh *fMesh;
+	
+        layout(location=0) out vec4 	outColor;
+		
+		uniform	TMaterial			*allTheMaterials;
+		uniform TShader 			*allTheShaders;		// pointer to the array with shaders
+		
+		void main(void)
+		{
+			TShader *theShader = allTheShaders + fMesh->shader;
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			
+			vec4 difColor = vec4(theMaterial->diffuseColor.rgb, 1.0);
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			outColor = vec4(fMesh->color.rgb, difColor.a);
+			
+			//FS_Depth();
+		}
+	}
+
+	////////////////////////////////////////////////////////////////////
+    /// IBL VERTEX PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+	GLSLShader VS_IBL
+	{
+		layout(location=0) in vec4 inPosition;
+		layout(location=1) in vec2 inTexCoords;
+		layout(location=2) in vec4 inNormal;
+		layout(location=3) in vec4 inTangent;
+		//layout(location=5) in float inMeshIndex;
+		
+		layout(location=0) smooth out vec3 outNw;	// 12 bytes
+		layout(location=1) smooth out vec2 outTC;	// 8 bytes
+		layout(location=2) smooth out vec3 outPw;
+		layout(location=3) smooth out vec3 outWV;	// 12 bytes
+		
+		layout(location=4) flat out TMesh	*fMesh;
+		layout(location=6) smooth out vec3 	outTangent;
+		
+		
+		out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+
+		uniform TMesh			*allTheMeshes;
+		uniform	TModel			*allTheModels;
+		
+		void main(void)
+        {
+			TMesh 	*theMesh = allTheMeshes + gl_BaseInstanceARB + gMeshIndex; // + gl_DrawIDARB;
+			TModel	*theModel = allTheModels + theMesh->model;
+			
+			// Surface normal in eye coords
+			mat4 normalMatrix = theModel->normalMatrix; // m4_WorldIT; //	transpose(inverse(matrix));
+			//mat4 normalMatrix = m4_WorldIT;
+			vec4 N = normalMatrix * vec4(inNormal.xyz, 1.0);
+		
+			vec4 Po    = m4_World * theModel->transform * vec4(inPosition.xyz, 1.0);
+			vec4 vPosition4 = m4_View * Po;
+			vec3 vPosition3 = vPosition4.xyz; // / vPosition4.w;
+			
+			float depthDisplacement = 0.0;
+			gl_Position = m4_Proj * vPosition4;
+			gl_Position.z += depthDisplacement;
+			
+			VS_Depth( depthDisplacement, gl_Position );
+			
+			outNw           = N.xyz; // / N.w;
+			outTangent = (normalMatrix * vec4(inTangent.xyz, 1.0)).xyz;
+			outTC           = inTexCoords;
+			outPw           = vPosition3.xyz;
+			outWV           =  /*eyePos -*/ Po.xyz; // / Po.w; //(Po.xyz - eyePos);
+			
+			fMesh = theMesh;
+        }
+	}
+
+	GLSLShader FS_IBL
+	{
+		layout(location=0) smooth in vec3 inNw;
+		layout(location=1) smooth in vec2 inTC;		// input 8 bytes
+		layout(location=2) smooth in vec3 inPw;
+		layout(location=3) smooth in vec3 inWV;
+		
+		layout(location=4) flat in TMesh *fMesh;
+		
+		layout(location=6) smooth in vec3 	inTangent;
+		
+        layout(location=0) out vec4 	outColor;
+		layout(location=1) out vec4		outNormal;	// output a view space normal
+		layout(location=2) out vec4		outMask;
+		layout(location=3) out vec4		outPosition;
+		
+		uniform	TMaterial			*allTheMaterials;
+		uniform TShader 			*allTheShaders;		// pointer to the array with shaders
+		
+		uniform LightDATA			*dirLights;		// pointer to the array of dir lights
+		
+		uniform samplerCube		DiffuseLightingSampler;
+		uniform samplerCube		SpecularLightingSampler;
+		uniform sampler2D		brdfSampler;
+		
+		uniform sampler2D 	ambientSampler;
+		uniform sampler2D	diffuseSampler;
+		uniform sampler2D	transparencySampler;
+		uniform sampler2D	specularitySampler;
+		uniform sampler2D	reflectivitySampler;
+		uniform sampler2D	normalMapSampler;
+		
+		vec3 toGamma( in vec3 linear ) 
+		{ 
+			return pow(linear.rgb, vec3(1.0 / 2.2));
+		}
+
+		vec4 toLinear( in vec4 gamma)
+		{
+			return pow(gamma, vec4(1.8) );
+		}
+
+		vec4 RGBMDecode ( in vec4 rgbm ) 
+		{
+		  return 5.0 * rgbm.rgba * rgbm.a;
+		}
+		
+		void ApplyRim(in vec3 Nn, in vec3 Pw, in vec4 rimOptions, in vec4 rimColor, inout vec4 difColor)
+		{
+			if( rimOptions.x > 0.0 ) {
+				
+				float f = rimOptions.y * abs( dot(Nn, Pw) );
+				f = rimOptions.x * ( 1. - smoothstep( 0.0, 1., f ) );
+				
+				vec3 color = rimColor.rgb;
+				/*
+				if (rimOptions.z > 0.0)
+				{
+					color = texture(rimSampler, inTC.st).rgb;
+				}
+				*/
+				vec3 rim = difColor.rgb + color;
+				difColor.rgb = mix(difColor.rgb, rim, f);
+			}
+		}
+		
+		#define PI 3.1415926
+		
+		// compute fresnel specular factor for given base specular and product
+		// product could be NdV or VdH depending on used technique
+		vec3 fresnel_factor(in vec3 f0, in float product)
+		{
+			return mix(f0, vec3(1.0), pow(1.01 - product, 5.0));
+		}
+		
+		// following functions are copies of UE4
+		// for computing cook-torrance specular lighting terms
+
+		float D_blinn(in float roughness, in float NdH)
+		{
+			float m = roughness * roughness;
+			float m2 = m * m;
+			float n = 2.0 / m2 - 2.0;
+			return (n + 2.0) / (2.0 * PI) * pow(NdH, n);
+		}
+
+		float D_beckmann(in float roughness, in float NdH)
+		{
+			float m = roughness * roughness;
+			float m2 = m * m;
+			float NdH2 = NdH * NdH;
+			return exp((NdH2 - 1.0) / (m2 * NdH2)) / (PI * m2 * NdH2 * NdH2);
+		}
+
+		float D_GGX(in float roughness, in float NdH)
+		{
+			float m = roughness * roughness;
+			float m2 = m * m;
+			float d = (NdH * m2 - NdH) * NdH + 1.0;
+			return m2 / (PI * d * d);
+		}
+		
+		float G_schlick(in float roughness, in float NdV, in float NdL)
+		{
+			float k = roughness * roughness * 0.5;
+			float V = NdV * (1.0 - k) + k;
+			float L = NdL * (1.0 - k) + k;
+			return 0.25 / (V * L);
+		}
+		
+		#define COOK_BECKMANN	1
+		
+		// cook-torrance specular calculation                      
+		vec3 cooktorrance_specular(in float NdL, in float NdV, in float NdH, in vec3 specular, in float roughness)
+		{
+		#ifdef COOK_BLINN
+			float D = D_blinn(roughness, NdH);
+		#endif
+
+		#ifdef COOK_BECKMANN
+			float D = D_beckmann(roughness, NdH);
+		#endif
+
+		#ifdef COOK_GGX
+			float D = D_GGX(roughness, NdH);
+		#endif
+
+			float G = G_schlick(roughness, NdV, NdL);
+
+			float rim = mix(1.0 - roughness * 1.0 * 0.9, 1.0, NdV); // material.w
+
+			return (1.0 / rim) * specular * G * D;
+		}
+		
+		void main(void)
+		{
+			TShader *theShader = allTheShaders + fMesh->shader;
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			
+			vec4 albedo = vec4(theMaterial->diffuseColor.rgb, 1.0);
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			// Albedo term.
+			
+			if (theMaterial->useDiffuse > 0.0f)
+			{
+				albedo = texture( diffuseSampler, coords.st );
+				albedo.rgb = pow(albedo.rgb, vec3(2.2) );
+			}
+		
+			// Specular material terms.
+		
+			float  roughness = theMaterial->roughness;
+			float  metal     = theMaterial->metal;
+			float  bakedAO   = 1.0;
+			
+			if (theMaterial->useSpecular > 0.0f)
+			{
+				vec4 maskMap = texture( specularitySampler, coords.st );
+				roughness = 1.0 - maskMap.r; // 1.0 - maskMap.r;
+				metal = maskMap.g;
+				bakedAO   = maskMap.b;
+			}
+			
+			// Compute normal.
+			vec3 normal = normalize(inNw);
+			vec3 binormal = cross(normalize(inTangent), normal);
+			
+			if (theMaterial->useNormalmap > 0.0f)
+			{
+				//tempColor = (tempColor - vec3(0.5f,0.5f,0.5f)) * vec3(2.0f,2.0f,2.0f);
+				vec4 nmColor = texture(normalMapSampler, coords.st);
+				
+				nmColor.rgb = (nmColor.rgb - vec3(0.5f,0.5f,0.5f)) * vec3(2.0f,2.0f,2.0f);
+				normal = normalize(nmColor.x * inTangent + nmColor.y * binormal + nmColor.z * normal);
+			}
+			/*
+			if (theMaterial->useReflect > 0.0f)
+			{
+				vec3 tempColor;
+				getReflectivityTexture( theMaterial->ambientChannel, coords, tempColor );
+				//tempColor.rgb = (tempColor.rgb - vec3(0.5f,0.5f,0.5f)) * vec3(2.0f,2.0f,2.0f);
+				
+				nmColor = normalize(nmColor + tempColor);
+				//normal = normalize(nmColor.x * inTangent + nmColor.y * binormal + nmColor.z * normal);
+				//albedo.rgb = tempColor;
+			}
+			*/
+			//outColor = albedo;
+			//return;
+			
+			
+			// Normal dependent terms.
+			vec3 eyeVec = normalize(-inPw);
+			
+			float  NoV = -dot (eyeVec, normal.xyz);
+			
+			
+			// Diffuse.
+			vec4 diffuseEnvironment  = toLinear(RGBMDecode(textureCubeLod(DiffuseLightingSampler, normal, 0.0f))) / PI;    
+			//vec4 diffuseEnvironment = textureCube(DiffuseLightingSampler, normal);
+			//vec4 diffuseEnvironment = vec4(1.0);
+			vec4 diffuse     = albedo  * (1.0 - metal) * diffuseEnvironment;
+			
+			ApplyRim(normal, eyeVec, theShader->rimOptions, theShader->rimColor, diffuse);
+		
+			// Specular.
+			
+			// Already flipped because roughness is encoded as gloss in the cerberus model.
+			//vec3 brdf                   = vec3(1.0, 0.0, 0.0); // texture2DLod(BrdfSampler, float2(NoV, roughness), 0.0f).xyz;
+
+			//vec3 eyeVec = normalize(-inPw);
+			//eyeVec = tangentMatrix * eyeVec;
+			/*
+			vec3 dir = eyeVec; // normalize(vec3(0.0, 0.5, 0.5));
+			vec3 halfVec = (eyeVec + dir)/2.0; // view + light
+				//float specular = pow( max(0.0, dot( Nn, halfVec ) ), theMaterial->specExp );
+			
+			float NdL = max(0.0, dot(normal, dir));
+			float NdV = max(0.001, dot(normal, eyeVec));
+			float NdH = max(0.001, dot(normal, halfVec));
+			//float roughness = 0.6;
+			float HdV = max(0.001, dot(halfVec, eyeVec));
+			vec3 specular2 = vec3(1.0);
+				
+			vec3 specfresnel = fresnel_factor(specular2, HdV);
+			vec3 brdf = cooktorrance_specular(NdL, NdV, NdH, specfresnel, roughness);
+			*/
+			
+			vec2 brdf = texture2D(brdfSampler, vec2(roughness, 1.0 - NoV)).xy;
+			
+			vec3 reflection = normalize(reflect(eyeVec, normal.xyz));
+			// Alter roughnessMipCount depending on the output resolution of the baker.
+			const float roughnessMipCount = 9.0f; 
+			
+			//vec4 specularEnvironment    = toLinear(RGBMDecode(textureCubeLod(SpecularLightingSampler, 
+			//	reflection, max(roughness * roughnessMipCount, textureQueryLod(DiffuseLightingSampler, reflection).y))));
+			vec4 specularEnvironment    = toLinear(RGBMDecode(textureCubeLod(SpecularLightingSampler, 
+				reflection, roughness * roughnessMipCount)));	
+			//specularEnvironment = toLinear(RGBMDecode(textureCube(SpecularLightingSampler, reflection)));
+			//vec4 specularEnvironment = vec4(1.0);
+			const vec4 dielectricColor  = vec4(0.04f, 0.04f, 0.04f, 1.0f);
+
+			// Hack version to decrease fresnel the more metal a meterial is.
+			//vec4 specular = lerp(dielectricColor, albedo, metal) * brdf.x + (brdf.y*(clamp(1.0-metal, 0.04f, 1.0f)));
+			// Non hack version.
+			vec4 specular                   = mix(dielectricColor, albedo, metal) * brdf.x + brdf.y;
+
+			specular                      = specularEnvironment * specular;
+/*
+			LIGHTINFOS lInfo;
+			lInfo.viewDistance = Vd;
+			lInfo.viewDir = Vn;
+			lInfo.normal = normal;
+			lInfo.uv = inTC;
+			lInfo.worldPosition = inWV;
+			lInfo.position = inPw;
+			lInfo.shininess = theMaterial->specExp;
+			lInfo.tangentMatrix = tangentMatrix;
+			
+			LIGHTRES	lResult;
+			lResult.ambientContrib = vec3(0.0);
+			lResult.diffContrib = vec3(0.0);
+			lResult.specContrib = vec3(0.0);
+			//lResult.R = vec3(0.0);
+			
+			// dir lights
+			LightDATA *light;
+			for (int i=0; i<numDirLights; ++i)
+			{
+				light = dirLights + i;
+				vec3 dir = -normalize(light->dir.xyz);
+				dir = tangentMatrix * dir;
+				
+				float intensity = light->attenuations.w;
+				float ndotl = max(0.0, dot( normal, dir ) );
+				
+				
+				
+				lResult.diffContrib += ndotl * intensity * light->color.rgb;
+				
+				vec3 eyeVec = normalize(-inPw);
+				eyeVec = tangentMatrix * eyeVec;
+			
+				vec3 halfVec = (eyeVec + dir)/2.0; // view + light
+				//float specular = pow( max(0.0, dot( Nn, halfVec ) ), theMaterial->specExp );
+			
+				float NdL = max(0.0, dot(normal, dir));
+				float NdV = max(0.001, dot(normal, eyeVec));
+				float NdH = max(0.001, dot(normal, halfVec));
+				float roughness = 0.6;
+				float HdV = max(0.001, dot(halfVec, eyeVec));
+				vec3 specular = vec3(1.0);
+				
+				vec3 specfresnel = fresnel_factor(specular, HdV);
+				vec3 specref = cooktorrance_specular(NdL, NdV, NdH, specfresnel, roughness);
+			
+				lResult.specContrib += intensity * specref * vec3(1.0); // * specular
+			}
+			
+			diffuse = albedo * (1.0 - metal) * vec4(lResult.diffContrib.xyz, 1.0) * diffuseEnvironment;
+			*/
+			// Final.
+			outColor = vec4((diffuse.rgb * theMaterial->diffuseColor.w + specular.rgb * theMaterial->specularColor.w) * bakedAO, 1.0); // +specular.rgb
+			outColor = vec4(toGamma(outColor.rgb), albedo.w);
+			//outColor = vec4(brdf.x, brdf.y, 0.0, 1.0);
+			// Debug, verify roughness lookup.
+			//    output.rgb = abs(brdf.bbb - 	float3(roughness,roughness,roughness));
+			
+			//outColor = vec4(fMesh->color.rgb, difColor.a);
+			
+			FS_Depth();
+			
+			outNormal = vec4( normalize(inNw), albedo.w );
+			//outNormal = normalize(inNw);
+			outPosition = vec4(inWV, fMesh->lightmap);
+			outMask = theShader->mask;
+		}
+	}
+	
+    ////////////////////////////////////////////////////////////////////
+    /// EYE's VERTEX PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+	GLSLShader VS_Eye
+	{
+		layout(location=0) in vec4 inPosition;
+		layout(location=1) in vec2 inTexCoords;
+		layout(location=2) in vec4 inNormal;
+		layout(location=3) in vec4 inTangent;
+		//layout(location=5) in float inMeshIndex;
+		
+		layout(location=1) smooth out vec2 outTC;	// 8 bytes
+		layout(location=4) flat out TMesh	*fMesh;
+		layout(location=5) flat out TModel	*fModel;
+		
+		out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+
+		out vec3 oPosition;  // position in world space
+		out vec3 oNormal;    // normal in world space
+		out vec3 oView;      // view vector in world space
+		
+		out vec3 mPosition;  // position in model space
+		out vec3 mNormal;    // normal in model space
+		out vec3 mView;      // view vector in model space
+		
+		out vec3 vPosition;	 // position in view space
+		out vec3 vNormal;    // normal in view space
+
+		uniform TMesh			*allTheMeshes;
+		uniform	TModel			*allTheModels;
+		
+		uniform float iris_size;		
+		uniform float cornea_bump_amount;
+		uniform float cornea_bump_radius_mult;
+	
+		mat4 InverseMatrix( mat4 A ) {
+		
+			float s0 = A[0][0] * A[1][1] - A[1][0] * A[0][1];
+			float s1 = A[0][0] * A[1][2] - A[1][0] * A[0][2];
+			float s2 = A[0][0] * A[1][3] - A[1][0] * A[0][3];
+			float s3 = A[0][1] * A[1][2] - A[1][1] * A[0][2];
+			float s4 = A[0][1] * A[1][3] - A[1][1] * A[0][3];
+			float s5 = A[0][2] * A[1][3] - A[1][2] * A[0][3];
+		 
+			float c5 = A[2][2] * A[3][3] - A[3][2] * A[2][3];
+			float c4 = A[2][1] * A[3][3] - A[3][1] * A[2][3];
+			float c3 = A[2][1] * A[3][2] - A[3][1] * A[2][2];
+			float c2 = A[2][0] * A[3][3] - A[3][0] * A[2][3];
+			float c1 = A[2][0] * A[3][2] - A[3][0] * A[2][2];
+			float c0 = A[2][0] * A[3][1] - A[3][0] * A[2][1];
+		 
+			float invdet = 1.0 / (s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0);
+		 
+			mat4 B;
+		 
+			B[0][0] = ( A[1][1] * c5 - A[1][2] * c4 + A[1][3] * c3) * invdet;
+			B[0][1] = (-A[0][1] * c5 + A[0][2] * c4 - A[0][3] * c3) * invdet;
+			B[0][2] = ( A[3][1] * s5 - A[3][2] * s4 + A[3][3] * s3) * invdet;
+			B[0][3] = (-A[2][1] * s5 + A[2][2] * s4 - A[2][3] * s3) * invdet;
+		 
+			B[1][0] = (-A[1][0] * c5 + A[1][2] * c2 - A[1][3] * c1) * invdet;
+			B[1][1] = ( A[0][0] * c5 - A[0][2] * c2 + A[0][3] * c1) * invdet;
+			B[1][2] = (-A[3][0] * s5 + A[3][2] * s2 - A[3][3] * s1) * invdet;
+			B[1][3] = ( A[2][0] * s5 - A[2][2] * s2 + A[2][3] * s1) * invdet;
+		 
+			B[2][0] = ( A[1][0] * c4 - A[1][1] * c2 + A[1][3] * c0) * invdet;
+			B[2][1] = (-A[0][0] * c4 + A[0][1] * c2 - A[0][3] * c0) * invdet;
+			B[2][2] = ( A[3][0] * s4 - A[3][1] * s2 + A[3][3] * s0) * invdet;
+			B[2][3] = (-A[2][0] * s4 + A[2][1] * s2 - A[2][3] * s0) * invdet;
+		 
+			B[3][0] = (-A[1][0] * c3 + A[1][1] * c1 - A[1][2] * c0) * invdet;
+			B[3][1] = ( A[0][0] * c3 - A[0][1] * c1 + A[0][2] * c0) * invdet;
+			B[3][2] = (-A[3][0] * s3 + A[3][1] * s1 - A[3][2] * s0) * invdet;
+			B[3][3] = ( A[2][0] * s3 - A[2][1] * s1 + A[2][2] * s0) * invdet;
+		 
+			return B;
+		}
+
+		mat3 makeRotationDir( vec3 direction, vec3 up )
+		{
+			 vec3 xaxis = normalize( cross( up, direction));
+			 vec3 yaxis = normalize( cross( direction, xaxis));
+
+			return mat3( xaxis.x,         xaxis.y,     xaxis.z,
+						 yaxis.x,         yaxis.y,     yaxis.z,
+						 direction.x, direction.y, direction.z);
+		}
+		
+		mat3 rotationMatrix(vec3 axis, float angle)
+		{
+			axis = normalize(axis);
+			float s = sin(angle);
+			float c = cos(angle);
+			float oc = 1.0 - c;
+			
+			return mat3(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,
+						oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,
+						oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c);
+		}
+
+		vec3 corneaVertexDisp
+		(
+			vec3		eyeP,
+			vec3		eyeN,
+			float		iris_size,
+			float		cornea_bump_amount,
+			float		cornea_bump_radius_mult,
+			out vec3	outN
+		)
+		{
+			vec3 _norm_P = normalize( eyeP );
+			float iris_depth = 1.0 - pow(  iris_size, 3.0 );
+			float _measured_eye_radius = length( eyeP );
+			float _iris_rad = sqrt( max( 0.0, 1.0 - iris_depth * iris_depth ) );
+			float _bump_t = 1.0;
+			if( _norm_P[2] > 0.0 )
+			{
+				_bump_t = min( 1.0, sqrt( max( 0.0, 1.0 - _norm_P[2] * _norm_P[2] ) ) / (
+						_iris_rad * cornea_bump_radius_mult ) );
+			}
+			float _bump_factor = pow( 1.0 - pow( _bump_t, 2.5 ), 1.0 ); 
+			_bump_factor *= cornea_bump_amount * _iris_rad * _measured_eye_radius;
+			
+			// faking bulging cornea normals yolo
+			float NzMask = 1.0 - (_bump_factor * (1.0-eyeN.z) * 2.5);				
+			outN =  normalize( vec3( eyeN.xy, eyeN.z * NzMask));
+			
+			return _bump_factor * eyeN;
+		}
+		
+		void main(void)
+        {
+			TMesh 	*theMesh = allTheMeshes + gl_BaseInstanceARB + gMeshIndex; // + gl_DrawIDARB;
+			TModel	*theModel = allTheModels + theMesh->model;
+			
+			// Surface normal in eye coords
+			mat3 normalMatrix = mat3(theModel->normalMatrix); // m4_WorldIT; //	transpose(inverse(matrix));
+			//mat4 normalMatrix = m4_WorldIT;
+			vec3 N = normalMatrix * inNormal.xyz;
+		
+			vec4 Po    = m4_World * theModel->transform * vec4(inPosition.xyz, 1.0);
+			vec4 vPosition4 = m4_View * Po;
+			
+			vec3 displacedN;
+			vec3 displacedP = inPosition.xyz + corneaVertexDisp( inPosition.xyz, inNormal.xyz, iris_size, cornea_bump_amount, cornea_bump_radius_mult, displacedN );		
+			
+			mat4 modelMatrix =  m4_World * theModel->transform;
+			oPosition	= vec3( modelMatrix * vec4( displacedP, 1.0 ));
+			oNormal		= normalize( mat3( modelMatrix[0].xyz, modelMatrix[1].xyz, modelMatrix[2].xyz ) * displacedN );
+			oView		= normalize( oPosition - eyePos );
+
+			mPosition	= displacedP;
+			mNormal 	= displacedN;
+			 
+			// we need to get cameraPosition in object space but three.js gives it in world space ( camera.matrixWorld )
+			// its possible to get it from gl_ModelViewMatrixInverse[3].xyz matrix but can't access it from three.js
+			// an option is to calculate and pass it from three.js using THREE.Matrix4()
+			// .getInverse( .multiplyMatrices( camera.matrixWorldInverse, mesh.matrixWorld ) )
+			// or since Three.js provides us with modelViewMatrix we can inverse it using expensive InverseMatrix() function
+			mat4 modelViewMatrix = m4_View * modelMatrix;
+			mat4 myModelViewMatrixInverse = InverseMatrix( modelViewMatrix );
+			mView 		= normalize( mPosition - myModelViewMatrixInverse[3].xyz );
+			
+					// EXPERIMENTS with rotations
+					/*
+					vec3 lookat = normalize( vec3( 0.5, 0.0, 6.0) );
+					mPosition	= makeRotationDir( lookat, vec3( 0.0, 1.0, 0.0) ) * mPosition;
+					mNormal		= makeRotationDir( lookat, vec3( 0.0, 1.0, 0.0) ) * mNormal; mNormal = normalize( mNormal );
+					mView		= makeRotationDir( lookat, vec3( 0.0, 1.0, 0.0) ) * mView; mView = normalize( mView );
+
+					
+					vec3 axis	= vec3( 1.0, 0.0, 0.0);
+					float angle	= radians(-90.0);
+					mPosition	= rotationMatrix( axis, angle) * mPosition;
+					mNormal		= rotationMatrix( axis, angle) * mNormal; mNormal = normalize( mNormal );
+					mView		= rotationMatrix( axis, angle) * mView; mView = normalize( mView );			
+					*/
+					
+			vPosition	= vec3( modelViewMatrix * vec4( displacedP, 1.0 ));
+			vNormal		= normalize( normalMatrix * displacedN );
+			
+			
+			//float depthDisplacement = 0.0;
+			//gl_Position = m4_Proj * vPosition4;
+			//gl_Position.z += depthDisplacement;
+			
+			//VS_Depth( depthDisplacement, gl_Position );
+			
+			gl_Position = m4_Proj * m4_View * modelMatrix * vec4( displacedP, 1.0 );
+			
+			outTC           = inTexCoords;
+			fMesh = theMesh;
+			fModel = theModel;
+        }
+	}
+	
+	GLSLShader FS_Eye
+	{
+		layout(location=1) smooth in vec2 inTC;		// input 8 bytes
+		layout(location=4) flat in TMesh *fMesh;
+		layout(location=5) flat in TModel *fModel;
+		
+		// inputs from vertex shader
+		in vec3 oPosition;
+		in vec3 oNormal;
+		in vec3 oView;
+		
+		in vec3 mPosition;
+		in vec3 mNormal;
+		in vec3 mView;
+		
+		in vec3 vPosition;
+		in vec3 vNormal;
+	
+        layout(location=0) out vec4 	outColor;
+		
+		uniform	TMaterial			*allTheMaterials;
+		uniform TShader 			*allTheShaders;		// pointer to the array with shaders
+		
+		// material uniforms
+		//uniform sampler2D texEyeCol;		
+		//uniform sampler2D texEyeNrm;
+		
+		uniform sampler2D	diffuseSampler;
+		uniform sampler2D	normalMapSampler;
+		
+		uniform sampler2D texEnvRfl;
+		uniform sampler2D texEnvDif;
+		uniform sampler2D texEnvRfr;
+		
+		uniform float pupil_size;
+		uniform float iris_tex_start;
+		uniform float iris_tex_end;
+		uniform float iris_border;
+		uniform float iris_size;
+		uniform float iris_edge_fade;
+		uniform float iris_inset_depth;
+		uniform float sclera_tex_scale;
+		uniform float sclera_tex_offset;
+		uniform float ior;
+		uniform float refract_edge_softness;
+
+		uniform float iris_texture_curvature;
+		uniform float arg_iris_shading_curvature;
+
+		uniform float tex_U_offset;
+		uniform float iris_normal_offset;
+		uniform float cornea_density;
+		uniform float bump_texture;
+		uniform int   catshape;
+		uniform float cybshape;
+		uniform int   col_texture;
+		
+		#define PI 3.14159265358979323846264
+		
+		float intersectSphere
+		(
+			vec3 ray_origin,
+			vec3 ray_dir,
+			vec3 sphere_center,
+			float sphere_rad,
+			float trace_dir
+		)
+		{
+			vec3 disp = ray_origin - sphere_center;
+			float B = dot(disp, ray_dir);
+			float C = dot(disp, disp) - sphere_rad * sphere_rad;
+			float D = B*B - C;
+			return D > 0.0 ? -B + trace_dir * sqrt(D) : -1.0;
+		}
+
+		// GL_OES_standard_derivatives needs to be enabled for dFdx dFdy functions in normalMapComp() to work
+		//#extension GL_OES_standard_derivatives : enable
+		
+		vec3 normalMapComp
+		(  
+			sampler2D normalMap, 
+			vec2 inUV, 
+			vec3 eye_pos, 
+			vec3 surf_norm,
+			float normalScale
+		) 
+		{
+			vec3 q0 = dFdx( eye_pos.xyz );
+			vec3 q1 = dFdy( eye_pos.xyz );
+			vec2 st0 = dFdx( inUV.st );
+			vec2 st1 = dFdy( inUV.st );
+
+			vec3 S = normalize(  q0 * st1.t - q1 * st0.t );
+			vec3 T = normalize( -q0 * st1.s + q1 * st0.s );
+			vec3 N = normalize( surf_norm );
+
+			vec3 mapN = texture2D( normalMap, inUV ).xyz * 2.0 - 1.0;
+			mapN.xy = normalScale * mapN.xy;
+			mat3 tsn = mat3( S, T, N );
+			return normalize( tsn * mapN );
+		}
+		
+		vec3 sphericalRefl( sampler2D panoTex, vec3 vReflect)
+		{
+			float yaw = .5 + atan( vReflect.z, vReflect.x ) / ( 2.0 * PI );
+			float pitch = .5 + atan( vReflect.y, length( vReflect.xz ) ) / ( PI );
+			return texture2D( panoTex, vec2( yaw, pitch ) ).rgb;
+		}
+		
+		void main(void)
+		{
+			// Eye Shader credits:
+			// v.1 S.Bertout CG to RSL
+			// v.2 A.Vill RSL
+			// v.3 D.Dresser RSL
+			// v.4 A.Vill GLSL
+			
+			TShader *theShader = allTheShaders + fMesh->shader;
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			
+			mat3 normalMatrix = mat3(fModel->normalMatrix);
+			mat4 modelMatrix = m4_World * fModel->transform;
+			mat4 viewMatrix = m4_View;
+			
+			vec4 difColor = vec4(theMaterial->diffuseColor.rgb, 1.0);
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			if (theMaterial->useDiffuse > 0.0f)
+			{
+				getDiffuseTexture( theMaterial->diffuseChannel, coords, difColor );
+			}
+		
+			if (theMaterial->useTransparency > 0.0f)
+			{
+				getTransparencyTexture( theMaterial->transparencyChannel, coords, difColor.a );
+			}
+			
+			
+			// declare outputs
+			float cornea_mask = 0.0;
+			float pupil_mask = 0.0;
+			float cornea_fade=0.0;
+			float cornea_alpha = 1.0;
+			vec3 iris_normal;
+			vec3 cornea_normal;
+			float eye_U;
+			float eye_V;
+			float iris_U = 0.0;
+			float iris_V = 0.0;
+			
+			float iris_depth = 1.0 - pow( iris_size, 3.0 );
+			float iris_shading_curvature = arg_iris_shading_curvature;
+			vec3 _norm_P = normalize( mPosition );
+			float _measured_eye_radius = length( mPosition );
+			vec3 _major_axis = vec3( 0.0, 0.0, 1.0 );
+			float _slice = _norm_P.z - iris_depth;
+			float _iris_rad = sqrt( max( 0.0, 1.0 - iris_depth * iris_depth ) );
+			vec3 _refract_N;
+			cornea_normal = mNormal;
+			_refract_N = cornea_normal;
+			vec3 _refract_vec = vec3(0.0, 1.0, 0.0);
+			vec3 ballCtr = vec3( 0.0, 0.0, 0.0 );
+			vec3 _pupil_center = ballCtr + iris_depth * _major_axis;
+			float _border_scale = 0.5;
+			
+			float _cur_refract_edge_softness = max( 0.000001, refract_edge_softness * 0.25);
+			iris_normal = mNormal;
+			float _cornea_mask_for_normals = 0.0;
+			vec3 _iris_point = _norm_P;
+			if( _slice >= 0.0 ) {
+				cornea_alpha = 0.0;
+				float _graded_eta = 1.0 / ior;
+				float _pupil_depth = iris_depth;
+				float _pupil_center_depth = iris_depth;
+
+				_refract_vec = refract( mView, _refract_N, _graded_eta );
+				float _final_iris_size = 1.0 / ( 1.0 + iris_border );
+				float _final_pupil_size = pupil_size  * _final_iris_size;
+				float _final_pupil_rad = _final_pupil_size * _iris_rad;
+
+				if( dot( _refract_vec, _refract_vec ) > 0.0 ) {
+					float _iris_scale = 1.0 / max( 0.0001, _iris_rad );
+					float _refract_edge_angle_boost = min(20.0, 1.0 / abs( mView.z ) );
+					if( iris_shading_curvature > 0.0) _refract_edge_angle_boost = 1.0;
+
+					float _iris_T_shading = -1.0;
+					{
+						//if( abs( iris_shading_curvature ) < 0.0001 ) iris_shading_curvature = 0.0001;
+						float _shading_curvature_dir = sign( iris_shading_curvature );
+
+						float _shading_curve_radius = abs( 1.0 / iris_shading_curvature );
+						vec3 _shading_curve_center = vec3( 0, 0, iris_depth + _shading_curvature_dir *
+							sqrt( _shading_curve_radius * _shading_curve_radius - _iris_rad * _iris_rad ) );
+
+						_iris_T_shading = intersectSphere( _norm_P, _refract_vec,
+							_shading_curve_center, _shading_curve_radius, _shading_curvature_dir );
+
+						float ray_dist_from_center = length( cross( _shading_curve_center - _norm_P,
+							_shading_curve_center - _norm_P -_refract_vec ) );
+						cornea_alpha = 1.0 - smoothstep( _shading_curve_radius -
+							_cur_refract_edge_softness * 0.5, _shading_curve_radius, ray_dist_from_center );
+
+						_iris_point = _norm_P + _iris_T_shading * _refract_vec;
+						iris_normal = -_shading_curvature_dir * normalize( _iris_point - _shading_curve_center );
+					}
+					float _iris_T_texture = -1.0;
+					if ( iris_texture_curvature == iris_shading_curvature )
+					{
+					_iris_T_texture = _iris_T_shading;
+					}
+					else
+					{
+						//if( abs( iris_texture_curvature ) < 0.0001 ) iris_texture_curvature = 0.0001;
+						float _texture_curvature_dir = sign( iris_texture_curvature );
+
+						float _texture_curve_radius = abs( 1.0 / iris_texture_curvature );
+						vec3 _texture_curve_center = vec3( 0, 0, iris_depth + _texture_curvature_dir *
+							sqrt( _texture_curve_radius * _texture_curve_radius - _iris_rad * _iris_rad ) );
+
+						_iris_T_texture = intersectSphere( _norm_P, _refract_vec,
+							_texture_curve_center, _texture_curve_radius, _texture_curvature_dir );
+					}
+					if( _iris_T_shading >= -0.0001 )
+					{
+						vec3 _fade_P = (_norm_P + _iris_T_shading * _refract_vec) * _iris_scale;
+						cornea_alpha = min( cornea_alpha,
+							smoothstep( -_cur_refract_edge_softness * _refract_edge_angle_boost, 0.0, 1.0 -
+								sqrt( _fade_P.x * _fade_P.x + _fade_P.y * _fade_P.y ) ) );
+					}
+					else
+					{
+						cornea_alpha = 0.0;
+					}
+
+					if( _iris_T_texture >= -0.0001 && _iris_T_shading >= -0.0001)
+					{
+						float _fade_T = _iris_T_shading * cornea_density;
+						cornea_fade = clamp( _fade_T * _fade_T, 0.0, 1.0 );
+						vec3 _iris_point_for_st = _norm_P + _iris_T_texture * _refract_vec;
+						vec3 _iris_ST = ( _iris_scale * _iris_point_for_st );
+						vec3 _iris_ST_orient = vec3( _iris_ST.xy, 0);
+						float _theta = ( atan( _iris_ST_orient.x, _iris_ST_orient.y ) / PI + 1.0 ) * 0.5;
+						float _r = 0.0;
+						if( catshape == 1 )
+						{
+							// Cat Iris
+							float cateyeShift = 0.3;
+							_final_pupil_size = _final_pupil_size * ( 1.0 + cateyeShift );
+							_r =  sqrt( pow( pow( _iris_ST.x, 0.7), 2.0 ) + pow( _iris_ST.y * ( _final_pupil_size + cateyeShift ), 2.0 ));
+						}else{
+							// Human Iris
+							_r = length( _iris_ST_orient );
+						}
+						
+						if( _r <= 1.0 + _cur_refract_edge_softness * _refract_edge_angle_boost )
+						{
+							float _iris_pos = (_r - _final_pupil_size) / (_final_iris_size - _final_pupil_size);
+							if( _r > _final_iris_size )
+							{
+								 _iris_pos = 1.0 + (_r * (1.0 + iris_border) - 1.0) * _border_scale;
+							}
+							pupil_mask = ( 1.0 - step( -_iris_pos, 0.0 ) ) * cornea_alpha;
+							iris_U = _theta + tex_U_offset;
+							iris_V = mix( iris_tex_start, iris_tex_end, _iris_pos );		
+							if( _r < _final_pupil_size )
+							{
+								iris_V = _r / _final_pupil_size * iris_tex_start;
+							}
+						}
+					}
+					cornea_mask = smoothstep( iris_inset_depth, iris_edge_fade + iris_inset_depth, _slice );
+					_cornea_mask_for_normals = smoothstep( iris_inset_depth,
+					iris_edge_fade + iris_inset_depth, _slice - iris_normal_offset );
+				}
+			}
+			iris_normal = mix( mNormal, iris_normal, _cornea_mask_for_normals );
+			eye_U = ( atan( _norm_P.x, _norm_P.y  ) / PI + 1.0 ) * 0.5 + tex_U_offset;
+			float _iris_edge_V = mix( iris_tex_start, iris_tex_end, 1.0 + iris_border * _border_scale);
+			eye_V = mix( _iris_edge_V, sclera_tex_scale, _slice - sclera_tex_offset );
+			
+			//////////////////////////////////////////////////////////////////////////////			
+			
+			vec2 eyeUVs = mix( vec2( eye_U, eye_V ), vec2( iris_U, iris_V ), cornea_mask);	
+			
+			// Reflections
+			vec3 fNormalSpec = normalMapComp( normalMapSampler, vec2( eye_U, eye_V ), -vPosition, oNormal, -bump_texture * (1.0-cornea_mask) );
+			vec3 oReflect = normalize( reflect( oView, fNormalSpec ) );
+			vec3 envTex = sphericalRefl( texEnvRfl, oReflect );		
+
+			//Cyborg Refractions
+			vec3 cybTex = vec3(0.0);
+			// Some GPUs render it hairy when using integer conditioning
+			/*
+			if( cybshape == 1 ){
+				cybTex = vec3( sphericalRefl( texEnvRfr, _refract_vec ).x * pupil_mask * 2.0, 0, 0);
+				cybTex = pow(cybTex, vec3(2.2));
+				envTex *= mix( vec3(0.8), vec3( 0.7, 0.2, 1.0 ), cornea_mask);
+			}
+			*/
+				// temporary fix
+				cybTex = vec3( sphericalRefl( texEnvRfr, _refract_vec ).x * pupil_mask * 2.0, 0, 0);
+				cybTex = pow(cybTex, vec3(2.2)) * vec3(cybshape);
+				envTex *= mix( vec3(1.0), mix( vec3(0.8), vec3( 0.7, 0.2, 1.0 ), cornea_mask), cybshape );
+
+			
+			// fresnel
+			const float fresBias = 0.002;
+			const float fresScale = 0.5;
+			const float fresPow = 6.0;
+			float fresnel = fresBias + fresScale * pow( 1.0 + dot( oView, fNormalSpec ), fresPow );		
+			
+			// eye texture
+			vec3 eyeTexIris = vec3( 0.8 ); 
+			vec3 eyeTexSclera = vec3( 0.8 );
+			if( col_texture == 1 ){
+				eyeTexIris = texture2D( diffuseSampler, vec2( iris_U, iris_V ) ).rgb  * (1.0 - pupil_mask); 
+				eyeTexSclera = texture2D( diffuseSampler, vec2( eye_U, eye_V ) ).rgb;	
+			}
+			vec3 eyeTex = mix( eyeTexSclera, eyeTexIris, cornea_mask );		
+
+			//sRGB to linear
+			eyeTex = pow(eyeTex, vec3(2.2));
+			envTex = pow(envTex, vec3(2.2));
+			envTex = envTex * 10.0;  envTex = pow(envTex, vec3(1.6));// exposure and gamma increase to match HDR
+
+			// experiment with diffuse lighting vs baked hdr diffuse
+			vec3 composites = vec3(1.0);
+			vec3 fNormalDiff = mNormal;
+			if( 0 == 1 ){
+					// Diff Normals. All lighting done in view space
+					fNormalDiff = normalMapComp( normalMapSampler, eyeUVs, -vPosition, normalize( normalMatrix * iris_normal ),  -bump_texture * mix( 0.5, 1.0, cornea_mask) );
+					// Put Spec Normals in view space too
+					fNormalSpec = vec3( viewMatrix * vec4( fNormalSpec, 0.0 ));
+					
+					vec3 directionalLightDirection = vec3( -1.0, 1.75, 1.0 );				
+					vec3 dirLgtVector = normalize( vec3( viewMatrix * vec4( directionalLightDirection, 0.0 )));
+					//diffuse
+					float diffuse = max( dot( fNormalDiff, dirLgtVector ), 0.0 ) * 0.6;
+					//spec
+					vec3 dirHalfVector = normalize( dirLgtVector + normalize( -vPosition ) );
+					float dirDotNormalHalf = max( dot( fNormalSpec, dirHalfVector ), 0.0 );
+					float specular = max( pow( dirDotNormalHalf, 1000.0 ), 0.0 ) * 5.0;
+					
+					// Dome light
+					vec3 hemiLightDirection = vec3( 0.0, 1.0, 0.0 );				
+					vec3 hemiLgtVector = normalize( vec3( viewMatrix * vec4( hemiLightDirection, 0.0 )));	
+					float hemiDiffuseWeight = 0.5 * dot( fNormalDiff, hemiLgtVector ) + 0.5;
+					vec3  hemiCol = mix( vec3( 0.08, 0.03, 0.002 ), vec3( 0.15, 0.2, 0.25 ), hemiDiffuseWeight);
+					
+					composites = mix( eyeTex * (diffuse + hemiCol), envTex, fresnel )   + specular;
+			}else{
+					fNormalDiff = normalMapComp( normalMapSampler, eyeUVs, -vPosition, normalize( mat3( modelMatrix[0].xyz, modelMatrix[1].xyz, modelMatrix[2].xyz ) * iris_normal ),  -bump_texture * mix( 0.5, 1.0, cornea_mask) );
+					vec3 sphericalDiff = sphericalRefl( texEnvDif,  fNormalDiff  ) * 1.3; //brighten it up a bit
+					vec3 sphericalDiffCatarax = pow( sphericalRefl( texEnvDif,  oNormal  ), vec3(2.0)) * vec3( 0.8, 0.79, 0.77);
+					sphericalDiff = pow( sphericalDiff, vec3(2.0)) * 1.5; // really arbitrary color correct
+
+					composites = mix( eyeTex * sphericalDiff, sphericalDiffCatarax, cornea_fade * 10.0 * cornea_mask) + cybTex;
+					composites = composites * ( 1.0 - fresnel ) + ( envTex * fresnel );
+			}
+
+			// linear to sRGB
+			composites =  pow( composites, vec3(1.0 / 2.2));
+
+			outColor = vec4( composites, 1.0);
+			
+			//outColor = vec4(fMesh->color.rgb, difColor.a);
+			
+			FS_Depth();
+		}
+	}
+	
+	////////////////////////////////////////////////////////////////////
+    /// SKIN's VERTEX PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+	GLSLShader VS_Skin
+	{
+		layout(location=0) in vec4 inPosition;
+		layout(location=1) in vec2 inTexCoords;
+		layout(location=2) in vec4 inNormal;
+		layout(location=3) in vec4 inTangent;
+		//layout(location=4) in vec4 inBinormal;
+		
+		layout(location=0) smooth out vec3 outNw;	// 12 bytes
+		layout(location=1) smooth out vec2 outTC;	// 8 bytes
+		layout(location=2) smooth out vec3 outPw;	// 12 bytes
+		layout(location=3) smooth out vec3 outWV;	// 12 bytes
+		layout(location=4) flat out TMesh	*fMesh;
+		layout(location=5) smooth out vec3 	outTangent;
+		//layout(location=6) smooth out vec3 	outBinormal;
+		
+		out vec3	n_eye;
+		
+		
+        out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+
+		uniform TMesh			*allTheMeshes;
+		uniform	TModel			*allTheModels;
+
+        void main(void)
+        {
+			TMesh 	*theMesh = allTheMeshes + gl_BaseInstanceARB + gMeshIndex; // + gl_DrawIDARB;
+			TModel	*theModel = allTheModels + theMesh->model;
+			
+			// Surface normal in eye coords
+			mat4 normalMatrix = theModel->normalMatrix; // m4_WorldIT; //	transpose(inverse(matrix));
+			vec4 N = normalMatrix * vec4(inNormal.xyz, 1.0);
+			
+			vec4 Po    = m4_World * theModel->transform * vec4(inPosition.xyz, 1.0);
+			vec4 vPosition4 = m4_View * Po;
+			vec3 vPosition3 = vPosition4.xyz; // / vPosition4.w;
+		
+			gl_Position = m4_Proj * vPosition4;
+			
+			//VS_Depth( depthDisplacement, gl_Position );
+			
+			outNw           = N.xyz; // / N.w;
+			outTC           = inTexCoords;
+			outPw           = vPosition3; // / vPosition4.w;
+			outWV           =  /*eyePos -*/ Po.xyz; // / Po.w; //(Po.xyz - eyePos);
+			
+			outTangent = (normalMatrix * vec4(inTangent.xyz, 1.0)).xyz;
+			//outBinormal = (normalMatrix * vec4(inBinormal.xyz, 1.0)).xyz;
+			
+			normalMatrix = transpose(inverse(m4_World * theModel->transform));
+			n_eye = (normalMatrix * vec4(inNormal.xyz, 1.0)).xyz; // inNormal.xyz;
+			
+			fMesh = theMesh;
+        }
+	}
+	
+	GLSLShader FS_Skin
+	{
+		layout(location=0) smooth in vec3 inNw;
+		layout(location=1) smooth in vec2 inTC;		// input 8 bytes
+		layout(location=2) smooth in vec3 inPw;
+		layout(location=3) smooth in vec3 inWV;
+		layout(location=5) smooth in vec3 	inTangent;
+		//layout(location=6) smooth in vec3 	inBinormal;
+		
+		layout(location=4) flat in TMesh *fMesh;
+	
+		in vec3		n_eye;
+		
+        layout(location=0) out vec4 	outColor;
+		
+		uniform	TMaterial			*allTheMaterials;
+		uniform TShader 			*allTheShaders;		// pointer to the array with shaders
+		
+		uniform LightDATA			*dirLights;		// pointer to the array of dir lights
+		uniform LightDATA 			*lights;		// pointer to the array with point and spot lights 
+	
+		#define PI 3.1415926
+		
+		//
+		void applyLight(in LIGHTINFOS lInfo, in LightDATA *pLight, out vec3 diffContrib, out vec3 specContrib)
+		{
+			vec3 lightDir = pLight->position.xyz - lInfo.position;
+			float dist = length(lightDir);
+			lightDir = normalize(lightDir);
+			float inner = 0.0;
+			
+			lightDir = lInfo.tangentMatrix * lightDir;
+			
+			vec3 normal = lInfo.normal;
+			// double sided lighting
+			//if (normal.z <= 0.0) normal = -normal;
+			
+			// And last but not least, figure out the spot factor ...
+			float spotFactor = 1.0;
+			float specular = 0.0;
+			
+			//if (pLight->castSpecularOnObject > 0.0f)
+			//{
+				vec3 eyeVec = normalize(-lInfo.viewDir);
+				eyeVec = lInfo.tangentMatrix * eyeVec;
+				
+				vec3 halfVec = (eyeVec - lightDir)/2.0; // view + light
+				specular = pow( max(0.0, dot( normal, halfVec ) ), 64.0 );
+			//}
+			
+			//specular = clamp(specular, 0.0, 1.0);
+			
+			if( pLight->position.w == LIGHT_TYPE_SPOT )
+			{
+				vec3 spotLightDir = normalize(pLight->dir.xyz);
+				spotLightDir = lInfo.tangentMatrix * spotLightDir;
+				spotFactor = max(0.0,  (dot( -lightDir, spotLightDir ) - pLight->dir.w) / (1.0 - pLight->dir.w) );
+			}
+
+			//float lshadow = spotFactor * mix(1.0, shadow, ndotL);
+		
+			float factor = pLight->attenuations.w * spotFactor;
+
+			//
+			diffContrib += vec3(0.0);
+			specContrib += vec3(specular);
+		}
+		
+		void ApplyRim(in vec3 Nn, in vec3 Pw, in vec4 rimOptions, in vec4 rimColor, inout vec4 difColor)
+		{
+			if( rimOptions.x > 0.0 ) {
+				
+				float f = rimOptions.y * abs( dot(Nn, Pw) );
+				f = rimOptions.x * ( 1. - smoothstep( 0.0, 1., f ) );
+				
+				vec3 color = rimColor.rgb;
+				/*
+				if (rimOptions.z > 0.0)
+				{
+					color = texture(rimSampler, inTC.st).rgb;
+				}
+				*/
+				vec3 rim = difColor.rgb + color;
+				difColor.rgb = mix(difColor.rgb, rim, f);
+			}
+		}
+		
+		// compute fresnel specular factor for given base specular and product
+		// product could be NdV or VdH depending on used technique
+		vec3 fresnel_factor(in vec3 f0, in float product)
+		{
+			return mix(f0, vec3(1.0), pow(1.01 - product, 5.0));
+		}
+		
+		// following functions are copies of UE4
+		// for computing cook-torrance specular lighting terms
+
+		float D_blinn(in float roughness, in float NdH)
+		{
+			float m = roughness * roughness;
+			float m2 = m * m;
+			float n = 2.0 / m2 - 2.0;
+			return (n + 2.0) / (2.0 * PI) * pow(NdH, n);
+		}
+
+		float D_beckmann(in float roughness, in float NdH)
+		{
+			float m = roughness * roughness;
+			float m2 = m * m;
+			float NdH2 = NdH * NdH;
+			return exp((NdH2 - 1.0) / (m2 * NdH2)) / (PI * m2 * NdH2 * NdH2);
+		}
+
+		float D_GGX(in float roughness, in float NdH)
+		{
+			float m = roughness * roughness;
+			float m2 = m * m;
+			float d = (NdH * m2 - NdH) * NdH + 1.0;
+			return m2 / (PI * d * d);
+		}
+		
+		float G_schlick(in float roughness, in float NdV, in float NdL)
+		{
+			float k = roughness * roughness * 0.5;
+			float V = NdV * (1.0 - k) + k;
+			float L = NdL * (1.0 - k) + k;
+			return 0.25 / (V * L);
+		}
+		
+		#define COOK_GGX	1
+		
+		// cook-torrance specular calculation                      
+		vec3 cooktorrance_specular(in float NdL, in float NdV, in float NdH, in vec3 specular, in float roughness)
+		{
+		#ifdef COOK_BLINN
+			float D = D_blinn(roughness, NdH);
+		#endif
+
+		#ifdef COOK_BECKMANN
+			float D = D_beckmann(roughness, NdH);
+		#endif
+
+		#ifdef COOK_GGX
+			float D = D_GGX(roughness, NdH);
+		#endif
+
+			float G = G_schlick(roughness, NdV, NdL);
+
+			float rim = mix(1.0 - roughness * 1.0 * 0.9, 1.0, NdV); // material.w
+
+			return (1.0 / rim) * specular * G * D;
+		}
+		
+		/////////////////////////////////////////////////////////////////////
+		//
+		void main(void)
+		{
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			TShader *theShader = allTheShaders + fMesh->shader;
+			
+			vec3 Nn = normalize(inNw);
+			vec3 Vd = eyePos - inWV;
+			vec3 Vn = normalize(Vd);
+			
+			vec4 difColor = vec4(theMaterial->diffuseColor.rgb, 1.0);
+			vec3 specColor = theMaterial->specularColor.rgb;
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			if (theMaterial->useDiffuse > 0.0f)
+			{
+				getDiffuseTexture( theMaterial->diffuseChannel, coords, difColor );
+				
+				if (theShader->alphaFromColor > 0.0)
+				{
+					difColor.a = difColor.r;
+				}
+			}
+			if (theMaterial->useTransparency > 0.0f)
+			{
+				getTransparencyTexture( theMaterial->transparencyChannel, coords, difColor.a );
+			}
+			
+			if (theMaterial->useSpecular > 0.0f)
+			{
+				getSpecularityTexture( theMaterial->specularChannel, coords, specColor );
+			}
+			
+			//
+			// calculate lighting indices
+			mat3 tangentMatrix = mat3(1.0);
+			
+			if (theMaterial->useNormalmap > 0.0f)
+			{
+				vec3 binormal = cross(normalize(inTangent), Nn);
+				tangentMatrix = transpose(mat3( normalize(inTangent), normalize(binormal), Nn ));
+				
+				vec3 normal;
+				getNormalMapTexture( theMaterial->normalmapChannel, coords, normal );
+				normal = (normal - vec3(0.5f,0.5f,0.5f)) * vec3(2.0f,2.0f,2.0f);
+				
+				Nn = normal;
+			}
+			
+			LIGHTINFOS lInfo;
+			lInfo.viewDistance = Vd;
+			lInfo.viewDir = Vn;
+			lInfo.normal = Nn;
+			lInfo.uv = inTC;
+			lInfo.worldPosition = inWV;
+			lInfo.position = inPw;
+			lInfo.shininess = theMaterial->specExp;
+			lInfo.tangentMatrix = tangentMatrix;
+			
+			LIGHTRES	lResult;
+			lResult.ambientContrib = vec3(0.0);
+			lResult.diffContrib = vec3(0.0);
+			lResult.specContrib = vec3(0.0);
+			//lResult.R = vec3(0.0);
+			
+			// dir lights
+			LightDATA *light;
+			for (int i=0; i<numDirLights; ++i)
+			{
+				light = dirLights + i;
+				vec3 dir = -normalize(light->dir.xyz);
+				dir = tangentMatrix * dir;
+				
+				float intensity = light->attenuations.w;
+				float ndotl = max(0.0, dot( Nn, dir ) );
+				
+				
+				
+				lResult.diffContrib += ndotl * intensity * light->color.rgb;
+				
+				vec3 eyeVec = normalize(-inPw);
+				eyeVec = tangentMatrix * eyeVec;
+			
+				vec3 halfVec = (eyeVec + dir)/2.0; // view + light
+				//float specular = pow( max(0.0, dot( Nn, halfVec ) ), theMaterial->specExp );
+			
+				float NdL = max(0.0, dot(Nn, dir));
+				float NdV = max(0.001, dot(Nn, eyeVec));
+				float NdH = max(0.001, dot(Nn, halfVec));
+				float roughness = 0.6;
+				float HdV = max(0.001, dot(halfVec, eyeVec));
+				vec3 specular = vec3(1.0);
+				
+				vec3 specfresnel = fresnel_factor(specular, HdV);
+				vec3 specref = cooktorrance_specular(NdL, NdV, NdH, specfresnel, roughness);
+			
+				lResult.specContrib += intensity * specref * vec3(1.0); // * specular
+			}
+			
+			// point / spot lights
+			for (int i=0; i<numPointLights; ++i)
+			{
+				light = lights + i;
+				
+				// compute and accumulate shading.
+				vec3 diffContrib, specContrib;
+				
+				applyLight(lInfo, light, diffContrib, specContrib);
+				
+				lResult.diffContrib += diffContrib;
+				lResult.specContrib += specContrib;
+			}
+			
+			// material diffuse factor and global shader transparency
+			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			vec3 ambientColor = theMaterial->ambientColor.rgb * globalAmbientLight.rgb * theMaterial->ambientColor.w;
+			
+			//difColor += vec4(ambientColor, theShader->transparency);
+			difColor *= vec4(ambientColor + difFactor * lResult.diffContrib, theShader->transparency); // ambientColor +
+			
+			//
+			/*theMaterial->emissiveColor.w * theMaterial->emissiveColor.xyz +*/
+			
+			difColor.rgb += specColor * lResult.specContrib;
+			
+			vec3 dir = -normalize(inPw.xyz);
+			dir = tangentMatrix * dir;
+			ApplyRim(Nn, dir, theShader->rimOptions, theShader->rimColor, difColor);
+			
+			float gamma = 0.4545;
+			difColor.rgb = pow(difColor.rgb, vec3(gamma));
+			outColor = difColor;
+			//outColor.rgb = normalize(inNw);
+			//outColor.rgb = lResult.specContrib;
+			//outColor.a = 1.0;
+			//FS_Depth();
+		}
+		
+	}
+		
+	////////////////////////////////////////////////////////////////////
+    /// LASHES's VERTEX PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	/*
+	GLSLShader VS_Lashes
+	{
+		layout(location=0) in vec4 inPosition;
+		layout(location=1) in vec2 inTexCoords;
+		layout(location=2) in vec4 inNormal;
+		layout(location=3) in vec4 inTangent;
+		//layout(location=4) in vec4 inBinormal;
+		
+		layout(location=0) smooth out vec3 outNw;	// 12 bytes
+		layout(location=1) smooth out vec2 outTC;	// 8 bytes
+		layout(location=2) smooth out vec3 outPw;	// 12 bytes
+		layout(location=3) smooth out vec3 outWV;	// 12 bytes
+		layout(location=4) flat out TMesh	*fMesh;
+		layout(location=5) smooth out vec3 	outTangent;
+		//layout(location=6) smooth out vec3 	outBinormal;
+		
+		
+        out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+
+		uniform TMesh			*allTheMeshes;
+		uniform	TModel			*allTheModels;
+
+        void main(void)
+        {
+			TMesh 	*theMesh = allTheMeshes + gl_BaseInstanceARB + gMeshIndex; // + gl_DrawIDARB;
+			TModel	*theModel = allTheModels + theMesh->model;
+			
+			// Surface normal in eye coords
+			mat4 normalMatrix = theModel->normalMatrix; // m4_WorldIT; //	transpose(inverse(matrix));
+			vec4 N = normalMatrix * vec4(inNormal.xyz, 1.0);
+			
+			vec4 Po    = m4_World * theModel->transform * vec4(inPosition.xyz, 1.0);
+			vec4 vPosition4 = m4_View * Po;
+			vec3 vPosition3 = vPosition4.xyz; // / vPosition4.w;
+		
+			gl_Position = m4_Proj * vPosition4;
+			
+			//VS_Depth( depthDisplacement, gl_Position );
+			
+			outNw           = N.xyz; // / N.w;
+			outTC           = inTexCoords;
+			outPw           = vPosition3; // / vPosition4.w;
+			
+			outTangent = (normalMatrix * vec4(inTangent.xyz, 1.0)).xyz;
+			//outBinormal = (normalMatrix * vec4(inBinormal.xyz, 1.0)).xyz;
+			
+			normalMatrix = transpose(inverse(m4_World * theModel->transform));
+			n_eye = (normalMatrix * vec4(inNormal.xyz, 1.0)).xyz; // inNormal.xyz;
+			
+			fMesh = theMesh;
+        }
+	}
+	
+	GLSLShader FS_Lashes
+	{
+		layout(location=0) smooth in vec3 inNw;
+		layout(location=1) smooth in vec2 inTC;		// input 8 bytes
+		layout(location=2) smooth in vec3 inPw;
+		layout(location=3) smooth in vec3 inWV;
+		layout(location=5) smooth in vec3 	inTangent;
+		//layout(location=6) smooth in vec3 	inBinormal;
+		
+		layout(location=4) flat in TMesh *fMesh;
+	
+        layout(location=0) out vec4 	outColor;
+		
+		uniform	TMaterial			*allTheMaterials;
+		uniform TShader 			*allTheShaders;		// pointer to the array with shaders
+		
+		/////////////////////////////////////////////////////////////////////
+		//
+		void main(void)
+		{
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			TShader *theShader = allTheShaders + fMesh->shader;
+			
+			outColor = vec4(0.0, 0.0, 0.0, 1.0);
+			
+		}
+	}
+	*/
+}
+
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+// Material Technique
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
+Technique Init
+{
+    Pass init
+    {
+        PolygonOffset = {1.0,1.0};
+        DEPTH_TEST = True;
+        DEPTH_FUNC = LEQUAL;
+        DEPTH_MASK = True;
+    }
+}
+
+// technique for output geometry with a very simple shading and MRT (normal, mask, etc.)
+
+Technique WallMaterial
+{
+	Pass pEarlyZNoTextures
+	{
+		VertexProgram = { Main::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = Main::FS_Simple;
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+	
+	Pass pBindedEarlyZ
+	{
+		VertexProgram = { Main::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = Main::FS_Simple;
+		FragmentProgram<"texturing"> = BindedTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+	Pass pBindlessEarlyZ
+	{
+		/*
+#ifdef GL_ARB_bindless_texture
+		VertexProgram = { Main::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = Main::FS_Simple;
+		FragmentProgram<"texturing"> = BindlessTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+#else
+	*/
+		VertexProgram = { Main::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = Main::FS_Simple;
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+
+	}
+	
+    Pass pNoTextures
+    {
+        VertexProgram = Main::VS;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = { Main::FS, Lighting, Projectors::FS, CSB::DoContrastSaturationBrightness };
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+    }
+	
+	Pass pBindedTextures
+	{
+		VertexProgram = Main::VS;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		//FragmentProgram = ;
+		FragmentProgram = { Main::FS, Lighting, Projectors::FS, CSB::DoContrastSaturationBrightness };
+		FragmentProgram<"texturing"> = BindedTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+	
+	Pass pBindlessTextures
+	{
+		/*
+#ifdef GL_ARB_bindless_texture
+		VertexProgram = { Main::VS };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = { Main::FS, Lighting, Projectors::FS, CSB::DoContrastSaturationBrightness };
+		FragmentProgram<"texturing"> = BindlessTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+#else
+	*/
+		VertexProgram = Main::VS;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = { Main::FS, Lighting, Projectors::FS, CSB::DoContrastSaturationBrightness };
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+
+	}
+}
+
+Technique WallMaterialLog
+{
+	Pass pEarlyZNoTextures
+	{
+		VertexProgram = { Main::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		
+		FragmentProgram = Main::FS_Simple;
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+	}
+	
+	Pass pBindedEarlyZ
+	{
+		VertexProgram = { Main::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		
+		FragmentProgram = Main::FS_Simple;
+		FragmentProgram<"texturing"> = BindedTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+	}
+	Pass pBindlessEarlyZ
+	{
+		/*
+#ifdef GL_ARB_bindless_texture
+		VertexProgram = { Main::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		
+		FragmentProgram = Main::FS_Simple;
+		FragmentProgram<"texturing"> = BindlessTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+#else
+	*/
+		VertexProgram = { Main::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		
+		FragmentProgram = Main::FS_Simple;
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+
+	}
+	
+    Pass pNoTextures
+    {
+        VertexProgram = Main::VS;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		
+		FragmentProgram = { Main::FS, Lighting, Projectors::FS, CSB::DoContrastSaturationBrightness };
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+    }
+	
+	Pass pBindedTextures
+	{
+		VertexProgram = Main::VS;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		
+		//FragmentProgram = ;
+		FragmentProgram = { Main::FS, Lighting, Projectors::FS, CSB::DoContrastSaturationBrightness };
+		FragmentProgram<"texturing"> = BindedTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+	}
+	
+	Pass pBindlessTextures
+	{
+		/*
+#ifdef GL_ARB_bindless_texture
+		VertexProgram = { Main::VS };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		
+		FragmentProgram = { Main::FS, Lighting, Projectors::FS, CSB::DoContrastSaturationBrightness };
+		FragmentProgram<"texturing"> = BindlessTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+#else
+	*/
+		VertexProgram = Main::VS;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		
+		FragmentProgram = { Main::FS, Lighting, Projectors::FS, CSB::DoContrastSaturationBrightness };
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+
+	}
+}
+
+Technique CharacterT
+{
+	Pass pEarlyZ
+	{
+		VertexProgram = { Character::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = Character::FS_Simple;
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+	
+	Pass pNoTextures
+	{
+		VertexProgram = { Character::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = Character::FS_Simple;
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+	
+	Pass pIBL
+	{
+		VertexProgram = Character::VS_IBL;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = Character::FS_IBL;
+		FragmentProgram<"texturing"> = BindedTextures::texturingGamma;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+	
+	Pass pEye
+	{
+		VertexProgram = Character::VS_Eye;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = Character::FS_Eye;
+		FragmentProgram<"texturing"> = BindedTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+	
+	Pass pSkin
+	{
+		VertexProgram = Character::VS_Skin;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = Character::FS_Skin;
+		FragmentProgram<"texturing"> = BindedTextures::texturingGamma;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+	/*
+	Pass pLashes
+	{
+		VertexProgram = Character::VS_Lashes;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		GeometryProgram = Character::GS_Lashes;
+		
+		FragmentProgram = Character::FS_Lashes;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+	*/
+}
+
+/////////////////////////////////////////////////////////
+// TODO: start using that instead of WallMaterialLog
+
+Technique DepthOverrides
+{
+	Pass linear
+	{
+		VertexProgramOverride<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		FragmentProgramOverride<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+	
+	Pass log
+	{
+		VertexProgramOverride<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		FragmentProgramOverride<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+	}
+}
+
+Technique ShadowT
+{
+	Pass p0
+	{
+		VertexProgram = { Shadows::VS_Proj };
+		GeometryProgram = { Shadows::GS_Proj };
+	}
+}

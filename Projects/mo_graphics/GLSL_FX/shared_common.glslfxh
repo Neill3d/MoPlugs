@@ -1,0 +1,150 @@
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// file: shared_common.glslfxh
+//
+//
+//	Author Sergey Solokhin (Neill3d)
+//
+//	GitHub page - https://github.com/Neill3d/MoPlugs
+//	Licensed under BSD 3-Clause - https://github.com/Neill3d/MoPlugs/blob/master/LICENSE
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////
+// GLSL Globals : meaning that all the GLSL domains (vertex, fragments etc.) will have a copy
+// of these data
+//
+GLSLShader 
+{
+    #version 430 compatibility
+	#extension GL_NV_shader_buffer_load : enable
+	#extension GL_NV_shader_atomic_float : enable
+	#extension GL_ARB_shader_storage_buffer_object : require
+	#extension GL_ARB_bindless_texture : require
+	#extension GL_ARB_shader_draw_parameters : require
+	
+	#define		SHADING_PHONG		0
+	#define		SHADING_FLAT		1
+	#define		SHADING_TOON		2
+	#define		SHADING_COLORID		3
+	
+	#define		SAMPLER_DIFFUSE			0
+	#define		SAMPLER_TRANSPARENCY	1
+	#define		SAMPLER_SPECULAR		2
+	#define		SAMPLER_REFLECT			3
+	#define		SAMPLER_COUNT			4
+	
+	//! Note: all structures are aligned to 16-bit
+	
+	struct TTexture
+	{
+		mat4		transform;
+		uvec2		address;
+		float		width;
+		float		height;
+		
+		// 80 bytes in total
+	};
+	
+	struct TMaterial
+	{
+		// textures for material channels
+		TTexture		*diffuse;
+		TTexture		*specular;
+		TTexture		*emissive;
+		TTexture		*transparency;
+		TTexture		*normalmap;
+		TTexture		*reflect;
+		
+		vec4		dummy;
+		float		specExp;
+		
+		float		useDiffuse;
+		float		useSpecular;
+		float		useEmissive;
+		
+		float		useTransparency;
+		float		useNormalmap;
+		float		useReflect;
+		
+		float		dummy2;
+		
+		//
+		/// Current material
+		//
+		vec4		emissiveColor;
+		vec4     	diffuseColor;
+		vec4     	ambientColor;
+		vec4		reflectColor;
+		vec4     	transparencyColor;
+		vec4     	specularColor;
+		
+		// 192 in total
+	};
+	
+	struct TShader
+	{
+		int			shadingType;
+		int			shaderType;
+		int			shader1;
+		int			shader2;
+		
+		int 		shader3;
+		int			shader4;
+		int			shader5;
+		float		transparency;
+	
+		//
+		/// shader parameters
+		//
+		float		toonEnabled;
+		float		toonSteps;
+		float		toonDistribution;
+		float		toonShadowPosition;
+		
+		vec4		customColor;
+		
+		float		contrast;
+		float		saturation;
+		float		brightness;
+		float		gamma;
+		
+		// 16
+		vec4		shadow // rgb - Color;	w-intensity
+		// 16
+		
+		// total - 96 bytes
+	};
+	
+	struct TModel
+	{
+		mat4		transform;		// local mesh matrix
+		mat4		normalMatrix;	// transpose(inverse(WorldViewIT))
+		
+		// total 128 bytes
+	};
+	
+	struct TMesh
+	{
+		TMaterial		*material;		// pointer to the mesh material
+		TTexture		*lightmap;		// pointer to the lightmap texture (if needed)
+		// 16
+		int				model;			// index to the model struct	
+		int				shader;			// index to the shader struct
+		
+		float			dummy;
+		float			dummy2;
+		// 16
+		
+		vec4		color;			// flat color id (buffer id rendering)
+		// 16
+		
+		// total - 48 bytes
+	};
+	
+	// prototype
+	void	getTexture(in TTexture *texture, in vec4 coords, in int index, out vec4 texColor);
+	void	getTexture(in TTexture *texture, in vec4 coords, in int index, out vec3 texColor);
+}

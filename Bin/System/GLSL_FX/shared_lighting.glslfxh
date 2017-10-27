@@ -1,0 +1,483 @@
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// file: shared_lighting.glslfxh
+//
+//
+//	Author Sergey Solokhin (Neill3d)
+//
+//	GitHub page - https://github.com/Neill3d/MoPlugs
+//	Licensed under BSD 3-Clause - https://github.com/Neill3d/MoPlugs/blob/master/LICENSE
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+uniform int		numberOfShadows	= 0;
+uniform mat4	shadowsMVP;
+
+//
+// GLSL Globals : meaning that all the GLSL domains (vertex, fragments etc.) will have a copy
+// of these data
+//
+GLSLShader
+{
+	#define	LIGHT_TYPE_DIRECTION			0.0
+	#define	LIGHT_TYPE_POINT				1.0
+	#define LIGHT_TYPE_SPOT					2.0
+
+	struct LightDATA
+	{
+		vec4 		position; 		// w - type
+		// 16
+		vec4 		dir; 			// w - spotAngle
+		// 16
+		vec4 		color;			// w - radius
+		// 16
+		vec4 		attenuations;
+		// 16
+		float		shadowMapLayer;
+		float		shadowMapSize;
+		float		shadowPCFKernelSize;
+		float		castSpecularOnObject;
+		// 16
+		//mat4		shadowVP;	// view projection matrix of a shadow map
+		vec4		shadowIndex;	// index and count in the shadow matrix array
+		vec4		normalizedFarPlanes;	// for cascaded shadows
+		// 64
+		
+		// total - 144 bytes
+	};
+	
+	struct LIGHTINFOS
+    {
+		mat3	tangentMatrix;
+		vec3	worldPosition;
+		vec3 	position;
+        vec3 	viewDistance;
+        vec3 	viewDir;	
+        vec3 	normal;	
+		vec2	uv;
+        float 	shininess;
+    };
+	
+	struct LIGHTRES
+    {
+        vec3 ambientContrib;
+        vec3 diffContrib;
+        vec3 specContrib;
+        //vec3 R;	// reflection vector : returned by the reflection computation
+        //vec4 reflectionHi; // result from a high res env.map
+        //vec4 reflectionLow; // result from a Low res env.map
+    };
+
+	// forward declaration
+	void evalShaderDirLighting(in LIGHTINFOS info, in int count, inout LIGHTRES result);
+	void evalShaderLighting(in LIGHTINFOS info, in int count, inout LIGHTRES result);
+	
+	void evalDirLighting(in LIGHTINFOS info, in int count, inout LIGHTRES result);
+	void evalLighting(in LIGHTINFOS info, inout LIGHTRES result);
+	void evalClusteringLightingDEPRICATED(in LIGHTINFOS info, inout LIGHTRES result);
+		
+}
+
+GLSLShader Lighting
+{
+	#define CLUSTERS_WIDTH_COUNT		8
+	#define	CLUSTERS_HEIGHT_COUNT		8
+	#define	CLUSTERS_DEPTH_COUNT		16
+	
+	// SSBO -------------------------------------------------
+	/*
+	layout (std430, binding=3) readonly buffer LB1
+	{
+		int 	clusterLightIndexLists[];
+	};
+	
+	layout (std430, binding=4) readonly buffer LB2
+	{
+		uvec2	clusterGrid[];
+	};
+	*/
+	
+	uniform int					*clusterIndex;
+	uniform uvec2				*clusterGrid;
+	
+	uniform LightDATA			*dirLights;		// pointer to the array of dir lights
+	uniform LightDATA 			*lights;		// pointer to the array with point and spot lights 
+	
+	uniform LightDATA			*shaderDirLights;
+	uniform LightDATA			*shaderLights;	// exclusive list of lights for the shader
+	
+	uniform sampler2DArrayShadow 		shadowsSampler;
+	
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////
+	// SHADOWS
+	
+	#define EPSILON 0.00001
+
+	vec3 getShadowCoords(in LightDATA *light, in vec3 worldPos)
+	{
+		//vec4 coords = light->shadowVP * vec4(worldPos, 1);
+		vec4 coords = vec4(worldPos, 1);
+		coords.xyz = (coords.xyz / coords.w) * vec3(0.5) + vec3(0.5);
+		return coords.xyz;
+	}
+	
+	float CalcShadowFactor(in float layer, in float mapSize, in float shadowIntensity, in float bias, in vec3 coords)
+	{
+		float receiver = coords.z - bias;
+		vec4 uv = vec4(coords.xy, layer, receiver);
+		
+		if (coords.x < 0 || coords.x > 1 || coords.y < 0 || coords.y > 1) 
+			return 1.0f;
+		
+		const float		shadowBlurStep = 1.0f / mapSize;
+		
+		float sum = 0.0;
+		const int FILTER_SIZE = 3;
+		const float HALF_FILTER_SIZE = 0.5 * float(FILTER_SIZE);
+		for (int i = 0; i < FILTER_SIZE; i++)
+		{
+			for (int j = 0; j < FILTER_SIZE; j++)
+			{
+				vec2 offset = shadowBlurStep * (vec2(i, j) - HALF_FILTER_SIZE) / HALF_FILTER_SIZE;
+				sum += texture(shadowsSampler, uv + vec4(offset, 0, 0));
+			}	
+		}
+		return sum / (FILTER_SIZE * FILTER_SIZE);
+	}
+	
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	void doDirLight(in LIGHTINFOS info, in vec3 lightDir, in vec3 lightColor, in float intensity, in float shadow, inout LIGHTRES result)
+	{
+		vec3 normal = info.normal;
+		// double sided lighting
+		//if (normal.z <= 0.0) normal = -normal;
+		
+		// N dot L
+		float ndotl = max(0.0, dot( normal, lightDir ) );
+		//float lshadow = mix(1.0, shadow, ndotl);
+		
+		result.diffContrib += ndotl * intensity * lightColor; // * lshadow
+	}
+	
+	void evalDirLighting(in LIGHTINFOS info, in int count, inout LIGHTRES result)
+	{
+		//float factor = texture( shadowsSampler, vec3(info.uv.x, info.uv.y, 0.0f) ).x;
+		
+		//result.diffContrib = vec3(factor);
+		//return;
+	
+		//float shadow = 1.0;
+		/*
+		LightDATA *light = dirLights;	
+		for (int i=startIndex; i<count; ++i)
+		{
+			if (light->shadowMapSize > 0.0f)
+			{
+				vec3 lPos = getShadowCoords(light, info.worldPosition);
+				shadow *= CalcShadowFactor( light->shadowMapLayer, light->shadowMapSize, 0.1f, 0.0006, lPos );
+			}
+			
+			light++;
+		}
+	*/
+		LightDATA *light = dirLights;
+		for (int i=0; i<count; ++i)
+		{
+			light = dirLights + i;
+			vec3 dir = -normalize(light->dir.xyz);
+			
+			float intensity = light->attenuations.w;
+			float ndotl = max(0.0, dot( info.normal, dir ) );
+			
+			result.diffContrib += ndotl * intensity * light->color.rgb;
+			//result.diffContrib = ndotl * intensity * light->color.rgb;
+			//doDirLight(info, dir, light->color.xyz, intensity, shadow, result);
+		}
+	}
+	
+	void evalShaderDirLighting(in LIGHTINFOS info, in int count, inout LIGHTRES result)
+	{
+		float shadow = 1.0;
+		
+		LightDATA *light = shaderDirLights;
+		for (int i=0; i<count; ++i)
+		{
+			light = shaderDirLights + i;
+			vec3 dir = -normalize(light->dir.xyz);
+			float intensity = light->attenuations.w;
+			
+			doDirLight(info, dir, light->color.xyz, intensity, shadow, result);
+		}
+	}
+	
+	/**
+	 * Computes contributions from a point light with a linear falloff using a blinn-phong model.
+	 */
+	 /*
+	void doLight(in LIGHTINFOS info, in LightDATA *pLight, in float shadow, inout vec3 diffContrib, inout vec3 specContrib)
+	{
+		vec3 lightDir = pLight->position.xyz - info.position;
+		float dist = length(lightDir);
+		lightDir = normalize(lightDir);
+		float inner = 0.0;
+		
+		lightDir = info.tangentMatrix * lightDir;
+		
+		vec3 normal = info.normal;
+		// double sided lighting
+		//if (normal.z <= 0.0) normal = -normal;
+		
+		float ndotL = max(dot(normal, lightDir),0.0);
+		
+		float radius = pLight->color.w;
+		float att = max(1.0 - max(0.0, (dist - inner) / (radius - inner)), 0.0);
+		if (dist > radius)
+			att = 0.0f;
+		
+		
+		// And last but not least, figure out the spot factor ...
+		float spotFactor = 1.0;
+		float specular = 0.0;
+		
+		//if (pLight->castSpecularOnObject > 0.0f)
+		//{
+			vec3 eyeVec = normalize(-info.viewDir);
+			eyeVec = info.tangentMatrix * eyeVec;
+			
+			vec3 halfVec = (eyeVec - lightDir)/2.0; // view + light
+			specular = pow( max(0.0, dot( normal, halfVec ) ), 64.0 );
+		//}
+		specular = 0.5;
+		//specular = clamp(specular, 0.0, 1.0);
+		
+		if( pLight->position.w == LIGHT_TYPE_SPOT )
+		{
+			vec3 spotLightDir = normalize(pLight->dir.xyz);
+			spotLightDir = info.tangentMatrix * spotLightDir;
+			spotFactor = max(0.0,  (dot( -lightDir, spotLightDir ) - pLight->dir.w) / (1.0 - pLight->dir.w) );
+		}
+
+		//float lshadow = spotFactor * mix(1.0, shadow, ndotL);
+	
+		float factor = pLight->attenuations.w * att * spotFactor;
+
+		//
+		
+		diffContrib += ndotL * factor * pLight->color.xyz; // * lshadow
+		//specContrib += specular * vec3(1.0); // * pLight->color.xyz;
+		specContrib = vec3(specular);
+	}
+*/
+	void doLight(in LIGHTINFOS info, in LightDATA *pLight, in float shadow, inout vec3 diffContrib, inout vec3 specContrib)
+	{
+		vec3 lightDir = pLight->position.xyz - info.position;
+		float dist = length(lightDir);
+		lightDir = normalize(lightDir);
+		float inner = 0.0;
+		
+		lightDir = info.tangentMatrix * lightDir;
+		
+		vec3 normal = info.normal;
+		// double sided lighting
+		//if (normal.z <= 0.0) normal = -normal;
+		
+		// And last but not least, figure out the spot factor ...
+		float spotFactor = 1.0;
+		float specular = 0.0;
+		
+		//if (pLight->castSpecularOnObject > 0.0f)
+		//{
+			vec3 eyeVec = normalize(-info.viewDir);
+			eyeVec = info.tangentMatrix * eyeVec;
+			
+			vec3 halfVec = (eyeVec - lightDir)/2.0; // view + light
+			specular = pow( max(0.0, dot( normal, halfVec ) ), 64.0 );
+		//}
+		
+		//specular = clamp(specular, 0.0, 1.0);
+		
+		if( pLight->position.w == LIGHT_TYPE_SPOT )
+		{
+			vec3 spotLightDir = normalize(pLight->dir.xyz);
+			spotLightDir = info.tangentMatrix * spotLightDir;
+			spotFactor = max(0.0,  (dot( -lightDir, spotLightDir ) - pLight->dir.w) / (1.0 - pLight->dir.w) );
+		}
+
+		//float lshadow = spotFactor * mix(1.0, shadow, ndotL);
+	
+		float factor = pLight->attenuations.w * spotFactor;
+
+		//
+		
+		specContrib = vec3(specular);
+	}
+
+	/**
+	 * Looks up light parameters in constant buffers using light index, and 
+	 * computes lighting by invoking doLight with these.
+	 */
+
+	int calcClusterOffset(vec2 fragPos, vec3 viewSpace)
+	{
+		float someLen = length(viewSpace);
+		int x = int(fragPos.x * SCREEN_SIZE.z * CLUSTERS_WIDTH_COUNT);
+		int y = int(fragPos.y * SCREEN_SIZE.w * CLUSTERS_HEIGHT_COUNT);
+		float fz = int(someLen / farPlane * CLUSTERS_DEPTH_COUNT);
+		x = clamp( x, 0, CLUSTERS_WIDTH_COUNT-1 );
+		y = clamp( y, 0, CLUSTERS_HEIGHT_COUNT-1 );
+		int z = int( clamp(fz, 0.0, -1.0f+CLUSTERS_DEPTH_COUNT) );
+		return x + CLUSTERS_WIDTH_COUNT * (y + z * CLUSTERS_HEIGHT_COUNT);
+	}
+
+	
+	void evalLighting(in LIGHTINFOS info, inout LIGHTRES result)
+	{
+		vec3 diffContrib = vec3(0.0);
+		vec3 specContrib = vec3(0.0);
+		
+		float shadow = 1.0;
+	
+		LightDATA *light = lights;
+		
+		for (int i=0; i<numPointLights; ++i)
+		{
+			light = lights + i;
+			
+			// compute and accumulate shading.
+			doLight(info, light, shadow, diffContrib, specContrib);
+		}
+		
+		result.diffContrib += diffContrib;
+		result.specContrib += specContrib;
+	}
+	
+	void evalShaderLighting(in LIGHTINFOS info, in int count, inout LIGHTRES result)
+	{
+		vec3 diffContrib = vec3(0.0f);
+		vec3 specContrib = vec3(0.0f);
+		
+		float shadow = 1.0;
+	
+		LightDATA *light = shaderLights;
+		
+		for (int i=0; i<count; ++i)
+		{
+			light = shaderLights + i;
+			
+			// compute and accumulate shading.
+			doLight(info, light, shadow, diffContrib, specContrib);
+		}
+		
+		result.diffContrib += diffContrib;
+		result.specContrib += specContrib;
+	}
+	
+	// ! depricated
+	void evalClusteringLightingDEPRICATED(in LIGHTINFOS info, inout LIGHTRES result)
+	{
+		// fetch cluster data ( offset to light indices, and number of lights) from grid buffer
+		int clusterOffset = calcClusterOffset(gl_FragCoord.xy, info.viewDistance);
+		uvec2 offsetCount = clusterGrid[clusterOffset];
+		
+		int lightCount = int(offsetCount.x);
+		int lightOffset = int(offsetCount.y);
+		
+		vec3 diffContrib = vec3(0.0f);
+		vec3 specContrib = vec3(0.0f);
+		
+		float shadow = 1.0;
+		/*
+		for (int i=0; i<lightCount; ++i)
+		{
+			// fetch light index from list of lights for the cluster
+			int lightIndex = clusterIndex[lightOffset+i];
+			
+			// compute and accumulate shading.
+			LightDATA *light = lights + lightIndex;
+			if (light->shadowMapSize > 0.0f)
+			{
+				vec3 lPos = getShadowCoords(light, info.worldPosition);
+				shadow *= CalcShadowFactor( light->shadowMapLayer, light->shadowMapSize, 0.1f, 0.0006, lPos );
+			}
+		}
+		*/
+		LightDATA *light = lights;
+		for (int i=0; i<lightCount; ++i)
+		{
+			// fetch light index from list of lights for the cluster
+			int lightIndex = clusterIndex[lightOffset+i];
+			
+			// compute and accumulate shading.
+			light = lights + lightIndex;
+			doLight(info, light, shadow, diffContrib, specContrib);
+		}
+		
+		result.diffContrib += diffContrib;
+		result.specContrib += specContrib;
+	}	
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+namespace Shadows
+{
+	//////////////////////////////////////////////////////////////////////////////////////
+	//
+	GLSLShader VS_Proj
+	{
+		layout(location=0) in vec4 					Position;
+		layout(location=6) in TModel				*inModel;	// (transformation)
+		layout(location=7) in mat4					*vMatrices;
+		
+		out gl_PerVertex {
+            vec4 gl_Position;
+        };
+		
+		layout(location=7) flat out int 	instanceID;
+		
+		void main()
+		{
+			vec4 pos = inModel->transform * Position;
+			gl_Position = vMatrices[gl_InstanceID] * pos;
+			instanceID = gl_InstanceID;
+		}
+	}
+
+	GLSLShader GS_Proj
+	{
+		layout(triangles) in;
+		layout(triangle_strip, max_vertices=3) out; // triangle_strip
+		
+		layout(location=7) flat in int 		instanceID[];
+		
+		in gl_PerVertex {
+			vec4 gl_Position;
+			
+		} gl_in[];
+		
+		out gl_PerVertex {
+			vec4 gl_Position;
+			int gl_Layer;
+		};
+		
+		void main()
+		{
+			int id = instanceID[0];
+			
+			for(int i=0; i<3; ++i)
+			{
+				gl_Layer = id;
+				gl_Position = gl_in[i].gl_Position;
+				EmitVertex();
+			}				
+			EndPrimitive();
+			
+		}
+	}
+}
+

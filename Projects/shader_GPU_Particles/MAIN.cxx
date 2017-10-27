@@ -69,17 +69,17 @@ bool FBLibrary::LibReady()	{
 	//
 	FBString effectPath, effectFullName;
 
-	if ( FindEffectLocation( FBString("\\GLSLFX\\", PARTICLES_EFFECT), effectPath, effectFullName ) )
+	if ( FindEffectLocation( FBString("\\GLSL_FX\\", PARTICLES_EFFECT), effectPath, effectFullName ) )
 	{
 		ParticlesSystem::Shader::SetShaderEffectLocation( effectFullName, effectFullName.GetLen() );
 
-		FBString computeLocation(effectPath, "\\GLSLFX\\Particles_simulation.cs");
+		FBString computeLocation(effectPath, "\\GLSL_CS\\Particles_simulation.cs");
 		ParticlesSystem::Shader::SetComputeShaderLocation( computeLocation, computeLocation.GetLen() );
 
-		FBString computeSelfCollisionsLocation(effectPath, "\\GLSLFX\\Particles_selfcollisions.cs");
+		FBString computeSelfCollisionsLocation(effectPath, "\\GLSL_CS\\Particles_selfcollisions.cs");
 		ParticlesSystem::Shader::SetComputeSelfCollisionsShaderLocation( computeSelfCollisionsLocation, computeSelfCollisionsLocation.GetLen() );
 
-		FBString computeIntegrateLocation(effectPath, "\\GLSLFX\\Particles_integrate.cs");
+		FBString computeIntegrateLocation(effectPath, "\\GLSL_CS\\Particles_integrate.cs");
 		ParticlesSystem::Shader::SetComputeIntegrateLocation( computeIntegrateLocation, computeIntegrateLocation.GetLen() );
 	}
 

@@ -388,6 +388,144 @@
     <None Include="SuperDynamicLighting_LOG.txt">
       <Filter>MB_Shaders</Filter>
     </None>
+    <None Include="GLSL\blur2.fsh">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\compositeBlend.fsh">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\dynamicMask.fsh">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\simple.vsh">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\drawCubeMap.fsh">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\drawCubeMap.vsh">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\drawLog.fsh">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\drawLog.vsh">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL_CS\blend.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\blur.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\computeDeformation.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\computeNormals.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\copy.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\fillcolor.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterBlur.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterChangeColor.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterColor.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterCrosshatch.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterCrossStitching.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterDecal.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterDOF.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterFilmGrain.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterFog.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterHalfTone.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterLUT.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterPosterization.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterShadow.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterSSAO.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\filterToonLines.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\layerShadow.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\misc_blending.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\misc_depth.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\misc_masking.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\recomputeNormals.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\recomputeNormalsNorm.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\recomputeNormalsZero.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_FX\CompositeMaster.glslfx">
+      <Filter>GLSL_FX</Filter>
+    </None>
+    <None Include="GLSL_FX\ProjectiveMapping.glslfx">
+      <Filter>GLSL_FX</Filter>
+    </None>
+    <None Include="GLSL_FX\shared_common.glslfxh">
+      <Filter>GLSL_FX</Filter>
+    </None>
+    <None Include="GLSL_FX\shared_customcolor.glslfxh">
+      <Filter>GLSL_FX</Filter>
+    </None>
+    <None Include="GLSL_FX\shared_depth.glslfxh">
+      <Filter>GLSL_FX</Filter>
+    </None>
+    <None Include="GLSL_FX\shared_globals.glslfxh">
+      <Filter>GLSL_FX</Filter>
+    </None>
+    <None Include="GLSL_FX\shared_lighting.glslfxh">
+      <Filter>GLSL_FX</Filter>
+    </None>
+    <None Include="GLSL_FX\shared_projectors.glslfxh">
+      <Filter>GLSL_FX</Filter>
+    </None>
+    <None Include="GLSL_FX\shared_texturing.glslfxh">
+      <Filter>GLSL_FX</Filter>
+    </None>
+    <None Include="GLSL_FX\TexturesBrowser.glslfx">
+      <Filter>GLSL_FX</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="CompositerMaster">
@@ -404,6 +542,15 @@
     </Filter>
     <Filter Include="Common">
       <UniqueIdentifier>{082899a8-8472-4c39-a3a6-2ad7d64901ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GLSL">
+      <UniqueIdentifier>{f2cf79f9-ce5a-45ce-b4a6-3aa2877640b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GLSL_CS">
+      <UniqueIdentifier>{de63170a-b388-4fe4-a018-6a27c5ab4c4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GLSL_FX">
+      <UniqueIdentifier>{369e745e-88a8-4000-a59f-dfa0d6ca38ed}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

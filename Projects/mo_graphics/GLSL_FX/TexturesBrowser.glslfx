@@ -1,0 +1,337 @@
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// file: TexturesBrowser.glslfx
+//
+//
+//	Author Sergey Solokhin (Neill3d)
+//
+//	GitHub page - https://github.com/Neill3d/MoPlugs
+//	Licensed under BSD 3-Clause - https://github.com/Neill3d/MoPlugs/blob/master/LICENSE
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+// #extension GL_ARB_separate_shader_objects : enable
+
+//////////////////////////////////////////////////////////
+
+uniform mat4	Proj;
+uniform mat4 	MVP;
+uniform float 	gQuadSize = 32.0;
+uniform vec3	gMouse = {0.0, 0.0, 0.0};
+uniform float	gPan = 0.0;
+uniform float	gHeight = 600.0;
+
+//////////////////////////////////////////////////////////
+
+RasterizationState rasterStateFill
+{
+    LINE_WIDTH = 1;
+    POLYGON_MODE={FRONT_AND_BACK, FILL};
+}
+RasterizationState rasterStateWire
+{
+    LINE_WIDTH = 2;
+    POLYGON_MODE={FRONT_AND_BACK, LINE};
+}
+DepthStencilState dstStateFloor
+{
+    DEPTH_TEST = true;
+    DEPTH_WRITEMASK = true;
+    DEPTH_FUNC = LEQUAL;
+}
+//////////////////////////////////////////////////////////////
+// GLSL Globals : meaning that all the GLSL domains (vertex, fragments etc.) will have a copy
+// of these data
+//
+GLSLShader 
+{
+    #version 420 compatibility
+	//#extension GL_ARB_shader_storage_buffer_object : require
+	#extension GL_NV_shader_buffer_load : enable
+	#extension GL_ARB_bindless_texture : require
+
+	
+	struct Texture
+	{
+		mat4		transform;
+		uvec2		address;
+		float		width;
+		float		height;
+	};
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Functions that we will use to output fragments in various ways
+//
+
+////////////////////////////////////////////////////////////////////
+/// Flat things
+////////////////////////////////////////////////////////////////////
+namespace Flat
+{
+    ////////////////////////////////////////////////////////////////////
+    /// WIRE's VERTEX PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+    GLSLShader VS
+    {
+		// in
+        layout(location=0) in vec4 Position;	
+		// out
+		layout(location=0) flat out int outInstanceID;
+		layout(location=1) out vec2 Size;
+		layout(location=2) flat out int outFlag;
+	
+        out gl_PerVertex {
+            vec4 gl_Position;
+        };
+		
+        void main(void)
+        {
+			float ls = 0.5 * gQuadSize;
+			vec4 point = MVP * vec4(Position.x + ls, Position.y + ls, 0.0, 1.0);
+			vec4 center = MVP * vec4(Position.x, Position.y, 0.0, 1.0);
+			Size = vec2(point.x - center.x, point.y - center.y);
+		
+			gl_Position = center;
+			
+			outInstanceID = int(Position.z);
+			outFlag = int(Position.w);
+        }
+    }
+	
+	GLSLShader VS_Background
+    {
+		// in
+        layout(location=0) in vec4 Position;	// rect 2-corner points inside
+		// out
+		layout(location=0) flat out int outInstanceID;
+		layout(location=1) out vec2 Point2;
+		
+        out gl_PerVertex {
+            vec4 gl_Position;
+        };
+		
+        void main(void)
+        {
+			vec4 point = MVP * vec4(Position.x - gPan, Position.y, 0.0, 1.0);
+			vec4 center = MVP * vec4(Position.z - gPan, Position.w, 0.0, 1.0);
+			
+			gl_Position = point;
+			Point2 = center.xy;
+			
+			outInstanceID = int(mod(float(gl_VertexID), 2.0 ));
+        }
+    }
+	
+	////////////////////////////////////////////////////////////////////
+    /// GEOMETRY PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+	GLSLShader GS
+	{
+		layout(points) in;
+		layout(triangle_strip, max_vertices=4) out; // triangle_strip
+		
+		layout(location=0) flat in int instanceID[];
+		layout(location=1) in vec2 Size[];
+		layout(location=2) flat in int flag[];
+		
+		in gl_PerVertex {
+			vec4 gl_Position;
+			// float gl_PointSize
+		} gl_in[];
+		
+		out gl_PerVertex {
+			vec4 gl_Position;
+		};
+		
+		layout(location=0) out vec2 outTc;
+		layout(location=1) flat out int outID;
+		layout(location=2) flat out int outFlag;
+		
+		void main()
+		{
+			int instanceID = instanceID[0];	// take one vertex for instanceID...
+			
+			vec2 pos2d = gl_in[0].gl_Position.xy;
+			vec2 size2d = Size[0];
+			
+			vec4 mousePos = Proj * vec4(gMouse.x, gMouse.y, 0.0, 1.0);
+			
+			bool UnderCursor = (mousePos.x > (pos2d.x-size2d.x) && mousePos.x < (pos2d.x+size2d.x) && mousePos.y > (pos2d.y-size2d.y)
+				&& mousePos.y < (pos2d.y+size2d.y) );
+			
+			if (UnderCursor)
+			{
+				size2d *= 1.2;
+			}
+			
+			outTc = vec2(0.0, 0.0);
+			outID = instanceID;
+			outFlag = flag[0];
+			gl_Position = vec4(pos2d.x - size2d.x, pos2d.y - size2d.y, 0.0, 1.0);//m4_WorldViewProj * gl_in[0].gl_Position;
+			EmitVertex();
+			
+			outTc = vec2(0.0, 1.0);
+			outID = instanceID;
+			outFlag = flag[0];
+			gl_Position = vec4(pos2d.x - size2d.x, pos2d.y + size2d.y, 0.0, 1.0);//m4_WorldViewProj * gl_in[0].gl_Position;
+			EmitVertex();
+			
+			outTc = vec2(1.0, 0.0);
+			outID = instanceID;
+			outFlag = flag[0];
+			gl_Position = vec4(pos2d.x + size2d.x, pos2d.y - size2d.y, 0.0, 1.0);//m4_WorldViewProj * gl_in[0].gl_Position;
+			EmitVertex();
+			
+			outTc = vec2(1.0, 1.0);
+			outID = instanceID;
+			outFlag = flag[0];
+			gl_Position = vec4(pos2d.x + size2d.x, pos2d.y + size2d.y, 0.0, 1.0);//m4_WorldViewProj * gl_in[0].gl_Position;
+			EmitVertex();
+			
+			EndPrimitive();
+		}
+	}
+	
+	
+	GLSLShader GS_Background
+	{
+		layout(points) in;
+		layout(triangle_strip, max_vertices=4) out; // triangle_strip
+		
+		layout(location=0) flat in int instanceID[];
+		layout(location=1) in vec2 Point2[];
+		
+		in gl_PerVertex {
+			vec4 gl_Position;
+			// float gl_PointSize
+		} gl_in[];
+		
+		out gl_PerVertex {
+			vec4 gl_Position;
+		};
+		
+		layout(location=0) out vec2 outTc;
+		layout(location=1) flat out int outID;
+		
+		void main()
+		{
+			int instanceID = instanceID[0];	// take one vertex for instanceID...
+			
+			vec2 p1 = gl_in[0].gl_Position.xy;
+			vec2 p2 = Point2[0];
+			
+			outTc = vec2(0.0, 0.0);
+			outID = instanceID;
+			gl_Position = vec4(p1.x, p1.y, 0.0, 1.0);//m4_WorldViewProj * gl_in[0].gl_Position;
+			EmitVertex();
+			
+			outTc = vec2(0.0, 1.0);
+			outID = instanceID;
+			gl_Position = vec4(p1.x, p2.y, 0.0, 1.0);//m4_WorldViewProj * gl_in[0].gl_Position;
+			EmitVertex();
+			
+			outTc = vec2(1.0, 0.0);
+			outID = instanceID;
+			gl_Position = vec4(p2.x, p1.y, 0.0, 1.0);//m4_WorldViewProj * gl_in[0].gl_Position;
+			EmitVertex();
+			
+			outTc = vec2(1.0, 1.0);
+			outID = instanceID;
+			gl_Position = vec4(p2.x, p2.y, 0.0, 1.0);//m4_WorldViewProj * gl_in[0].gl_Position;
+			EmitVertex();
+			
+			EndPrimitive();
+		}
+	}
+	
+    ////////////////////////////////////////////////////////////////////
+    /// WIRE's FRAGMENT PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+    GLSLShader FS
+    {
+		uniform	Texture *texAddress;
+	
+		layout(location=0) in vec2 	inTc;
+		layout(location=1) flat in int 	inID;
+        layout(location=2) flat in int  inFlag;
+	
+		layout(location=0) out vec4 color;
+		
+		
+        void main() 
+        {
+			if (inID >= 0)
+			{
+				Texture *lTexture = texAddress + inID;
+				if (lTexture->address.x > 0)
+				{
+					sampler2D smplr = sampler2D(lTexture->address);
+					color = vec4(float(inFlag), 0.0, 0.0, 0.0) + texture( smplr, inTc );
+				}
+				else
+				{
+					color = vec4(1.0, 1.0, 1.0, 1.0);
+				}
+			}
+			else
+				color = vec4(1.0, 1.0, 1.0, 1.0);
+        }
+    }
+	
+	GLSLShader FS_Background
+    {
+		layout(location=0) in vec2 	inTc;
+		layout(location=1) flat in int 	inID;
+		
+		layout(location=0) out vec4 color;
+		
+		
+        void main() 
+        {
+			
+			color = vec4( max( 0.2 + inTc.t * 0.5 - 0.35 * inID, 0.0) );
+			
+        }
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+// Material Technique
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
+Technique Init
+{
+    Pass init
+    {
+        PolygonOffset = {1.0,1.0};
+        DEPTH_TEST = True;
+        DEPTH_FUNC = LEQUAL;
+        DEPTH_MASK = True;
+    }
+}
+
+Technique background
+{
+	Pass p0
+	{
+		VertexProgram = Flat::VS_Background;
+		GeometryProgram = Flat::GS_Background;
+		FragmentProgram = Flat::FS_Background;
+	}
+}
+
+Technique t0
+{
+	Pass p0
+	{
+		VertexProgram = Flat::VS;
+		GeometryProgram = Flat::GS;
+		FragmentProgram = Flat::FS;
+	}
+}

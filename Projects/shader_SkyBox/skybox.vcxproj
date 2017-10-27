@@ -96,10 +96,10 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\_plugins\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\_plugins\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\bin\x64\plugins_2015\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">..\..\_plugins\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\..\obj\$(Configuration)\$(Platform)\plugins\$(ProjectName)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">..\..\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</IgnoreImportLibrary>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">true</IgnoreImportLibrary>

@@ -28,8 +28,8 @@
 
 #include "IO\FileUtils.h"
 
-#include "..\Common_Physics\physics_common.h"
-#include "..\library_NewtonPhysics\newton_PUBLIC.h"
+#include "Common_Physics\physics_common.h"
+#include "library_NewtonPhysics\newton_PUBLIC.h"
 
 #include "algorithm\math3d_mobu.h"
 

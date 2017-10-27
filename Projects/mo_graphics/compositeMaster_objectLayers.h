@@ -28,6 +28,9 @@
 #define COMPOSITESHADOW__CLASSSTR			"ObjectCompositionShadow"
 #define COMPOSITESHADOW__ASSETNAME			"Shadow Layer"
 
+#define COMPOSITESHADOW__LABEL				"3d Shadow"
+#define COMPOSITESHADOW__SHADER				"\\GLSL_CS\\layerShadow.cs"
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
@@ -295,10 +298,10 @@ protected:
 	std::auto_ptr<CProgramUniformsBase>			mProgramShadowUniforms;
 
 	const char *MixedProgramLabel() {
-		return "3d Shadow";
+		return COMPOSITESHADOW__LABEL;
 	}
 	const char *MixedProgramPath() {
-		return "\\GLSL_CS\\layerShadow.cs";
+		return COMPOSITESHADOW__SHADER;
 	}
 
 	CompositeComputeShader::CComputeTextureBuffer<1>		mTextureShadow;

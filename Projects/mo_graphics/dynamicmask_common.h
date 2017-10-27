@@ -14,6 +14,11 @@
 
 #include "dynamicmask_object.h"
 
+#define DYNAMIC_MASK_SHADER_FRAGMENT		"\\GLSL\\dynamicMask.fsh"
+#define DYNAMIC_MASK_SHADER_VERTEX			"\\GLSL\\simple.vsh"
+
+#define DYNAMIC_MASK_BLUR_FRAGMENT			"\\GLSL\\blur2.fsh"
+#define DYNAMIC_MASK_BLUR_VERTEX			"\\GLSL\\simple.vsh"
 
 ///////////////////////////////////////////
 

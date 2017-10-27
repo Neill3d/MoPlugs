@@ -1,0 +1,62 @@
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// file: shared_globals.glslfxh
+//
+//
+//	Author Sergey Solokhin (Neill3d)
+//
+//	GitHub page - https://github.com/Neill3d/MoPlugs
+//	Licensed under BSD 3-Clause - https://github.com/Neill3d/MoPlugs/blob/master/LICENSE
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+//--------------------------------------------------------------------------------------
+// Based on nvFX library
+//--------------------------------------------------------------------------------------
+
+// setup camera and global scene matrices
+ConstantBuffer global transfBlock1
+{
+    uniform mat4 m4_ViewProj;
+    uniform mat4 m4_ViewProjI;
+    uniform mat4 m4_Proj;
+    uniform mat4 m4_View;
+    uniform mat4 m4_ViewIT;
+    uniform vec3 eyePos : EYEPOS;
+    uniform float farPlane;
+}
+
+// setup local object matrix
+ConstantBuffer global transfBlock2
+{
+    uniform mat4 m4_World;
+    uniform mat4 m4_WorldView;
+    uniform mat4 m4_WorldViewProj;
+    uniform mat4 m4_WorldIT;
+}
+
+ConstantBuffer global frustumBlock
+{
+	uniform vec4	frustum_planes[6];
+}
+
+ConstantBuffer global cubeMapBlock
+{
+	uniform mat4	cubeMapProjections[6];
+	uniform mat4	cubeMapWorldToLocal;
+	uniform vec4	cubeMapPosition;
+	uniform vec4	cubeMapMax;
+	uniform vec4	cubeMapMin;
+	uniform float	cubeMapParallaxCorrection;
+	uniform vec3	cubeMapTemp;
+}
+
+ConstantBuffer global lightBlock
+{
+	uniform vec4	globalAmbientLight;
+	uniform	int		numDirLights;
+	uniform int		numPointLights;
+	uniform float	dummyLB1;
+	uniform float	dummyLB2;
+}

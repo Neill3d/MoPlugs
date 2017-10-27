@@ -23,7 +23,8 @@
 #define FILTER3DDOF__CLASSSTR				"ObjectFilter3dDOF"
 #define FILTER3DDOF__ASSETNAME				"3d DOF Filter"
 
-
+#define FILTER3DDOF__LABEL					"3d DOF"
+#define FILTER3DDOF__SHADER					"\\GLSL_CS\\FilterDOF.cs"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -110,10 +111,10 @@ public:
 protected:
 
 	virtual const char *MixedProgramLabel() override {
-		return "3d DOF";
+		return FILTER3DDOF__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterDOF.cs";
+		return FILTER3DDOF__SHADER;
 	}
 	virtual void OnSetProgramDefines( const CCompositionInfo *pInfo, const CProcessingInfo &prInfo, FBString &defineLine ) override
 	{

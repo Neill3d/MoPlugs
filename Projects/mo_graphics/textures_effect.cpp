@@ -42,7 +42,7 @@ ORView3DEffect::ORView3DEffect()
 
 	FBString effectPath, effectFullName;
 	
-	if ( FindEffectLocation(FBString("\\GLSLFX\\", TEXTURES_EFFECT), effectPath, effectFullName) )
+	if ( FindEffectLocation(FBString("\\GLSL_FX\\", TEXTURES_EFFECT), effectPath, effectFullName) )
 	{
 		if (false == loadEffect( effectFullName ) )
 			FBMessageBox( "Textures Browser", "Failed to load textures browser effect", "Ok" );

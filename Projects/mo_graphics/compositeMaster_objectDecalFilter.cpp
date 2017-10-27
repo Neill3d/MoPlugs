@@ -238,7 +238,7 @@ void ObjectFilter3dDecal::CropTexture(const GLuint texId,
 			"layout (local_size_x =32, local_size_y = 32) in;\n" );
 	FBString strDefine( "" );
 
-	const char *programPath = "\\GLSL_CS\\copy.cs";
+	const char *programPath = COPY_COMPUTE_SHADER;
 
 	CompositeComputeShader::CMixedProgram		*mCopyProgram = nullptr;
 	mCopyProgram = CompositeComputeShader::CMixedProgramManager::instance().QueryAProgramMix( "copy", 

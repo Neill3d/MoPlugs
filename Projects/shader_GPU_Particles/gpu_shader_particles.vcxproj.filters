@@ -12,6 +12,12 @@
     <Filter Include="Common">
       <UniqueIdentifier>{44ee9720-528b-4c63-8993-68ae1e963619}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GLSL_CS">
+      <UniqueIdentifier>{f31cc97e-0c5c-4142-a187-742ef35e2bf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GLSL_FX">
+      <UniqueIdentifier>{94abde2c-cfb4-4221-9810-c40f02d63ce0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ParticleSystem.cxx">
@@ -114,5 +120,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.md" />
+    <None Include="GLSL_CS\Particles_integrate.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\Particles_selfcollisions.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\Particles_simulation.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_FX\Particles.glslfx">
+      <Filter>GLSL_FX</Filter>
+    </None>
+    <None Include="GLSL_FX\Particles_generation.glslfxh">
+      <Filter>GLSL_FX</Filter>
+    </None>
   </ItemGroup>
 </Project>

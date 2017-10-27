@@ -15,7 +15,7 @@
 #include <GL\glew.h>
 
 #include "grabber_cubemap.h"
-#include "nv_dds.h"
+#include "nv_dds\nv_dds.h"
 #include "graphics\Framebuffer.h"
 #include "graphics\glslShader.h"
 #include "graphics\CheckGLError_MOBU.h"

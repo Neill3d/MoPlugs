@@ -14,7 +14,7 @@
 
 
 #include "shared_models.h"
-#include "..\Common_Physics\physics_common.h"
+#include "Common_Physics\physics_common.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
 // GPUCacheGeometry

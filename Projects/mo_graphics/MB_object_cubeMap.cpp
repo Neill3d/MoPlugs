@@ -14,7 +14,7 @@
 #include "algorithm\nv_math.h"
 #include "graphics\checkglerror_MOBU.h"
 #include <Windows.h>
-#include "nv_dds.h"
+#include "nv_dds\nv_dds.h"
 
 #include <Windows.h>
 #include <CommDlg.h>

@@ -170,10 +170,10 @@ void CGPUFBScene::LoadShader()
 
 		Graphics::ShaderComposite	*pEffects = nullptr;
 
-		if ( FindEffectLocation( FBString("\\GLSLFX\\", COMPOSITE_EFFECT), effectPath, effectFullName ) )
+		if ( FindEffectLocation( FBString("\\GLSL_FX\\", COMPOSITE_EFFECT), effectPath, effectFullName ) )
 		{
 			pEffects =  new Graphics::ShaderComposite();
-			if( !pEffects->Initialize( FBString(effectPath, "\\GLSLFX\\"), COMPOSITE_EFFECT, 512, 512, 1.0) )
+			if( !pEffects->Initialize( FBString(effectPath, "\\GLSL_FX\\"), COMPOSITE_EFFECT, 512, 512, 1.0) )
 			{
 				mNeedCompositeShader = false;
 				pEffects = nullptr;
@@ -209,10 +209,10 @@ void CGPUFBScene::LoadShader()
 
 		Graphics::ShaderEffect	*pEffects = nullptr;
 
-		if ( FindEffectLocation( FBString("\\GLSLFX\\", UBERSHADER_EFFECT), effectPath, effectFullName ) )
+		if ( FindEffectLocation( FBString("\\GLSL_FX\\", UBERSHADER_EFFECT), effectPath, effectFullName ) )
 		{
 			pEffects =  new Graphics::ShaderEffect();
-			if( !pEffects->Initialize( FBString(effectPath, "\\GLSLFX\\"), UBERSHADER_EFFECT, 512, 512, 1.0) )
+			if( !pEffects->Initialize( FBString(effectPath, "\\GLSL_FX\\"), UBERSHADER_EFFECT, 512, 512, 1.0) )
 			{
 				mNeedUberShader = false;
 				pEffects = nullptr;

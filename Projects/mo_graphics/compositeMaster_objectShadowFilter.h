@@ -23,6 +23,9 @@
 #define FILTER3DSHADOW__CLASSSTR				"ObjectFilter3dShadow"
 #define FILTER3DSHADOW__ASSETNAME				"3d Shadow Filter"
 
+#define FILTER3DSHADOW__LABEL					"3d Shadow"
+#define FILTER3DSHADOW__SHADERPATH				"\\GLSL_CS\\FilterShadow.cs"
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 3D SHADOW - post precessing shadow mapping
 
@@ -72,10 +75,10 @@ public:
 protected:
 
 	virtual const char *MixedProgramLabel() override {
-		return "3d Shadow";
+		return FILTER3DSHADOW__LABEL;
 	}
 	virtual const char *MixedProgramPath() override {
-		return "\\GLSL_CS\\FilterShadow.cs";
+		return FILTER3DSHADOW__SHADERPATH;
 	}
 	virtual void OnSetProgramDefines( const CCompositionInfo *pInfo, const CProcessingInfo &prInfo, FBString &defineLine ) override
 	{

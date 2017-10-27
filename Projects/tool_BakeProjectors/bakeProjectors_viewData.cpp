@@ -14,7 +14,7 @@
 
 #include "bakeProjectors_viewData.h"
 
-#define UBERSHADER_PATH				"D:\\Work\\MOPLUGS\\_Plugins\\GLSLFX\\"
+#define UBERSHADER_PATH				"\\GLSL_FX\\"
 #define UBERSHADER_EFFECT			"ProjectiveBaking.glslfx"
 
 #include "StringUtils.h"
@@ -138,10 +138,10 @@ void ViewBakeProjectorsData::RenderToFramebuffers(bool &grabImage, FBString &gra
 			mUberShader->SetTechnique( Graphics::eEffectTechniqueShading );
 
 			const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
-			mLocTexture = loc->allTheTextures;
-			mLocMaterial = loc->allTheMaterials;
-			mLocShader = loc->allTheShaders;
-			mLocProjectors = loc->allTheProjectors;
+			mLocTexture = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheTextures); // allTheTextures;
+			mLocMaterial = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheMaterials); // allTheMaterials;
+			mLocShader = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheShaders); // allTheShaders;
+			mLocProjectors = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheProjectors); // allTheProjectors;
 
 			CHECK_GL_ERROR();
 		}
@@ -291,7 +291,7 @@ void ViewBakeProjectorsData::RenderToFramebuffers(bool &grabImage, FBString &gra
 		if (hasProjectors)
 		{
 			mUberShader->UpdateNumberOfProjectors( mProjectors.GetNumberOfProjectors() );
-			mProjectors.Bind(loc->fragment, mLocProjectors, 0);
+			mProjectors.Bind(loc->GetFragmentId(), mLocProjectors, 0);
 		}
 		else
 		{
@@ -479,8 +479,8 @@ void ViewBakeProjectorsData::RenderModel(FBModel *pModel)
 		FBMaterial *pMaterial = pData->GetSubRegionMaterial(i);
 		UploadMaterial(pMaterial);
 
-		mBufferMaterial.BindAsUniform( loc->fragment, mLocMaterial, 0 );
-		mBufferTexture.BindAsUniform( loc->fragment, mLocTexture, 0 );
+		mBufferMaterial.BindAsUniform( loc->GetFragmentId(), mLocMaterial, 0 );
+		mBufferTexture.BindAsUniform( loc->GetFragmentId(), mLocTexture, 0 );
 
 		//
 		pData->DrawSubRegion(i);

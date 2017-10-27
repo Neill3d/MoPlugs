@@ -47,6 +47,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ortexture_advanceBlend", "t
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "library_NewtonWrapper", "..\..\MoPlugs_Framework\projects\NewtonPhysicsLibrary.vcxproj", "{341721E7-6BFE-4EF0-AD99-CBCC374E9AE3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tool_bakeProjectors", "tool_BakeProjectors\bakeProjectors.vcxproj", "{915633C2-9C23-4130-8D20-4DBC17B0F975}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug 2013|Win32 = Debug 2013|Win32
@@ -851,6 +853,42 @@ Global
 		{341721E7-6BFE-4EF0-AD99-CBCC374E9AE3}.RelWithDebInfo|Win32.ActiveCfg = Release|x64
 		{341721E7-6BFE-4EF0-AD99-CBCC374E9AE3}.RelWithDebInfo|x64.ActiveCfg = Release|x64
 		{341721E7-6BFE-4EF0-AD99-CBCC374E9AE3}.RelWithDebInfo|x64.Build.0 = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Debug 2013|Win32.ActiveCfg = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Debug 2013|x64.ActiveCfg = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Debug 2013|x64.Build.0 = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Debug 2015|Win32.ActiveCfg = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Debug 2015|x64.ActiveCfg = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Debug 2015|x64.Build.0 = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Debug_md|Win32.ActiveCfg = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Debug_md|x64.ActiveCfg = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Debug_md|x64.Build.0 = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Debug|Win32.ActiveCfg = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Debug|x64.ActiveCfg = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Debug|x64.Build.0 = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.debugDll|Win32.ActiveCfg = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.debugDll|x64.ActiveCfg = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.debugDll|x64.Build.0 = Debug|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.MinSizeRel|Win32.ActiveCfg = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.MinSizeRel|x64.ActiveCfg = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.MinSizeRel|x64.Build.0 = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Release 2015|Win32.ActiveCfg = Release 2015|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Release 2015|x64.ActiveCfg = Release 2015|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Release 2015|x64.Build.0 = Release 2015|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Release 2017|Win32.ActiveCfg = Release 2015|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Release 2017|x64.ActiveCfg = Release 2015|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Release 2017|x64.Build.0 = Release 2015|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Release_md|Win32.ActiveCfg = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Release_md|x64.ActiveCfg = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Release_md|x64.Build.0 = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Release|Win32.ActiveCfg = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Release|x64.ActiveCfg = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.Release|x64.Build.0 = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.releaseDll|Win32.ActiveCfg = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.releaseDll|x64.ActiveCfg = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.releaseDll|x64.Build.0 = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.RelWithDebInfo|Win32.ActiveCfg = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.RelWithDebInfo|x64.ActiveCfg = Release|x64
+		{915633C2-9C23-4130-8D20-4DBC17B0F975}.RelWithDebInfo|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

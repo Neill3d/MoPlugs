@@ -14,9 +14,9 @@
 #include "Shader.h"
 #include <GL\glew.h>
 #include "IO\FileUtils.h"
-#include "nv_dds.h"
+#include "nv_dds\nv_dds.h"
 
-#define SKYBOX_EFFECT				"\\GLSLFX\\SkyBox.glslfx"
+#define SKYBOX_EFFECT				"\\GLSL_FX\\SkyBox.glslfx"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 //

@@ -1,0 +1,533 @@
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+// Projective Mapping FX Shader
+//
+// Projective Mapping Shader plugin for the Autodesk MotionBuilder
+//
+// Author Sergey Solokhin (Neill3d) 2014. Based on nvFX library
+//
+//	GitHub page - https://github.com/Neill3d/MoPlugs
+//	Licensed under BSD 3-Clause - https://github.com/Neill3d/MoPlugs/blob/master/LICENSE
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+#extension GL_ARB_separate_shader_objects : enable
+
+//////////////////////////////////////////////////////////
+
+#include "shared_globals.glslfxh"
+
+uniform float 	Fcoef;	// Fcoef = 2.0 / log2(farplane + 1.0)
+uniform float	AlphaPass = 0.0f;
+uniform float	normal_length = 10.0f;
+uniform int 	numProjectors = 0;
+uniform float	depthDisplacement = 0.0f;
+
+// its very important for clustering lights
+uniform int		SCREEN_WIDTH;
+uniform int		SCREEN_HEIGHT;
+
+// custom projectors bake unifroms
+
+uniform float	saveOnlyProjectors = 0.0f;
+
+//////////////////////////////////////////////////////////
+
+GLSLShader 
+{
+    #version 430 compatibility
+	#extension GL_NV_shader_buffer_load : enable
+	#extension GL_NV_shader_atomic_float : enable
+	#extension GL_ARB_shader_storage_buffer_object : require
+	#extension GL_ARB_bindless_texture : require
+	#extension GL_ARB_shader_draw_parameters : require
+}
+
+#include "shared_projectors.glslfxh"
+#include "shared_customcolor.glslfxh"
+
+
+//////////////////////////////////////////////////////////////
+// GLSL Globals : meaning that all the GLSL domains (vertex, fragments etc.) will have a copy
+// of these data
+//
+GLSLShader 
+{
+	//! Note: all structures are aligned to 16-bit
+	
+	struct TTexture
+	{
+		mat4		transform;
+		uvec2		address;
+		float		width;
+		float		height;
+		
+		// 80 bytes in total
+	};
+	
+	struct TMaterial
+	{
+		// textures for material channels
+		int			diffuse;
+		int			specular;
+		int			emissive;
+		int			transparency;
+		int			normalmap;
+		int			reflect;
+		
+		float		specExp;
+		
+		float		useDiffuse;
+		float		useSpecular;
+		float		useEmissive;
+		float		useTransparency;
+		float		useNormalmap;
+		float		useReflect;
+		
+		float		dummy1;
+		float 		dummy2;
+		float 		dummy3;
+		
+		//
+		/// Current material
+		//
+		vec4		emissiveColor;
+		vec4     	diffuseColor;
+		vec4     	ambientColor;
+		vec4		reflectColor;
+		vec4     	transparencyColor;
+		vec4     	specularColor;
+		
+		// 160 in total
+	};
+	
+	struct TShader
+	{
+		int			shadingType;
+		int			shaderType;
+		int			shader1;
+		int			shader2;
+		
+		int 		shader3;
+		int			shader4;
+		int			shader5;
+		float		transparency;
+	
+		//
+		/// shader parameters
+		//
+		float		toonEnabled;
+		float		toonSteps;
+		float		toonDistribution;
+		float		toonShadowPosition;
+		
+		vec4		customColor;
+		
+		float		contrast;
+		float		saturation;
+		float		brightness;
+		float		gamma;
+		
+		float		depthDisplacement;
+		float		alphaFromColor;
+		float		dummy2;
+		float		applyColorCorrection;
+		
+		//
+		vec4		mask;
+		vec4		rimOptions;	// x - useRim, y-rimPower, z-useRimSampler
+		vec4		rimColor;	// w - rim blend mode
+		
+		// 16
+		vec4		shadow; // rgb - Color;	w-intensity
+		// 16
+		
+		// total - 96 bytes
+	};
+	
+	struct TModel
+	{
+		mat4		transform;		// local mesh matrix
+		mat4		normalMatrix;	// transpose(inverse(WorldViewIT))
+		
+		// total 128 bytes
+	};
+	
+	struct TMesh
+	{
+		int				material;		// pointer to the mesh material
+		int				lightmap;		// pointer to the lightmap texture (if needed)
+		
+		int				model;			// index to the model struct	
+		int				shader;			// index to the shader struct
+		// 16
+		
+		vec4		color;			// flat color id (buffer id rendering)
+		// 16
+		
+		// total - 32 bytes
+	};
+	
+	// prototype
+	void getDiffuseTexture(in TTexture *tex, in vec4 coords, out vec4 texColor);
+	void getTransparencyTexture(in TTexture *tex, in vec4 coords, out float texColor);
+	void getSpecularityTexture(in TTexture *tex, in vec4 coords, out float texColor);
+	void getReflectivityTexture(in TTexture *tex, in vec4 coords, out vec3 texColor);
+}
+
+////////////////////////////////////////////////////////////////////
+/// Main things
+////////////////////////////////////////////////////////////////////
+namespace Main
+{
+
+	GLSLShader Texture_NonBindless
+	{
+		uniform sampler2D	diffuseSampler;
+		uniform sampler2D	transparencySampler;
+		uniform sampler2D	specularitySampler;
+		uniform sampler2D	reflectivitySampler;
+		//uniform samplerCube	cubeMapSampler;
+	
+		void getDiffuseTexture(in TTexture *tex, in vec4 coords, out vec4 texColor)
+		{
+			vec4 tc = tex->transform * coords;
+			texColor = texture( diffuseSampler, tc.st );
+			// texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+		void getTransparencyTexture(in TTexture *tex, in vec4 coords, out float texColor)
+		{
+			vec4 tc = tex->transform * coords;
+			texColor = texture( transparencySampler, tc.st ).a;
+			// texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+		void getSpecularityTexture(in TTexture *tex, in vec4 coords, out float texColor)
+		{
+			vec4 tc = tex->transform * coords;
+			texColor = texture( specularitySampler, tc.st ).r;
+			// texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+		void getReflectivityTexture(in TTexture *tex, in vec4 coords, out vec3 texColor)
+		{
+			vec4 tc = tex->transform * coords;
+			texColor = texture( reflectivitySampler, tc.st ).rgb;
+			//texColor = texture( cubeMapSampler, coords.xyz ).rgb;
+			// texColor = pow(texColor.rgb, vec3(2.2) );
+		}
+	}
+	
+    ////////////////////////////////////////////////////////////////////
+    /// MAIN's VERTEX PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+    GLSLShader VS
+    {
+        layout(location=0) in vec4 inPosition;
+		layout(location=1) in vec2 inTexCoords;
+		layout(location=2) in vec4 inNormal;
+		
+		layout(location=0) smooth out vec3 outNw;	// 12 bytes
+		layout(location=1) smooth out vec2 outTC;	// 8 bytes
+		layout(location=2) smooth out vec3 outPw;	// 12 bytes
+		layout(location=3) smooth out vec3 outWV;	// 12 bytes
+		
+        out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+	
+        void main(void)
+        {
+			// Surface normal in eye coords
+			mat4 normalMatrix = m4_WorldIT; //	transpose(inverse(matrix));
+			vec4 N = normalMatrix * vec4(inNormal.xyz, 1.0);
+		
+			vec4 Po    = m4_World * vec4(inPosition.xyz, 1.0);
+			vec4 vPosition4 = m4_View * Po;
+			vec3 vPosition3 = vPosition4.xyz; // / vPosition4.w;
+		
+			gl_Position = m4_ViewProjI * vec4(inTexCoords.x, inTexCoords.y, 0.0, 1.0);
+			
+			outNw           = N.xyz;
+			outTC           = inTexCoords;
+			outPw           = vPosition3;
+			outWV           =  /*eyePos -*/ Po.xyz; //(Po.xyz - eyePos);
+        }
+    }
+	
+	
+	
+    ////////////////////////////////////////////////////////////////////
+    /// MAIN's FRAGMENT PROGRAM ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+    GLSLShader FS
+    {
+		#define	PI	3.14159265358979323846264
+	
+		layout(location=0) smooth in vec3 inNw;
+		layout(location=1) smooth in vec2 inTC;		// input 8 bytes
+		layout(location=2) smooth in vec3 inPw;
+		layout(location=3) smooth in vec3 inWV;
+		
+        out vec4 	color;
+		
+		uniform float				aabb=1.0;
+		uniform TTexture			*allTheTextures;
+		uniform	TMaterial			*allTheMaterials;
+		//uniform TShader 			*allTheShaders;		// pointer to the array with shaders
+		uniform ProjectorDATA		*allTheProjectors;
+	
+		/////////////////////////////////////////////////////////////////////
+		
+		uniform sampler2D 	projectorsSampler[MAX_SHADER_PROJECTORS];
+		uniform	sampler2D	projectorMaskA;
+		uniform	sampler2D	projectorMaskB;
+		uniform sampler2D	backgroundSampler;	// for matte shading
+		////////////////////////////////////////////////////////////////////
+		
+		//
+		// Subroutine Prototype
+		//
+		subroutine vec3 BlendTYPE(vec3 base, vec3 blend);
+		
+		//
+		// 25 modes in total
+		//
+		layout(index=0) subroutine(BlendTYPE) vec3 blendNormal(vec3 base, vec3 blend) {
+			return blend;
+		}
+		
+		layout(index=1) subroutine(BlendTYPE) vec3 blendLighten(vec3 base, vec3 blend) {
+			return BlendLighten(base, blend);
+		}		
+		layout(index=2) subroutine(BlendTYPE) vec3 blendDarken(vec3 base, vec3 blend) {
+			return BlendDarken(base, blend);
+		}
+		layout(index=3) subroutine(BlendTYPE) vec3 blendMultiply(vec3 base, vec3 blend) {
+			return BlendMultiply(base, blend);
+		}
+		layout(index=4) subroutine(BlendTYPE) vec3 blendAverage(vec3 base, vec3 blend) {
+			return BlendAverage(base, blend);
+		}
+		layout(index=5) subroutine(BlendTYPE) vec3 blendAdd(vec3 base, vec3 blend) {
+			return BlendAdd(base, blend);
+		}
+		layout(index=6) subroutine(BlendTYPE) vec3 blendSubstract(vec3 base, vec3 blend) {
+			return BlendSubstract(base, blend);
+		}
+		layout(index=7) subroutine(BlendTYPE) vec3 blendDifference(vec3 base, vec3 blend) {
+			return BlendDifference(base, blend);
+		}
+		layout(index=8) subroutine(BlendTYPE) vec3 blendNegation(vec3 base, vec3 blend) {
+			return BlendNegation(base, blend);
+		}
+		layout(index=9) subroutine(BlendTYPE) vec3 blendExclusion(vec3 base, vec3 blend) {
+			return BlendExclusion(base, blend);
+		}
+		layout(index=10) subroutine(BlendTYPE) vec3 blendScreen(vec3 base, vec3 blend) {
+			return BlendScreen(base, blend);
+		}
+		layout(index=11) subroutine(BlendTYPE) vec3 blendOverlay(vec3 base, vec3 blend) {
+			return BlendOverlay(base, blend);
+		}
+		layout(index=12) subroutine(BlendTYPE) vec3 blendSoftLight(vec3 base, vec3 blend) {
+			return BlendSoftLight(base, blend);
+		}
+		layout(index=13) subroutine(BlendTYPE) vec3 blendHardLight(vec3 base, vec3 blend) {
+			return BlendHardLight(base, blend);
+		}
+		layout(index=14) subroutine(BlendTYPE) vec3 blendColorDodge(vec3 base, vec3 blend) {
+			return BlendColorDodge(base, blend);
+		}
+		layout(index=15) subroutine(BlendTYPE) vec3 blendColorBurn(vec3 base, vec3 blend) {
+			return BlendColorBurn(base, blend);
+		}
+		layout(index=16) subroutine(BlendTYPE) vec3 blendLinearDodge(vec3 base, vec3 blend) {
+			return BlendLinearDodge(base, blend);
+		}
+		layout(index=17) subroutine(BlendTYPE) vec3 blendLinearBurn(vec3 base, vec3 blend) {
+			return BlendLinearBurn(base, blend);
+		}
+		layout(index=18) subroutine(BlendTYPE) vec3 blendLinearLight(vec3 base, vec3 blend) {
+			return BlendLinearLight(base, blend);
+		}
+		layout(index=19) subroutine(BlendTYPE) vec3 blendVividLight(vec3 base, vec3 blend) {
+			return BlendVividLight(base, blend);
+		}
+		layout(index=20) subroutine(BlendTYPE) vec3 blendPinLight(vec3 base, vec3 blend) {
+			return BlendPinLight(base, blend);
+		}
+		layout(index=21) subroutine(BlendTYPE) vec3 blendHardMix(vec3 base, vec3 blend) {
+			return BlendHardMix(base, blend);
+		}
+		layout(index=22) subroutine(BlendTYPE) vec3 blendReflect(vec3 base, vec3 blend) {
+			return BlendReflect(base, blend);
+		}
+		layout(index=23) subroutine(BlendTYPE) vec3 blendGlow(vec3 base, vec3 blend) {
+			return BlendGlow(base, blend);
+		}
+		layout(index=24) subroutine(BlendTYPE) vec3 blendPhoenix(vec3 base, vec3 blend) {
+			return BlendPhoenix(base, blend);
+		}
+		
+		//
+		subroutine uniform BlendTYPE BlendWithProjector[25];	// blending with each projector
+		
+		//////////////////////////////////////////////////////////////////////
+		
+		void ApplyProjectors(inout vec4 difColor)
+		{
+			vec4 projColor;
+			vec4 projCoords;
+			float projAlpha;
+			
+			ProjectorDATA *pProj = allTheProjectors;
+			
+			for (int i=0; i<numProjectors; ++i)
+			{
+				pProj = allTheProjectors + i;
+			
+				projCoords = pProj->matrix * vec4(inWV.xyz, 1.0);
+				if (projCoords.z < 0.0) continue;
+		
+				projCoords.xy /= projCoords.q;		
+				projColor = texture(projectorsSampler[i], projCoords.xy);
+				
+				ComputeProjectorMask( pProj->maskLayer, pProj->maskChannel, inTC, projCoords, projColor );	
+				projAlpha = pProj->blendOpacity * projColor.w;
+				
+				projColor.rgb = BlendWithProjector[int(pProj->blendMode)](difColor.rgb, projColor.rgb);
+				
+				difColor.rgb = mix( difColor.rgb, projColor.rgb, projAlpha );
+				difColor.a = mix( difColor.a, projAlpha, projAlpha );
+			}
+		}
+		
+		
+		
+		//////////////////////////////////////////////////////////////////////
+	
+		vec4 FlatShade()
+		{
+			TMaterial *theMaterial = allTheMaterials;
+			//TShader *theShader = allTheShaders;
+			TTexture *theTexture = allTheTextures;
+			
+			vec3 Nn = normalize(inNw);
+			vec3 Vd = eyePos - inWV;
+			vec3 Vn = normalize(Vd);
+			
+			vec4 difColor = vec4(theMaterial->diffuseColor.rgb, 1.0);
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			if (saveOnlyProjectors > 0.0f)
+			{
+				difColor = vec4(1.0f, 1.0f, 1.0f, 0.0f);
+			}
+			else
+			{
+				if (theMaterial->useDiffuse > 0.0f)
+				{
+					getDiffuseTexture( theTexture, coords, difColor );
+				}
+				if (theMaterial->useTransparency > 0.0f)
+				{
+					getTransparencyTexture( theTexture, coords, difColor.a );
+				}
+			}
+			
+			// material diffuse factor and global shader transparency
+			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			difFactor *= aabb;
+			difFactor = clamp(difFactor, 1.0, 1.0);
+			
+			//
+			// DONE: apply projector textures
+			ApplyProjectors(difColor);
+			
+			//vec3 ambientColor = theMaterial->ambientColor.rgb * globalAmbientLight.rgb * theMaterial->ambientColor.w;
+			//difColor *= vec4(ambientColor + vec3(difFactor), theShader->transparency);
+			
+			return difColor * difFactor;
+		}
+		
+		////////////////////////////////////////////////////////////////////
+		
+		
+        void main() 
+        {
+			//
+			// calculate shading
+			vec4 shadeColor = FlatShade();		// theShader->shadingType
+			
+			color = shadeColor;
+        }
+    }
+}
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+// Material Technique
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
+Technique Init
+{
+    Pass init
+    {
+        PolygonOffset = {1.0,1.0};
+        DEPTH_TEST = True;
+        DEPTH_FUNC = LEQUAL;
+        DEPTH_MASK = True;
+    }
+}
+
+Technique WallMaterial
+{
+	Pass pEarlyZNoTextures
+	{
+        PolygonOffset = {1.0,1.0};
+        DEPTH_TEST = True;
+        DEPTH_FUNC = LEQUAL;
+        DEPTH_MASK = True;
+	}
+	
+	Pass pBindedEarlyZ
+	{
+        PolygonOffset = {1.0,1.0};
+        DEPTH_TEST = True;
+        DEPTH_FUNC = LEQUAL;
+        DEPTH_MASK = True;
+	}
+	Pass pBindlessEarlyZ
+	{
+        PolygonOffset = {1.0,1.0};
+        DEPTH_TEST = True;
+        DEPTH_FUNC = LEQUAL;
+        DEPTH_MASK = True;
+	}
+	
+    Pass pNoTextures
+    {
+        PolygonOffset = {1.0,1.0};
+        DEPTH_TEST = True;
+        DEPTH_FUNC = LEQUAL;
+        DEPTH_MASK = True;
+    }
+	
+    Pass pBindedTextures
+    {
+		//RasterizationState = rasterStateFill;
+		
+        VertexProgram = { Main::VS };
+		FragmentProgram = { Main::Texture_NonBindless, Main::FS, Projectors::FS };
+    }
+	
+	Pass pBindlessTextures
+	{
+        PolygonOffset = {1.0,1.0};
+        DEPTH_TEST = True;
+        DEPTH_FUNC = LEQUAL;
+        DEPTH_MASK = True;
+	}
+}

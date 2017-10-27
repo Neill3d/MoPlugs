@@ -764,7 +764,7 @@ void ToolBakeProjectors::EventButtonBakeRangeClick( HISender pSender, HKEvent pE
 
 void ToolBakeProjectors::EventButtonAboutClick( HISender pSender, HKEvent pEvent )
 {
-	FBMessageBox( "Bake Projectors Tool", "Created by Sergey Solohin (Neill3d) 2015\n"
+	FBMessageBox( "Bake Projectors Tool", "Created by Sergey Solokhin (Neill3d) 2015\n"
 											" MoPLUGS Project\n",
 											"Ok" );
 }

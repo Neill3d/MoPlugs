@@ -15,6 +15,9 @@
     <Filter Include="jpeg">
       <UniqueIdentifier>{3d7c4aea-32cf-4ad6-87e4-b1fc436b8ac6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GLSL_FX">
+      <UniqueIdentifier>{ea8fc2fc-4893-4867-9d5d-2b02f72917f4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bakeProjectors.cxx">
@@ -29,11 +32,11 @@
     <ClCompile Include="..\Common_Projectors\bakeProjectors_projectors.cpp">
       <Filter>Common_Projectors</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\jpeg-compressor\jpge.cpp">
-      <Filter>jpeg</Filter>
-    </ClCompile>
     <ClCompile Include="bakeProjectors_viewData.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jpge.cpp">
+      <Filter>jpeg</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -46,14 +49,17 @@
     <ClInclude Include="..\Common_Projectors\bakeProjectors_projectors.h">
       <Filter>Common_Projectors</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\jpeg-compressor\jpge.h">
-      <Filter>jpeg</Filter>
-    </ClInclude>
     <ClInclude Include="bakeProjectors_viewData.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jpge.h">
+      <Filter>jpeg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="BakeProjectors_README.txt" />
+    <None Include="GLSL_FX\ProjectiveBaking.glslfx">
+      <Filter>GLSL_FX</Filter>
+    </None>
   </ItemGroup>
 </Project>

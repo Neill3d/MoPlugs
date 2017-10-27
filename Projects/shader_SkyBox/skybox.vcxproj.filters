@@ -9,6 +9,12 @@
       <UniqueIdentifier>{e81e272a-5386-4c10-9593-0aeaea1d8db6}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
+    <Filter Include="GLSL">
+      <UniqueIdentifier>{892ed2d0-6e26-46d3-b316-9aa04cc9f032}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GLSL_FX">
+      <UniqueIdentifier>{a81dd2b9-399f-44e8-8e20-fc565a044ec8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SkyBox_shader.cxx">
@@ -40,9 +46,6 @@
     <ClInclude Include="Panorama.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SOIL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Panorama_shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -54,11 +57,18 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="skybox.rc">
-      <Filter>Source Files</Filter>
-    </ResourceCompile>
+    <None Include="SkyBox_README.txt" />
+    <None Include="GLSL\skydome.fsh">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\skydome.vsh">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL_FX\SkyBox.glslfx">
+      <Filter>GLSL_FX</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="SkyBox_README.txt" />
+    <ResourceCompile Include="skybox.rc" />
   </ItemGroup>
 </Project>

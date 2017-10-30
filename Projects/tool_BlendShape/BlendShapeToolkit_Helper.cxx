@@ -19,7 +19,7 @@
 #include "ClusterAdvance.h"
 #include "GeometryUtils.h"
 
-#include "tinyxml.h"
+#include "IO\tinyxml.h"
 
 BlendShapeDeformerConstraint	*gTempConstraint = nullptr;		// this deform constraint is used for shaping
 

@@ -23,7 +23,7 @@
 #include "ClusterAdvance.h"
 #include "GeometryUtils.h"
 
-#include "tinyxml.h"
+#include "IO\tinyxml.h"
 
 #include "resource.h"
 #include "ResourceUtils.h"

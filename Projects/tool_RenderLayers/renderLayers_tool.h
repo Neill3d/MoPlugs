@@ -16,7 +16,7 @@
 //--- SDK include
 #include <fbsdk/fbsdk.h>
 #include "renderCommon.h"
-#include "renderadvance_view.h"
+//#include "renderadvance_view.h"
 #include "persistent_data.h"
 
 //--- Registration define

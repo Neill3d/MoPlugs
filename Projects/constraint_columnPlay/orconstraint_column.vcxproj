@@ -137,11 +137,11 @@
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\MotionCodeLibrary;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include\fbsdk;..\..\glew-1.11.0\include;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">..\..\MotionCodeLibrary\Include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include\fbsdk;..\..\..\MoPlugs_Framework\code;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">..\..\MotionCodeLibrary\Include;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include\fbsdk;..\..\..\MoPlugs_Framework\code;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\MotionCodeLibrary\Include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include\fbsdk;..\..\..\MoPlugs_Framework\code;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\MotionCodeLibrary\Include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include\fbsdk;$(MOPLUGS_FRAMEWORK)\code;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);..\..\glew-1.11.0\lib\Release\x64\;$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);..\..\..\MoPlugs_Framework\lib;$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">$(ADSK_MOBU_2017_64)\OpenRealitySDK\lib\$(Platform);..\..\..\MoPlugs_Framework\lib;$(LibraryPath)</LibraryPath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">$(ADSK_MOBU_2015_64)\OpenRealitySDK\lib\$(Platform);..\..\..\MoPlugs_Framework\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">$(ADSK_MOBU_2015_64)\OpenRealitySDK\lib\$(Platform);$(MOPLUGS_FRAMEWORK)\lib;$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\lib\$(Platform);..\..\glew-1.11.0\lib\Release\x64\;$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug 2017|x64'">$(ADSK_MOBU_2017_64)\OpenRealitySDK\lib\$(Platform);..\..\..\MoPlugs_Framework\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>

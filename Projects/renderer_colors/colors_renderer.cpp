@@ -18,7 +18,7 @@
 #endif
 
 // Class declaration
-#include "orcustomrenderer_renderer.h"
+#include "colors_renderer.h"
 #include <fbsdk/fbsystem.h>
 #include <fbsdk/fbscene.h>
 #include <fbsdk/fbrenderer.h>

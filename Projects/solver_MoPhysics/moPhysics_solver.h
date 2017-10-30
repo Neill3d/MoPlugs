@@ -17,7 +17,7 @@
 #include <fbsdk/fbsdk.h>
 
 //--- Class declaration
-#include "..\Common_Physics\physics_common.h"
+#include "Common_Physics\physics_common.h"
 #include "queryFBGeometry.h"
 #include <vector>
 

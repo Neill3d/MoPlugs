@@ -22,7 +22,7 @@
 #include <stack>
 #include <map>
 
-#include "WGLFONT.h"
+#include "graphics\WGLFONT.h"
 
 #include <Delegate.h>
 

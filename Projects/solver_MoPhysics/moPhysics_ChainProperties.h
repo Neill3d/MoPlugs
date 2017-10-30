@@ -16,7 +16,7 @@
 //--- SDK include
 #include <fbsdk/fbsdk.h>
 
-#include "..\Common_Physics\physics_common.h"
+#include "Common_Physics\physics_common.h"
 #include "queryFBGeometry.h"
 
 #define	MOCHAINPHYSPROPERTIES__CLASSNAME		MOChainPhysProperties

@@ -12,7 +12,7 @@
 
 
 #include "moPhysics_solver.h"
-#include "..\library_NewtonPhysics\newton_PUBLIC.h"
+#include "library_NewtonPhysics\newton_PUBLIC.h"
 #include "queryFBGeometry.h"
 
 #include "moPhysics_CarProperties.h"

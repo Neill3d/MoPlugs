@@ -20,7 +20,7 @@ For scripts there is also a way to define startup paths with MOTIONBUILDER_PYTHO
 
 I have a very useful application to configurate motionbuilder startup paths for plugins and scripts - [ConfigApp](ConfigApp.md)
 
-## Hardware requirenments ##
+## Hardware requirements ##
 
  I'm using many nvidia extensions, so to make the morenderer work properly, you should have nVidia card (with gpu chipset Kepler or later)
 

@@ -196,6 +196,9 @@
     <ClCompile Include="..\Common_graphics_exchange\mographics_common.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="gpucache_saver_mobu.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h" />
@@ -322,9 +325,6 @@
     <ClInclude Include="..\Common_Projectors\bakeProjectors_projectors.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="gpucache_saver_mobu.h">
-      <Filter>MB_Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="MB_renderer.h">
       <Filter>MB_Shaders</Filter>
     </ClInclude>
@@ -372,6 +372,9 @@
     </ClInclude>
     <ClInclude Include="..\Common_graphics_exchange\mographics_common.h">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="gpucache_saver_mobu.h">
+      <Filter>scenegraph_shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

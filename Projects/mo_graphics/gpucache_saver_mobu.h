@@ -14,513 +14,370 @@
 
 //--- SDK include
 #include <fbsdk/fbsdk.h>
+#include "gpucache_saver.h"
+#include "ContentInspector.h"
 
-const char *FBVideoFormatToChar( FBVideoFormat format )
-{
-	switch(format)
-	{
-	case kFBVideoFormat_Any: return "unsupported";
-	case kFBVideoFormat_Other: return "unsupported";
-	case kFBVideoFormat_RGBA_32: return "RGBA";
-	case kFBVideoFormat_RGB_24: return "RGB";
-	case kFBVideoFormat_BGRA_32: return "BGRA";
-	case kFBVideoFormat_BGR_24: return "BGR";
-	case kFBVideoFormat_BGR_16: return "BGR";
-	case kFBVideoFormat_ABGR_32: return "ABGR";
-	case kFBVideoFormat_ARGB_32: return "unsupported";
-	case kFBVideoFormat_422: return "unsupported";
-	}
-
-	return "unsupported";
-}
-
-// return false if a format is unsupported
-bool FBVideoFormatToOpenGL(const FBVideoFormat clipFormat, GLint &internalFormat, GLint &format, const bool compressed)
-{
-	switch (clipFormat)
-	{
-	case kFBVideoFormat_Any:
-		return false;
-		break;
-	case kFBVideoFormat_Other:
-		return false;
-		break;
-	case kFBVideoFormat_RGBA_32:
-		internalFormat = (compressed) ? GL_COMPRESSED_RGBA : GL_RGBA8;
-		format = GL_RGBA;
-		break;
-	case kFBVideoFormat_RGB_24:
-		internalFormat = (compressed) ? GL_COMPRESSED_RGB : GL_RGB8;
-		format = GL_RGB;
-		break;
-	case kFBVideoFormat_BGRA_32:
-		internalFormat = (compressed) ? GL_COMPRESSED_RGBA : GL_BGRA;
-		format = GL_RGBA;
-		break;
-	case kFBVideoFormat_BGR_24:
-		internalFormat = (compressed) ? GL_COMPRESSED_RGB : GL_BGR; 
-		format = GL_RGB;
-		break;
-	case kFBVideoFormat_BGR_16:
-		return false;
-		break;
-	case kFBVideoFormat_ABGR_32:
-		internalFormat = (compressed) ? GL_COMPRESSED_RGBA : GL_ABGR_EXT;
-		format = GL_RGBA;
-		break;
-	case kFBVideoFormat_ARGB_32:
-		return false;
-		break;
-	case kFBVideoFormat_422:
-		return false;
-		break;
-	}
-
-	return true;
-}
-
-int VideoFormatComponentsCount( FBVideoFormat format )
-{
-	if (format==kFBVideoFormat_ABGR_32 || format==kFBVideoFormat_ARGB_32 || format == kFBVideoFormat_BGRA_32 || format == kFBVideoFormat_RGBA_32 )
-		return 4;
-
-	return 3;
-}
-
-void GetAffectedLights(FBModelList &pList, std::vector<FBLight*> &pAffectedLights)
-{
-	FBScene *pScene = FBSystem::TheOne().Scene;
-
-	pAffectedLights.reserve( pScene->Lights.GetCount() );
-
-	for (int i=0; i<pScene->Lights.GetCount(); ++i)
-		pAffectedLights.push_back(pScene->Lights[i]);
-}
-
-
-bool GetObjectsFromXML( const char *filename, FBModelList &pList )
-{
-	std::vector<FBMaterial*> lAffectedMaterials;
-	std::vector<FBTexture*> lAffectedTextures;
-	std::vector<FBVideo*> lAffectedMedia;
-	std::vector<int>	lTextureToVideo;
-	std::vector<FBShader*> lAffectedShaders;
-
-	TiXmlDocument	doc;
-	TiXmlNode *node = nullptr;
-	TiXmlElement *modelsElem = nullptr;
-	TiXmlElement *modelElem = nullptr;
-	TiXmlAttribute  *attrib = nullptr;
-
-	try
-	{
-
-		if (doc.LoadFile( filename ) == false)
-			throw std::exception( "failed to open xml file" );
-
-		pList.Clear();
-
-		// TODO: replace models positions and global bounding box
-		node = doc.FirstChild("Models");
-		if (node == nullptr)
-			throw std::exception( "failed to find models group in cache" );
-
-		modelsElem = node->ToElement();
-		if (modelsElem)
-		{
-			
-			modelElem = modelsElem->FirstChildElement("Model");
-
-			FBString modelName;
-
-			while (modelElem)
-			{
-
-				// enumerate attribs
-				for( attrib = modelElem->FirstAttribute();
-						attrib;
-						attrib = attrib->Next() )
-				{
-					if ( strcmp(attrib->Name(), "name") == 0 )
-					{
-						modelName = attrib->Value();
-
-						FBModel *pModel = FBFindModelByLabelName(modelName);
-						if (pModel)
-						{
-							pList.Add(pModel);
-						}
-					}
-					
-				}
-
-				modelElem = modelElem->NextSiblingElement();
-			}
-		}
-
-	}
-	catch (const std::exception &e)
-	{
-		printf( "%s\n", e.what() );
-		return false;
-	}
-
-	return true;
-}
-
-void GetVideoInfo()
-{
-	// write video clip
-	auto fn_writeVideoClip = [&AddSomeVideo] (TiXmlElement &layerItem, FBVideo *pVideo, double &totalUncompressedSize, int i) 
-	{
-		if (FBIS(pVideo, FBVideoClipImage) )
-		{
-			FBVideoClipImage *pClip = (FBVideoClipImage*) pVideo;
-			layerItem.SetAttribute( "width", pClip->Width );
-			layerItem.SetAttribute( "height", pClip->Height );
-			layerItem.SetAttribute( "filename", pClip->Filename );
-			layerItem.SetAttribute( "format", FBVideoFormatToChar(pClip->Format) );
-			layerItem.SetAttribute( "startFrame", pClip->StartFrame );
-			layerItem.SetAttribute( "stopFrame", pClip->StopFrame );
-			layerItem.SetAttribute( "frameRate", pClip->FrameRate );
-
-			layerItem.SetAttribute( "imageSequence", (pClip->ImageSequence == true) ? 1 : 0 );
-
-			totalUncompressedSize += pClip->Width * pClip->Height * VideoFormatComponentsCount( pClip->Format );
-
-			AddSomeVideo( i, pVideo );
-		}
-		else
-		if (FBIS(pVideo, FBVideoClip) )
-		{
-			FBVideoClip *pClip = (FBVideoClip*) pVideo;
-			layerItem.SetAttribute( "width", pClip->Width );
-			layerItem.SetAttribute( "height", pClip->Height );
-			layerItem.SetAttribute( "filename", pClip->Filename );
-			layerItem.SetAttribute( "format", FBVideoFormatToChar(pClip->Format) );
-
-			totalUncompressedSize += pClip->Width * pClip->Height * VideoFormatComponentsCount( pClip->Format );
-
-			AddSomeVideo( i, pVideo );
-		}
-	};
-}
+#include <vector>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //
-class CGPUCacherSaverQueryMOBU
+class CGPUCacherSaverQueryMOBU : public CGPUCacheSaverQuery
 {
-
 public:
+
+	// a constructor
+	CGPUCacherSaverQueryMOBU( FBModelList &modelList )
+		: CGPUCacheSaverQuery()
+		, pList(modelList)
+	{}
+
+	virtual bool Init(const char *filename) override;
+
+	//
+	// query infromation for header
 
 	virtual const int GetVersion() {
 		return 1;
 	}
-
-	virtual const char *GetSourceFilename() {
+	virtual const char *GetSourceFilename()
+	{
 		FBString fbxFileName = FBApplication::TheOne().FBXFileName;
 		return fbxFileName;
 	}
 
-	virtual const int GetModelsCount()
-	{
-		return pList.GetCount();
-	}
+	//
+	// query information for lights
 
-	void Init()
-	{
-		GetAffectedLights( pList, lAffectedLights );
-
-		FBVector3d vmin, vmax, lmin, lmax;
-		int totalNumberOfVertices = 0;
-		int totalNumberOfIndices = 0;
-
-		int totalNumberOfSubMeshes = 0;
-
-		for (int i=0; i<pList.GetCount(); ++i)
-		{
-			FBModel *pModel = pList[i];
-			pModel->GetBoundingBox( lmin, lmax);
-
-			FBVector4d l4Min, l4Max;
-			l4Min[0] = lmin[0];
-			l4Min[1] = lmin[1];
-			l4Min[2] = lmin[2];
-			l4Min[3] = 1.0;
-
-			l4Max[0] = lmax[0];
-			l4Max[1] = lmax[1];
-			l4Max[2] = lmax[2];
-			l4Max[3] = 1.0;
-
-			FBMatrix lMtx;
-			pModel->GetMatrix( lMtx );
-			FBVectorMatrixMult( l4Min, lMtx, l4Min );
-			FBVectorMatrixMult( l4Max, lMtx, l4Max );
-
-			lmin = FBVector3d(l4Min);
-			lmax = FBVector3d(l4Max);
-
-			if (i==0)
-			{
-				vmin = lmin;
-				vmax = lmax;
-			}
-			else
-			{
-				vmin[0] = std::min( vmin[0], lmin[0] );
-				vmin[1] = std::min( vmin[1], lmin[1] );
-				vmin[2] = std::min( vmin[2], lmin[2] );
-
-				vmax[0] = std::max( vmax[0], lmax[0] );
-				vmax[1] = std::max( vmax[1], lmax[1] );
-				vmax[2] = std::max( vmax[2], lmax[2] );
-			}
-
-			// calculate final buffers arrays
-			FBModelVertexData *pVertexData = pModel->ModelVertexData;
-			totalNumberOfVertices += pVertexData->GetVertexCount();
-
-			int numberOfIndices = 0;
-			for (int j=0; j<pVertexData->GetSubPatchCount(); ++j)
-			{
-				const int offset =	pVertexData->GetSubPatchIndexOffset(j);
-				const int size =	pVertexData->GetSubPatchIndexSize(j);
-
-				numberOfIndices = std::max( numberOfIndices, offset+size );
-			}
-			totalNumberOfIndices += numberOfIndices;
-
-		
-			auto AddSomeVideo = [&media, &textureToVideo] (const int i, FBVideo *pVideo) {
-			bool IsExist=false;
-			for (int ii=0; ii<media.size(); ++ii)
-			{
-				if (media[ii] == pVideo)
-				{
-					IsExist = true;
-					textureToVideo[i] = ii;
-					break;
-				}
-
-				// check if they share the same filename
-				if ( ((FBVideoClip*)pVideo)->Filename == ((FBVideoClip*)media[ii])->Filename)
-				{
-					IsExist = true;
-					textureToVideo[i] = ii;
-					break;
-				}
-			}
-
-			if (IsExist == false)
-			{
-				const int vidIndex = (int) media.size();
-				media.push_back(pVideo);
-				textureToVideo[i] = vidIndex;
-			}
-		}
-
-
-			// add material exclusivly to the material list
-		int index=0;
-		if (pAffectedMaterials)
-		{
-			bool IsExist = false;
-			int k=0;
-			for (auto iter=pAffectedMaterials->begin(); iter!=pAffectedMaterials->end(); ++iter, ++k)
-				if ( *iter == pMaterial)
-				{
-					index = k;
-					IsExist = true;
-					break;
-				}
-
-			if (IsExist == false)
-			{
-				index = (int) pAffectedMaterials->size();
-				pAffectedMaterials->push_back( pMaterial );
-			}
-		}
-
-		//
-		//
-
-		int index = 0;
-		if (pAffectedShaders)
-		{
-			bool IsExist = false;
-			int k=0;
-			for (auto iter=pAffectedShaders->begin(); iter!=pAffectedShaders->end(); ++iter, ++k)
-			{
-				if ( *iter == pShader)
-				{
-					IsExist = true;
-					index = k;
-					break;
-				}
-			}
-
-			if (IsExist == false)
-			{
-				index = (int) pAffectedShaders->size();
-				pAffectedShaders->push_back(pShader);
-			}
-		}
+	virtual const int GetLightsCount() {
+		return (int) lAffectedLights.size();
 	}
 	
-	void GetShaderAlphaSource()
+	virtual const char *GetLightName(const int index) override
 	{
-		FBProperty *lProp = pShader->PropertyList.Find( "Transparency" );
-	if (lProp)
-		alphaSource = lProp->AsInt();	
+		return lAffectedLights[index]->LongName;
 	}
+	virtual void GetLightPosition(const int index, vec4 &pos) override;
+	virtual void GetLightDirection(const int index, vec4 &dir) override;
+	virtual void GetLightColor(const int index, vec4 &color) override;
+	virtual void GetLightAttenuation(const int index, vec4 &att) override;
+	virtual void GetLightShadowing(const int index, bool &castshadow) override;
 
-	void ConvertShader()
+	// query information for textures
+
+	virtual const int GetVideoCount() override
 	{
-		// transparency mode
-	int alphaSource = 0;
-	FBProperty *lProp = pShader->PropertyList.Find( "Transparency" );
-	if (lProp)
-		alphaSource = lProp->AsInt();	
-	shdItem.SetAttribute( "alpha", alphaSource );
-
-	lProp = pShader->PropertyList.Find( "TransparencyFactor" );
-	if (lProp)
+		return (int) lAffectedMedia.size();
+	}
+	virtual const char *GetVideoName(const int index) override
 	{
-		double transparency;
-		lProp->GetData( &transparency, sizeof(double) );
-		shdItem.SetDoubleAttribute( "transparency", transparency );
+		return lAffectedMedia[index]->LongName;
 	}
-
-	// additional properties
-	if ( FBIS(pShader, ProjTexShader) )
+	virtual const int GetVideoWidth(const int index) override
 	{
-		shdItem.SetAttribute( "type", (int) eShaderTypeSuperLighting );
-
-		ProjTexShader *pSuperShader = (ProjTexShader*) pShader;
-		EShadingType shadingType = pSuperShader->ShadingType;
+		FBVideo *pVideo = lAffectedMedia[index];
 		
-	
-		TiXmlElement colorCorrItem("ColorCorrection");
-		
-		TiXmlElement customColorItem("CustomColor");
-		FBColor color = pSuperShader->CustomColor;
-		customColorItem.SetDoubleAttribute( "r", color[0] );
-		customColorItem.SetDoubleAttribute( "g", color[1] );
-		customColorItem.SetDoubleAttribute( "b", color[2] );
-		
-		colorCorrItem.InsertEndChild( customColorItem );
-		
-		colorCorrItem.SetAttribute( "blendType", (int) pSuperShader->CustomColorMode );
-		colorCorrItem.SetDoubleAttribute( "contrast", pSuperShader->Contrast );
-		colorCorrItem.SetDoubleAttribute( "saturation", pSuperShader->Saturation );
-		colorCorrItem.SetDoubleAttribute( "brightness", pSuperShader->Brightness );
-		colorCorrItem.SetDoubleAttribute( "gamma", pSuperShader->Gamma );
-		
-		shdItem.InsertEndChild( colorCorrItem );
-
-		// Toon settings
-		TiXmlElement shadingItem( "Shading" );
-		shadingItem.SetAttribute( "type", (int) shadingType );
-		shadingItem.SetAttribute( "toonEnabled", 0 );
-		shadingItem.SetDoubleAttribute( "toonSteps", pSuperShader->ToonSteps );
-		shadingItem.SetDoubleAttribute( "toonDistribution", pSuperShader->ToonDistribution );
-		shadingItem.SetDoubleAttribute( "toonShadowPosition", pSuperShader->ToonShadowPosition );
-		
-		shdItem.InsertEndChild( shadingItem );
+		if (FBIS(pVideo, FBVideoClip) )
+			return ( (FBVideoClip*) pVideo)->Width;
+		return 1;
 	}
-	else if ( FBIS(pShader, FXColorCorrectionShader) )
+	virtual const int GetVideoHeight(const int index) override
 	{
-		shdItem.SetAttribute( "type", (int) eShaderTypeColorCorrection );
-
-		FXColorCorrectionShader *pSuperShader = (FXColorCorrectionShader*) pShader;
-
-		TiXmlElement colorCorrItem("ColorCorrection");
+		FBVideo *pVideo = lAffectedMedia[index];
 		
-		TiXmlElement customColorItem("CustomColor");
-		FBColor color = pSuperShader->CustomColor;
-		customColorItem.SetDoubleAttribute( "r", color[0] );
-		customColorItem.SetDoubleAttribute( "g", color[1] );
-		customColorItem.SetDoubleAttribute( "b", color[2] );
-		
-		colorCorrItem.InsertEndChild( customColorItem );
-		
-		colorCorrItem.SetAttribute( "blendType", (int) pSuperShader->CustomColorMode );
-		colorCorrItem.SetDoubleAttribute( "contrast", pSuperShader->Contrast );
-		colorCorrItem.SetDoubleAttribute( "saturation", pSuperShader->Saturation );
-		colorCorrItem.SetDoubleAttribute( "brightness", pSuperShader->Brightness );
-		colorCorrItem.SetDoubleAttribute( "gamma", pSuperShader->Gamma );
-		
-		shdItem.InsertEndChild( colorCorrItem );
+		if (FBIS(pVideo, FBVideoClip) )
+			return ( (FBVideoClip*) pVideo)->Height;
+		return 1;
 	}
-	else if ( FBIS(pShader, FXProjectionMapping) )
-	{
-		shdItem.SetAttribute( "type", (int) eShaderTypeProjections );
-	}
-	else if ( FBIS(pShader, FXShadingShader) )
-	{
-		shdItem.SetAttribute( "type", (int) eShaderTypeShading );
-
-		FXShadingShader *pSuperShader = (FXShadingShader*) pShader;
-		EShadingType shadingType = pSuperShader->ShadingType;
-
-		// Toon settings
-		TiXmlElement shadingItem( "Shading" );
-		shadingItem.SetAttribute( "type", (int) shadingType );
-		shadingItem.SetAttribute( "toonEnabled", 0 );
-		shadingItem.SetDoubleAttribute( "toonSteps", pSuperShader->ToonSteps );
-		shadingItem.SetDoubleAttribute( "toonDistribution", pSuperShader->ToonDistribution );
-		shadingItem.SetDoubleAttribute( "toonShadowPosition", pSuperShader->ToonShadowPosition );
-		
-		shdItem.InsertEndChild( shadingItem );
-	}
-	else
-	{
-		shdItem.SetAttribute( "type", (int) eShaderTypeDefault );
-	}
-	}
-
-	void ConvertMaterial()
-	{
-		
-		FBTexture *pTexture = pMaterial->GetTexture();
-		
-		int index = -1;
-		if (pTexture)
-		{
-			bool isExist = false;
-			for (int k=0; k<textures.size(); ++k)
-				if (textures[k] == pTexture)
-				{
-					index = k;
-					isExist = true;
-					break;
-				}
-		
-			if (isExist == false)
-			{
-				index = (int) textures.size();
-				textures.push_back( pTexture );
-			}
-		}
-
-	}
-
-	virtual void GetTextureMatrix( const int index, mat4 &mat )
-	{
-		FBMatrix md(pTexture->GetMatrix());
-
-	for (int i=0; i<16; ++i)
-		mf.mat_array[i] = (float) md[i];
-	}
-
-	virtual int GetTextureVideoIndex( const int index );
+	virtual const int GetVideoFormat(const int index) override;
+	virtual const bool IsVideoImageSequence(const int index) override;
+	virtual const int GetVideoStartFrame(const int index) override;
+	virtual const int GetVideoStopFrame(const int index) override;
+	virtual const int GetVideoFrameRate(const int index) override;
+	virtual const char *GetVideoFilename(const int index) override;
+	virtual const double GetVideoSize(const int index) override;
+	virtual const bool IsVideoUsedMipmaps(const int index) override;
 
 	// information about media
-	virtual double GetTotalUncompressedSize()
+	virtual double GetTotalUncompressedSize() override
 	{
-		return totalUncompressedSize / 1024.0 / 1024.0;
+		return mTotalUncompressedSize;
 	}
+
+	//
+
+	virtual const int GetSamplersCount() override
+	{
+		return (int) lAffectedTextures.size();
+	}
+	virtual const char *GetSamplerName(const int index) override // pTexture->LongName
+	{
+		return lAffectedTextures[index]->LongName;
+	}
+	virtual const int GetSamplerVideoIndex(const int index) override	// which video is used for that sampler
+	{
+		return lTextureToVideo[index];
+	}
+
+	virtual void GetSamplerMatrix( const int index, mat4 &mat ) override
+	{
+		FBTexture *pTexture = lAffectedTextures[index];
+		FBMatrix md(pTexture->GetMatrix());
+
+		for (int i=0; i<16; ++i)
+			mat.mat_array[i] = (float) md[i];
+	}
+
+
+	//
+	// query information for materials
+
+	virtual const int GetMaterialsCount() override
+	{
+		return (int) lAffectedMaterials.size();
+	}
+
+	virtual const char *GetMaterialName(const int index) override // pMaterial->LongName 
+	{
+		return lAffectedMaterials[index]->LongName;
+	}
+	virtual void ConvertMaterial(const int index, MaterialGLSL &data) override
+	{
+		FBMaterial *pMaterial = lAffectedMaterials[index];
+		CMaterialsInspector::ConstructFromFBMaterial(pMaterial, FBGetDisplayInfo(), data);
+	}
+
+	//
+	// query information for shaders
+
+	virtual const int GetShadersCount() override
+	{
+		return (int) lAffectedShaders.size();
+	}
+
+	virtual const char *GetShaderName(const int index) override
+	{
+		return lAffectedShaders[index]->LongName;
+	}
+	virtual const int GetShaderAlphaSource(const int index) override
+	{
+		int alphaSource = 0;
+
+		FBProperty *lProp = lAffectedShaders[index]->PropertyList.Find( "Transparency" );
+		if (lProp)
+			alphaSource = lProp->AsInt();
+
+		return alphaSource;
+	}
+	virtual void ConvertShader(const int index, ShaderGLSL &data) override
+	{
+		FBShader *pShader = lAffectedShaders[index];
+		CShadersInspector::ConstructFromFBShader(pShader, FBGetDisplayInfo(), data);
+	}
+
+	//
+	// query information for models
+
+	virtual const int GetModelsCount() override {
+		return mModelsCount;
+	}
+	virtual const int GetSubMeshesCount() override {
+		return mSubMeshesCount;
+	}
+	virtual const unsigned int GetTotalCounts(unsigned int &vertices, unsigned int &indices) override
+	{
+		vertices = totalNumberOfVertices;
+		indices = totalNumberOfIndices;
+	}
+	// NOTE: should be calculated in global world space !
+	virtual void GetBoundingBox(vec4 &bmin, vec4 &bmax) override
+	{
+		bmin = vec4( (float)vmin[0], (float)vmin[1], (float)vmin[2], 0.0f );
+		bmax = vec4( (float)vmax[0], (float)vmax[1], (float)vmax[2], 0.0f );
+	}
+
+	virtual const char *GetModelName(const int modelId) override // longname
+	{
+		FBModel *pModel = pList[modelId];
+		return pModel->LongName;
+	}
+	virtual const int GetModelVisible(const int modelId) override // (pModel->IsVisible()) ? 1 : 0
+	{
+		FBModel *pModel = pList[modelId];
+		return (pModel->IsVisible()) ? 1 : 0;
+	}
+	virtual const int GetModelCastsShadows(const int modelId) override // (pModel->CastsShadows) ? 1 : 0
+	{
+		FBModel *pModel = pList[modelId];
+		return (pModel->CastsShadows) ? 1 : 0;
+	}
+	virtual const int GetModelReceiveShadows(const int modelId) override // (pModel->ReceiveShadows) ? 1 : 0
+	{
+		FBModel *pModel = pList[modelId];
+		return (pModel->ReceiveShadows) ? 1 : 0;
+	}
+	virtual void GetModelMatrix(const int modelId, mat4 &mat) override
+	{
+		FBMatrix mdl;
+		FBModel *pModel = pList[modelId];
+		pModel->GetMatrix(mdl);
+		
+		for (int i=0; i<16; ++i)
+			mat.mat_array[i] = (float) mdl[i];
+	}
+	virtual void GetModelTranslation(const int modelId, vec4 &pos) override
+	{
+		FBVector3d v;
+		FBModel *pModel = pList[modelId];
+		pModel->GetVector(v);
+
+		pos = vec4( (float)v[0], (float)v[1], (float)v[2], 1.0);
+	}
+	virtual void GetModelRotation(const int modelId, vec4 &rot) override
+	{
+		FBVector3d v;
+		FBModel *pModel = pList[modelId];
+		pModel->GetVector(v, kModelRotation);
+
+		rot = vec4( (float)v[0], (float)v[1], (float)v[2], 1.0);
+	}
+	virtual void GetModelScaling(const int modelId, vec4 &scaling) override
+	{
+		FBVector3d v;
+		FBModel *pModel = pList[modelId];
+		pModel->GetVector(v, kModelScaling);
+
+		scaling = vec4( (float)v[0], (float)v[1], (float)v[2], 1.0);
+	}
+	// NOTE: should be calculated in global world space !
+	virtual void GetModelBoundingBox(const int modelId, vec4 &bmin, vec4 &bmax) override
+	{
+		FBVector3d v1, v2;
+
+		FBMatrix mdl;
+		FBModel *pModel = pList[modelId];
+		pModel->GetMatrix(mdl);
+		pModel->GetBoundingBox(v1, v2);
+
+		FBVector4d lmin, lmax;
+		FBVectorMatrixMult( lmin, mdl, FBVector4d(v1[0], v1[1], v1[2], 1.0) );
+		FBVectorMatrixMult( lmax, mdl, FBVector4d(v2[0], v2[1], v2[2], 1.0) );
+
+		bmin = vec4( (float)lmin[0], (float)lmin[1], (float)lmin[2], 1.0 );
+		bmax = vec4( (float)lmax[0], (float)lmax[1], (float)lmax[2], 1.0 );
+	}
+
+	// model geometry
+
+	virtual const int GetModelVertexCount(const int modelId) override // pVertexData->GetVertexCount()
+	{
+		FBModel *pModel = pList[modelId];
+		FBModelVertexData *pData = pModel->ModelVertexData;
+		if (nullptr != pData)
+		{
+			return pData->GetVertexCount();
+		}
+		return 0;
+	}
+	virtual const int GetModelUVCount(const int modelId) override
+	{
+		FBModel *pModel = pList[modelId];
+		FBModelVertexData *pData = pModel->ModelVertexData;
+		if (nullptr != pData)
+		{
+			return pData->GetVertexCount();
+		}
+		return 0;
+	}
+
+	virtual void ModelVertexArrayRequest(const int modelId) override
+	{
+		FBModel *pModel = pList[modelId];
+		mVertexData = pModel->ModelVertexData;
+		mVertexData->VertexArrayMappingRequest();
+	}
+	virtual const float *GetModelVertexArrayPoint( const bool afterDeform ) override
+	{
+		return (float*) mVertexData->GetVertexArray( kFBGeometryArrayID_Point, afterDeform );
+	}
+	virtual const float *GetModelVertexArrayNormal( const bool afterDeform ) override
+	{
+		return (float*) mVertexData->GetVertexArray( kFBGeometryArrayID_Normal, afterDeform );
+	}
+	virtual const float *GetModelVertexArrayTangent( const bool afterDeform ) override
+	{
+		return (float*) mVertexData->GetVertexArray( kFBGeometryArrayID_Tangent, afterDeform );
+	}
+	virtual const float *GetModelVertexArrayUV( const int uvset, const bool afterDeform ) override
+	{
+		return (float*) mVertexData->GetUVSetArray();
+	}
+	virtual const int *GetModelIndexArray() override
+	{
+		return mVertexData->GetIndexArray();
+	}
+	virtual void ModelVertexArrayRelease() override
+	{
+		mVertexData->VertexArrayMappingRelease();
+	}
+
+	// CGPUVertexData::GetStrideFromArrayElementType( pVertexData->GetVertexArrayType(kFBGeometryArrayID_Point) ) 
+	virtual const int GetModelVertexArrayPointStride(const int modelId) override
+	{
+		return sizeof(FBVertex);
+	}
+	virtual const int GetModelVertexArrayNormalStride(const int modelId) override
+	{
+		return sizeof(FBNormal);
+	}
+	virtual const int GetModelVertexArrayTangentStride(const int modelId) override
+	{
+		return sizeof(FBNormal);
+	}
+	virtual const int GetModelVertexArrayUVStride(const int modelId) override
+	{
+		return sizeof(FBUV);
+	}
+
+	virtual const int GetModelSubPatchCount(const int index) override
+	{
+		FBModel *pModel = pList[index];
+		mVertexData = pModel->ModelVertexData;
+		return mVertexData->GetSubPatchCount();
+	}
+	virtual void GetModelSubPatchInfo(const int modelid, const int patchid, int &offset, int &size, int &materialId) override
+	{
+		FBModel *pModel = pList[modelid];
+		mVertexData = pModel->ModelVertexData;
+		offset = mVertexData->GetSubPatchIndexOffset(patchid);
+		size = mVertexData->GetSubPatchIndexSize(patchid);
+		materialId = mVertexData->GetSubPatchMaterialId(patchid);
+	}
+
+	virtual const unsigned int GetModelShadersCount(const int index) override
+	{
+		FBModel *pModel = pList[index];
+		return pModel->Shaders.GetCount();
+	}
+	virtual const int GetModelShaderId(const int index, const int nshader) override
+	{
+		FBModel *pModel = pList[index];
+		FBShader *pShader = pModel->Shaders[nshader];
+
+		int result = -1;
+		int shaderNdx = 0;
+		for (auto iter=begin(lAffectedShaders); iter!=end(lAffectedShaders); 
+			++iter, ++shaderNdx)
+		{
+			if (pShader == *iter)
+			{
+				result = shaderNdx;
+				break;
+			}
+		}
+
+		return result;
+	}
+
 
 protected:
 
@@ -532,4 +389,21 @@ protected:
 	std::vector<FBShader*> lAffectedShaders;
 	std::vector<FBLight*> lAffectedLights;
 
+	int		mModelsCount;
+	int		mSubMeshesCount;
+
+	FBVector3d vmin, vmax;
+	int totalNumberOfVertices;
+	int totalNumberOfIndices;
+
+	double	mTotalUncompressedSize;
+
+	FBModelVertexData		*mVertexData;
+
+	static void GetAffectedLights(FBModelList &pList, std::vector<FBLight*> &pAffectedLights);
+	static void GetAffectedMedia(const std::vector<FBTexture*> &pAffectedTextures, 
+		std::vector<FBVideo*> &pAffectedMedia, std::vector<int> &lTextureToVideo, double &totalUncompressedSize);
+
+	void ConvertShader();
+	void ConvertMaterial();
 };

@@ -108,10 +108,10 @@ void ViewBakeProjectorsData::RenderToFramebuffers(bool &grabImage, FBString &gra
 
 		FBString effectPath, effectFullName;
 
-		if ( FindEffectLocation( FBString("\\GLSLFX\\", UBERSHADER_EFFECT), effectPath, effectFullName ) )
+		if ( FindEffectLocation( FBString("\\GLSL_FX\\", UBERSHADER_EFFECT), effectPath, effectFullName ) )
 		{
 			mUberShader = new Graphics::ShaderEffect();
-			if( !mUberShader->Initialize( FBString(effectPath, "\\GLSLFX\\"), UBERSHADER_EFFECT, 512, 512, 1.0) )
+			if( !mUberShader->Initialize( FBString(effectPath, "\\GLSL_FX\\"), UBERSHADER_EFFECT, 512, 512, 1.0) )
 			{
 				mReadyToLoad = false;
 				delete mUberShader;

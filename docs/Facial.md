@@ -26,7 +26,7 @@ Names for common data locations (project organization):
 Source data for facial animation contains:
 * source video and extracted image sequence with 90 degree rotation to have normal vertical face orientation
 * extracted landmarks positions from Faceware Analyzer (*.xml format)
-* extracted landmarks positions from Cambridge Face Tracker (*.txt format)
+* extracted landmarks positions from [OpenFace (*.txt format)](https://github.com/TadasBaltrusaitis/OpenFace)
 * extracted landmarks from Mocha
 
 ### From source data into MoBu optical clip

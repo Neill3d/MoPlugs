@@ -235,7 +235,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2015|x64'">
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
-    <IncludePath>..\include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include;..\..\glew-1.11.0\include;..\..\Cg\include;..\..\Include;..\..\SceneGraph_Shared\code;$(IncludePath)</IncludePath>
+    <IncludePath>..\include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include;$(MOPLUGS_EXTERNAL)\glew\include;..\..\Cg\include;..\..\Include;$(MOPLUGS_FRAMEWORK)\code;$(IncludePath)</IncludePath>
+    <IntDir>..\..\..\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2017|x64'">
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
@@ -361,7 +362,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;CMD_SEND_CODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;CMD_SEND_CODE;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

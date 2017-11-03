@@ -946,7 +946,7 @@ protected:
 	}
 	virtual void ConvertResource( FBMaterial *mbitem, FBEvaluateInfo *pEvalInfo, MaterialGLSL &item, bool subdata ) override
 	{
-		ConstructFromFBMaterial(mbitem, pEvalInfo, item);
+		ConstructFromFBMaterial(mbitem, pEvalInfo, mTexturesInspector, item);
 
 		// update from connection ?!
 	}
@@ -971,8 +971,8 @@ public:
 		mTexturesInspector = pTexturesInspector;
 	}
 
-	void ConstructFromFBMaterial( FBMaterial *pMaterial, FBEvaluateInfo *pEvalInfo, MaterialGLSL &mat );
-
+	static void ConstructFromFBMaterial( FBMaterial *pMaterial, FBEvaluateInfo *pEvalInfo, CTexturesInspector *pTexInspector, MaterialGLSL &mat );
+	//void ConstructFromFBMaterial_Full( FBMaterial *pMaterial, FBEvaluateInfo *pEvalInfo, MaterialGLSL &mat );
 
 	virtual int	GetResourceType() const {
 		return RESOURCE_MATERIAL;

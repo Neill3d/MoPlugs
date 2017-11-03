@@ -21,6 +21,8 @@
 #include "GPUCaching_shader.h"
 #include "GPUCaching_model_display.h"
 
+#include "gpucache_saver_mobu.h"
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -261,13 +263,24 @@ void MoRendererCallback::ExportGPUCache()
 		FBString filePath(ExtractFilePath(fullFileName));
 		filePath = filePath + "\\";
 		filePath = filePath + fileName;
+
+		CGPUCacheSaverQueryMOBU	fbQuery(pList);
+		CGPUCacheSaver	saver;
+
+		bool lSuccess = saver.Save( fullFileName, &fbQuery );
+
 		/*
 		WriteObjectsToXML(	fullFileName, 
 							FBString(filePath + "_Geometry.pck"), 
 							FBString(filePath + "_Textures.pck"), 
 							pList );
 */
-		FBMessageBox( "GPU Caching Export", "Export is Done!", "Ok" );
+		
+		FBString lMessage( "Export is Done!" );
+		if (false == lSuccess)
+			lMessage = "Failed to Export Objects!";
+
+		FBMessageBox( "GPU Caching Export", lMessage, "Ok" );
 
 	}
 }

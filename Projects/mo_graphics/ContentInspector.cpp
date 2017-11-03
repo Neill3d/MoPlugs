@@ -1007,7 +1007,7 @@ void CShadersInspector::UpdateGPUBuffer( CGPUBuffer *pBuffer )
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CMaterialsInspector
 
-void CMaterialsInspector::ConstructFromFBMaterial( FBMaterial *pMaterial, FBEvaluateInfo *pEvalInfo, MaterialGLSL &mat )
+void CMaterialsInspector::ConstructFromFBMaterial( FBMaterial *pMaterial, FBEvaluateInfo *pEvalInfo, CTexturesInspector *pTexInspector, MaterialGLSL &mat )
 {
 	//DefaultMaterial(mat);
 
@@ -1064,14 +1064,14 @@ void CMaterialsInspector::ConstructFromFBMaterial( FBMaterial *pMaterial, FBEval
 	mat.useSpecular = 0.0f;
 	mat.useTransparency = 0.0f;
 
-	if (nullptr == mTexturesInspector)
+	if (nullptr == pTexInspector)
 		return;
 
 	// AO term
 	if (pMaterial->GetTexture(kFBMaterialTextureAmbient) )
 	{
 		FBTexture *ptexture = pMaterial->GetTexture(kFBMaterialTextureAmbient);
-		int index = mTexturesInspector->FindResourceIndex(ptexture);
+		int index = pTexInspector->FindResourceIndex(ptexture);
 
 		if (index >= 0)
 		{
@@ -1084,7 +1084,7 @@ void CMaterialsInspector::ConstructFromFBMaterial( FBMaterial *pMaterial, FBEval
 	if (pMaterial->GetTexture() )
 	{
 		FBTexture *ptexture = pMaterial->GetTexture();
-		int index = mTexturesInspector->FindResourceIndex(ptexture);
+		int index = pTexInspector->FindResourceIndex(ptexture);
 
 		if (index >= 0)
 		{
@@ -1096,7 +1096,7 @@ void CMaterialsInspector::ConstructFromFBMaterial( FBMaterial *pMaterial, FBEval
 	if (pMaterial->GetTexture(kFBMaterialTextureReflection) )
 	{
 		FBTexture *ptexture = pMaterial->GetTexture(kFBMaterialTextureReflection);
-		int index = mTexturesInspector->FindResourceIndex(ptexture);
+		int index = pTexInspector->FindResourceIndex(ptexture);
 
 		if (index >= 0)
 		{
@@ -1108,7 +1108,7 @@ void CMaterialsInspector::ConstructFromFBMaterial( FBMaterial *pMaterial, FBEval
 	if (pMaterial->GetTexture(kFBMaterialTextureTransparent) )
 	{
 		FBTexture *ptexture = pMaterial->GetTexture(kFBMaterialTextureTransparent);
-		int index = mTexturesInspector->FindResourceIndex(ptexture);
+		int index = pTexInspector->FindResourceIndex(ptexture);
 
 		if (index >= 0)
 		{
@@ -1120,7 +1120,7 @@ void CMaterialsInspector::ConstructFromFBMaterial( FBMaterial *pMaterial, FBEval
 	if (pMaterial->GetTexture(kFBMaterialTextureNormalMap) )
 	{
 		FBTexture *ptexture = pMaterial->GetTexture(kFBMaterialTextureNormalMap);
-		int index = mTexturesInspector->FindResourceIndex(ptexture);
+		int index = pTexInspector->FindResourceIndex(ptexture);
 
 		if (index >= 0)
 		{
@@ -1132,7 +1132,7 @@ void CMaterialsInspector::ConstructFromFBMaterial( FBMaterial *pMaterial, FBEval
 	if (pMaterial->GetTexture(kFBMaterialTextureEmissive) )
 	{
 		FBTexture *ptexture = pMaterial->GetTexture(kFBMaterialTextureEmissive);
-		int index = mTexturesInspector->FindResourceIndex(ptexture);
+		int index = pTexInspector->FindResourceIndex(ptexture);
 
 		if (index >= 0)
 		{
@@ -1144,7 +1144,7 @@ void CMaterialsInspector::ConstructFromFBMaterial( FBMaterial *pMaterial, FBEval
 	if (pMaterial->GetTexture(kFBMaterialTextureSpecular) )
 	{
 		FBTexture *ptexture = pMaterial->GetTexture(kFBMaterialTextureSpecular);
-		int index = mTexturesInspector->FindResourceIndex(ptexture);
+		int index = pTexInspector->FindResourceIndex(ptexture);
 
 		if (index >= 0)
 		{

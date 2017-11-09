@@ -15,7 +15,7 @@
 //--- SDK include
 #include <fbsdk/fbsdk.h>
 #include "..\Common\Common_shader.h"
-#include "Shader.h"
+#include "ShaderFX.h"
 #include "shared_content.h"
 
 #include "callback_factory.h"

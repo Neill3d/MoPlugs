@@ -308,7 +308,7 @@ void CGPUFBScene::RenderPassShaderModels(const EShaderPass pass, CBaseShaderCall
 
 bool CGPUFBScene::RenderPassModelDraw2(CBaseShaderCallback *pCallback, const CRenderOptions &options, FBModel *pModel, const int meshIndex)
 {
-	const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
+	//const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
 
 	FBModelVertexData *pData = pModel->ModelVertexData;
 	
@@ -362,7 +362,7 @@ void CGPUFBScene::RenderSceneCallbacks(bool selectionPass, bool useEarlyZ, bool 
 	FBRenderer* lRenderer = mSystem.Renderer;
 	const int numberOfModels = lRenderer->DisplayableGeometryCount;
 
-	if (mUberShader.get() == nullptr || numberOfModels == 0)
+	if ( false == mMaterialShaders.IsOk() || 0 == numberOfModels )
 		return;
 
 	// process shader info before passes rendering

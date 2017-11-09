@@ -18,7 +18,7 @@
 //--- SDK include
 #include <fbsdk/fbsdk.h>
 
-#include "Shader.h"
+#include "ShaderFX.h"
 
 // STL
 #include <vector>
@@ -259,7 +259,19 @@ public:
 	// call this value when force is false, then value will be used only if hint if false
 	//void		SetLogarithmicDepth(const bool value);
 
-	Graphics::ShaderEffect		*GetUberShaderPtr();
+	// GetShaderFXPtr
+	//	- initialize - flag to 
+	Graphics::BaseMaterialShaderFX		*GetShaderFXPtr(const int shaderIndex, bool initialize=true);
+	void EvaluateOnShaderFX( std::function<void(Graphics::BaseMaterialShaderFX*)> f )
+	{
+		for (int i=0; i<Graphics::MATERIAL_SHADER_COUNT; ++i)
+		{
+			if ( nullptr != GetShaderFXPtr(i, false) )
+				f( GetShaderFXPtr(i, false) );
+		}
+	}
+
+
 	Graphics::ShaderComposite	*GetCompositeShaderPtr();
 
 	
@@ -397,7 +409,8 @@ protected:
 	//
 	bool				mNeedEvaluate;
 
-	bool				mNeedUberShader;
+	//bool				mNeedProjectorsShader;
+	//bool				mNeedIBLShader;
 	bool				mNeedCompositeShader;
 	//bool				mLogarithmicDepthHint;		//!< global value that we should take in account
 
@@ -417,13 +430,16 @@ protected:
 	int					mNumberOfUnReadyModels;
 
 	// pass common scene data to a shader
+	GLint						mVertexId;
+	GLint						mFragmentId;
+
 	GLint						mLocAllTheMeshes;
 	GLint						mLocAllTheModels;
 
-	int							mLocTexture;
-	int							mLocMaterial;
-	int							mLocShader;
-	int							mLocProjectors;
+	GLint						mLocTexture;
+	GLint						mLocMaterial;
+	GLint						mLocShader;
+	GLint						mLocProjectors;
 
 	CGPUBufferNV				mBufferModel;
 	CGPUBufferNV				mBufferMesh;
@@ -440,7 +456,9 @@ protected:
 	};
 	CPushCameraCacheInfo			mPushCameraCacheInfo;
 
-	std::auto_ptr<Graphics::ShaderEffect>		mUberShader;
+	
+	Graphics::MaterialShaderManager		mMaterialShaders;
+
 	std::auto_ptr<Graphics::ShaderComposite>	mShaderComposite;
 
 	bool						mLockSmallEvents; // don't process small events during clear, load or merge

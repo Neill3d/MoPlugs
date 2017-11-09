@@ -30,9 +30,9 @@ const bool CUberShaderCallback::IsForShaderAndPass(FBShader *pShader, const ESha
 
 bool CUberShaderCallback::OnTypeBegin(const CRenderOptions &options, bool useMRT)
 {
-	mUberShader = mGPUFBScene->GetUberShaderPtr();
+	mShaderFX = mGPUFBScene->GetShaderFXPtr(mCurrentTech);
 
-	if (nullptr == mUberShader)
+	if (nullptr == mShaderFX)
 		return false;
 
 	ERenderGoal goal = options.GetGoal();
@@ -64,9 +64,10 @@ bool CUberShaderCallback::OnTypeBegin(const CRenderOptions &options, bool useMRT
 	}
 	*/
 	CHECK_GL_ERROR_MOBU();
-	mUberShader->SetTechnique( mCurrentTech );
-	mUberShader->SetBindless(mIsBindless);
-	mUberShader->SetNumberOfProjectors( 0 );
+	mShaderFX->ModifyShaderFlags( Graphics::eShaderFlag_Bindless, mIsBindless );
+	//mUberShader->SetTechnique( mCurrentTech );
+	//mUberShader->SetBindless(mIsBindless);
+	//mUberShader->SetNumberOfProjectors( 0 );
 	//mUberShader->SetRimParameters( 0.0, 0.0, false, vec3(0.0f, 0.0f, 0.0f) );
 	//mUberShader->SetDepthDisplacement( 0.0f );
 	
@@ -94,8 +95,8 @@ bool CUberShaderCallback::OnTypeBegin(const CRenderOptions &options, bool useMRT
 	}
 	*/
 
-	mUberShader->NoTextures( false == options.IsTextureMappingEnable() );
-	mUberShader->SetEarlyZ(mIsEarlyZ);
+	mShaderFX->ModifyShaderFlags( Graphics::eShaderFlag_NoTextures, false == options.IsTextureMappingEnable() );
+	mShaderFX->ModifyShaderFlags( Graphics::eShaderFlag_EarlyZ, mIsEarlyZ );
 	
 	//
 	OnTypeBeginPredefine( options, useMRT );
@@ -112,7 +113,7 @@ bool CUberShaderCallback::OnTypeBegin(const CRenderOptions &options, bool useMRT
 
 void CUberShaderCallback::OnTypeEnd(const CRenderOptions &options)
 {
-	if (nullptr == mUberShader)
+	if (nullptr == mShaderFX)
 		return;
 	/*
 	// proj tex outputs to normal and mask attachments, not only color
@@ -122,7 +123,7 @@ void CUberShaderCallback::OnTypeEnd(const CRenderOptions &options)
 		glDrawBuffers( 1, buffers );
 	}
 	*/
-	mUberShader->UnsetTextures();
+	mShaderFX->UnsetTextures();
 	mGPUFBScene->UnBindUberShader();
 
 	// unbind matCap and shadows
@@ -295,7 +296,7 @@ const bool CProjTexBindedCallback::IsForShaderAndPass(FBShader *pShader, const E
 
 bool CProjTexBindedCallback::OnInstanceBegin(const CRenderOptions &options, FBRenderOptions *pFBRenderOptions, FBShader *pShader, CBaseShaderInfo *pInfo)
 {
-	if (nullptr == mUberShader)
+	if (nullptr == mShaderFX)
 		return false;
 
 	//mShader = pInfo->GetFBShader();
@@ -488,7 +489,7 @@ void CProjTexBindedCallback::OnInstanceEnd(const CRenderOptions &options, FBShad
 
 void CProjTexBindedCallback::InternalInstanceEnd()
 {
-	if (nullptr == mUberShader)
+	if (nullptr == mShaderFX)
 		return;
 
 	if (FBIS(mShader, ProjTexShader))
@@ -529,7 +530,7 @@ void CProjTexBindedCallback::OnMaterialEnd(const CRenderOptions &options, FBMate
 
 bool CProjTexBindedCallback::OnModelDraw(const CRenderOptions &options, FBRenderOptions *pFBRenderOptions, FBModel *pModel, CBaseShaderInfo *pInfo)
 {
-	if (nullptr == mUberShader)
+	if (nullptr == mShaderFX)
 		return false;
 
 	// TODO: bind model sprite sheet property values !
@@ -549,19 +550,19 @@ bool CProjTexBindedCallback::OnModelDraw(const CRenderOptions &options, FBRender
 			FBVector3d	v;
 			pAnimProp->GetData(v, sizeof(double)*3);
 
-			mUberShader->UpdateTextureOffset( vec4( (float)v[0], (float)v[1], (float)v[2], 0.0) );
+			mShaderFX->UpdateTextureOffset( vec4( (float)v[0], (float)v[1], (float)v[2], 0.0) );
 
 			pAnimProp = (FBPropertyAnimatable*) pModel->PropertyList.Find( "SpriteSheet Scaling" );
 			if (pAnimProp)
 			{
 				pAnimProp->GetData(v, sizeof(double)*3);
-				mUberShader->UpdateTextureScaling( vec4( (float)v[0], (float)v[1], (float)v[2], 0.0) );
+				mShaderFX->UpdateTextureScaling( vec4( (float)v[0], (float)v[1], (float)v[2], 0.0) );
 			}
 		}
 		else
 		{
-			mUberShader->UpdateTextureOffset( vec4( 0.0, 0.0, 0.0, 0.0) );
-			mUberShader->UpdateTextureScaling( vec4( 1.0, 1.0, 1.0, 1.0) );
+			mShaderFX->UpdateTextureOffset( vec4( 0.0, 0.0, 0.0, 0.0) );
+			mShaderFX->UpdateTextureScaling( vec4( 1.0, 1.0, 1.0, 1.0) );
 		}
 	}
 

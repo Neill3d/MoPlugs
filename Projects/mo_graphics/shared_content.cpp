@@ -14,7 +14,7 @@
 #include "shared_content.h"
 #include "shared_camera.h"
 
-#include "Shader.h"
+#include "ShaderFX.h"
 #include "ProjTex_shader.h"
 
 // STL
@@ -31,7 +31,6 @@
 
 #include "mographics_common.h"
 
-#define UBERSHADER_EFFECT			"ProjectiveMapping.glslfx"
 #define COMPOSITE_EFFECT			"CompositeMaster.glslfx"
 
 //extern Graphics::ShaderEffect*		mpLightShader;
@@ -64,9 +63,13 @@
 CGPUFBScene::CGPUFBScene()
 	: mGPUSceneLights( new CGPUShaderLights() )
 	//, mFrameBufferBack( new FrameBuffer( 0, 0, FrameBuffer::eCreateColorTexture | FrameBuffer::eCreateDepthTexture | FrameBuffer::eDeleteFramebufferOnCleanup, 1 ) )
-	, mUberShader(nullptr)
+	//, mProjectorsShader(nullptr)
+	//, mIBLShader(nullptr)
 	, mShaderComposite(nullptr)
 {
+
+	mVertexId = -1;
+	mFragmentId = -1;
 
 	mLocAllTheMeshes = -1;
 	mLocAllTheModels = -1;
@@ -108,6 +111,13 @@ CGPUFBScene::CGPUFBScene()
 	mLastLightsBinded = nullptr;
 
 	ShadowConstructor();
+
+	FBString effectPath, effectFullName;
+	if (true == FindEffectLocation( "\\GLSL_FX\\IBL.glslfx", effectPath, effectFullName ) )
+	{
+		effectPath = effectPath + "\\GLSL_FX\\";
+		mMaterialShaders.SetEffectStoragePath( effectPath );
+	}
 }
 
 CGPUFBScene::~CGPUFBScene()
@@ -116,7 +126,10 @@ CGPUFBScene::~CGPUFBScene()
 
 	//mFrameBufferBack.reset(nullptr);
 
-	mUberShader.reset(nullptr);
+	mMaterialShaders.Clear();
+
+	//mProjectorsShader.reset(nullptr);
+	//mIBLShader.reset(nullptr);
 	mShaderComposite.reset(nullptr);
 }
 
@@ -149,15 +162,13 @@ CCameraInfoCache &CGPUFBScene::GetCameraCache()
 
 void CGPUFBScene::ClearCache()
 {
-	mUberShader.reset(nullptr);
-
+	mMaterialShaders.Clear();
 	mLastTime = FBTime::Infinity;
 }
 
 void CGPUFBScene::SetLogarithmicDepth(const bool value)
 {
-	if (mUberShader.get() )
-		mUberShader->SetLogarithmicDepth(value);
+	mMaterialShaders.SetLogarithmicDepth(value);
 }
 
 void CGPUFBScene::LoadShader()
@@ -201,56 +212,7 @@ void CGPUFBScene::LoadShader()
 	}
 
 	//
-	if (mNeedUberShader && mUberShader.get() == nullptr)
-	{
-		// try to load
-
-		FBString effectPath, effectFullName;
-
-		Graphics::ShaderEffect	*pEffects = nullptr;
-
-		if ( FindEffectLocation( FBString("\\GLSL_FX\\", UBERSHADER_EFFECT), effectPath, effectFullName ) )
-		{
-			pEffects =  new Graphics::ShaderEffect();
-			if( !pEffects->Initialize( FBString(effectPath, "\\GLSL_FX\\"), UBERSHADER_EFFECT, 512, 512, 1.0) )
-			{
-				mNeedUberShader = false;
-				pEffects = nullptr;
-				//mUberShader.reset(nullptr);
-				
-				FBTrace( "[VR RENDERER]: Failed to initialize an Uber shader!\n" );
-			}
-		}
-		else
-		{
-			FBTrace( "[VR RENDERER]: Failed to find an Uber shader!\n" );
-
-			mNeedUberShader = false;
-			pEffects = nullptr;
-			//mUberShader.reset(nullptr);
-		}
-
-		if (pEffects != nullptr)
-		{
-			pEffects->SetBindless(false);
-			pEffects->SetCubeMapRendering(false);
-			//pEffects->SetLogarithmicDepth(false);
-			//pEffects->SetDepthDisplacement( 0.0f );
-			pEffects->SetTechnique( Graphics::eEffectTechniqueShading );
-			pEffects->PrepCurrentTech();
-
-			const auto loc = pEffects->GetCustomEffectShaderLocationsPtr();
-			mLocTexture = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheTextures);
-			mLocMaterial = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheMaterials);
-			mLocShader = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheShaders);
-			mLocProjectors = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheProjectors);
-
-			CHECK_GL_ERROR_MOBU();
-
-			//mLastContext = wglGetCurrentContext();
-			mUberShader.reset(pEffects);
-		}
-	}
+	mMaterialShaders.LoadShaders();
 }
 
 
@@ -358,11 +320,18 @@ void CGPUFBScene::PrepareCamera(FBCamera *pCamera, const CTilingInfo &tilingInfo
 		//mUberShader->SetCubeMapRendering(false);
 	}
 	*/
+
+	auto &cameraCache = mCameraCache;
+	mMaterialShaders.EvaluateOnShader( [&cameraCache](Graphics::BaseMaterialShaderFX *pShaderFX) {
+		pShaderFX->UploadCameraUniforms( cameraCache );
+	} );
+
+	/*
 	if (mUberShader.get() )
 	{
 		mUberShader->UploadCameraUniforms(mCameraCache);
 	}
-
+	*/
 	//FBColorAndAlpha backcolor( pcamera->BackGroundColor );
 	//glClearColor((float)backcolor[0], (float)backcolor[1], (float)backcolor[2], (float)backcolor[3]);
 
@@ -386,10 +355,11 @@ void CGPUFBScene::PopCameraCache()
 	// global interchange with shader plugins
 	SetCameraCache(mCameraCache);
 
-	if (mUberShader.get() )
-	{
-		mUberShader->UploadCameraUniforms(mCameraCache);
-	}
+	auto &cameraCache = mCameraCache;
+
+	mMaterialShaders.EvaluateOnShader( [&cameraCache](Graphics::BaseMaterialShaderFX *pShaderFX) {
+		pShaderFX->UploadCameraUniforms(cameraCache);
+	} );
 
 	CHECK_GL_ERROR_MOBU();
 }
@@ -694,21 +664,28 @@ void CGPUFBScene::PrepareBuffersFromCamera()
 
 bool CGPUFBScene::PrepRender()
 {
-	if (nullptr == mUberShader.get() )
+	if (false == mMaterialShaders.IsOk() )
 		return false;
+
 	//
 	//PrepareCamera(pRenderOptions, cubeMapSetup, cubeMapFace, cubemap);
 
-	mUberShader->PrepCurrentTech();
+	Graphics::BaseMaterialShaderFX *pShaderFX = mMaterialShaders.Get();
 
-	const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
-	mLocTexture = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheTextures);
-	mLocMaterial = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheMaterials);
-	mLocShader = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheShaders);
-	mLocProjectors = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheProjectors);
+	pShaderFX->PrepTechAndPass();
 
-	mLocAllTheMeshes = loc->GetVertexLocation(Graphics::eCustomVertexLocationAllTheMeshes);
-	mLocAllTheModels = loc->GetVertexLocation(Graphics::eCustomVertexLocationAllTheModels);
+	const auto loc = pShaderFX->GetCurrentEffectLocationsPtr();
+
+	mVertexId = loc->vptr()->GetShaderId();
+	mFragmentId = loc->fptr()->GetShaderId();
+
+	mLocTexture = loc->fptr()->GetLocation(Graphics::eCustomLocationAllTheTextures);
+	mLocMaterial = loc->fptr()->GetLocation(Graphics::eCustomLocationAllTheMaterials);
+	mLocShader = loc->fptr()->GetLocation(Graphics::eCustomLocationAllTheShaders);
+	mLocProjectors = loc->fptr()->GetLocation(Graphics::eCustomLocationAllTheProjectors);
+
+	mLocAllTheMeshes = loc->vptr()->GetLocation(Graphics::eCustomVertexLocationAllTheMeshes);
+	mLocAllTheModels = loc->vptr()->GetLocation(Graphics::eCustomVertexLocationAllTheModels);
 
 	//
 	// render to view
@@ -733,73 +710,54 @@ bool CGPUFBScene::PrepRender()
 	// this could be used for every camera
 	//mShaderLights->Prep(mCameraCache, nullptr);
 	
-	mUberShader->SetNumberOfProjectors(0);
-	mUberShader->UploadModelTransform( mat4(array16_id) );
+	//mUberShader->SetNumberOfProjectors(0);
+	pShaderFX->UploadModelTransform( mat4(array16_id) );
 	
 	FBColor ambientColor = FBGlobalLight::TheOne().AmbientColor;
 	
-	mUberShader->UploadLightingInformation( false,
+	pShaderFX->UploadLightingInformation( false,
 			vec4((float)ambientColor[0], (float)ambientColor[1], (float)ambientColor[2], 0.0f), 
 			0, 0);
 	
 	BindLights(true);
 	//}
 
-	mBufferTexture.BindAsUniform( mUberShader->GetFragmentProgramId(), mLocTexture, 0 );
-	mBufferShader.BindAsUniform( mUberShader->GetFragmentProgramId(), mLocShader, 0 );
-	mBufferMaterial.BindAsUniform( loc->GetFragmentId(), mLocMaterial, 0 );
+	const GLint fragmentId = loc->fptr()->GetShaderId();
+	const GLint vertexId = loc->vptr()->GetShaderId();
 
-	mBufferModel.BindAsUniform( mUberShader->GetVertexProgramId(), mLocAllTheModels, 0 );
-	mBufferMesh.BindAsUniform( mUberShader->GetVertexProgramId(), mLocAllTheMeshes, 0 );
+	mBufferTexture.BindAsUniform( fragmentId, mLocTexture, 0 );
+	mBufferShader.BindAsUniform( fragmentId, mLocShader, 0 );
+	mBufferMaterial.BindAsUniform( fragmentId, mLocMaterial, 0 );
+
+	mBufferModel.BindAsUniform( vertexId, mLocAllTheModels, 0 );
+	mBufferMesh.BindAsUniform( vertexId, mLocAllTheMeshes, 0 );
 
 	return true;
 }
 
 bool CGPUFBScene::BindUberShader(bool overrideShading, const EShadingType overrideShadingType)
 {
-	if (mUberShader.get() == nullptr) 
-		return false;
+	Graphics::BaseMaterialShaderFX *pShader = mMaterialShaders.Get();
 
-	//mUberShader->SetLogarithmicDepth( mSettings->DisplayDepth == eGraphicsDepthLog );
-	
-	mUberShader->Bind();
-
-	
-	if ( (true == mUberShader->IsWallTechnique()) 
-		&& (false == mUberShader->IsEarlyZ()) )
+	bool lSuccess = false;
+	if ( nullptr != pShader ) 
 	{
-		// DONE: subroutines for blending modes
-		// set subroutine values
-		GLuint index[30];
-		for (int i=0; i<30; ++i)
-			index[i] = i;
-	
-		if (overrideShading)
-		{
-			const int indexOffset = 25;
-
-			for (int i=0; i<eShadingTypeCount; ++i)
-				index[indexOffset + i] = indexOffset + (int) overrideShadingType;
-		}
-
-		glUniformSubroutinesuiv( GL_FRAGMENT_SHADER, GLsizei(30), &index[0] );
+		pShader->Bind();
+		CHECK_GL_ERROR_MOBU();
+		lSuccess = true;
 	}
-
-	CHECK_GL_ERROR_MOBU();
-	return true;
+	return lSuccess;
 }
 
 void CGPUFBScene::UnBindUberShader()
 {
-	if (mUberShader.get() == nullptr) 
-		return;
-
-	mUberShader->UnBind();
-
-	mLastLightsBinded = nullptr;
+	Graphics::BaseMaterialShaderFX *pShader = mMaterialShaders.Get();
+	if ( nullptr != pShader ) 
+	{
+		pShader->UnBind();
+		mLastLightsBinded = nullptr;
+	}
 }
-
-
 
 void CGPUFBScene::UploadModelInfo(FBModel *pModel, bool uploadAndBind)
 {
@@ -817,7 +775,7 @@ void CGPUFBScene::UploadModelInfo(FBModel *pModel, bool uploadAndBind)
 	mBufferModel.UpdateData( sizeof(ModelGLSL), 1, &modeldata );
 	
 	if (true == uploadAndBind && mLocAllTheModels >= 0)
-		mBufferModel.BindAsUniform( mUberShader->GetVertexProgramId(), mLocAllTheModels, 0 );
+		mBufferModel.BindAsUniform( mVertexId, mLocAllTheModels, 0 );
 }
 
 void CGPUFBScene::UploadMeshInfo(const MeshGLSL &meshinfo, bool uploadAndBind)
@@ -832,7 +790,7 @@ void CGPUFBScene::UploadMeshInfo(const MeshGLSL &meshinfo, bool uploadAndBind)
 	mBufferMesh.UpdateData( sizeof(MeshGLSL), 1, &meshinfo );
 
 	if (true == uploadAndBind && mLocAllTheMeshes >= 0)
-		mBufferMesh.BindAsUniform( mUberShader->GetVertexProgramId(), mLocAllTheMeshes, 0 );
+		mBufferMesh.BindAsUniform( mVertexId, mLocAllTheMeshes, 0 );
 }
 
 void CGPUFBScene::UploadShader(FBShader *pShader)
@@ -842,14 +800,14 @@ void CGPUFBScene::UploadShader(FBShader *pShader)
 	mBufferShader.UpdateData(sizeof(ShaderGLSL), 1, &shaderdata);
 }
 
-Graphics::ShaderEffect *CGPUFBScene::GetUberShaderPtr()
+Graphics::BaseMaterialShaderFX *CGPUFBScene::GetShaderFXPtr(const int shaderIndex, bool initialize)
 {	
-	if (mUberShader.get() == nullptr)
-	{
-		mNeedUberShader = true;
-	}
+	mMaterialShaders.SetCurrent(shaderIndex);
+
+	if ( true == initialize && false == mMaterialShaders.IsOk() )
+		mMaterialShaders.NeedUpdate();
 	
-	return mUberShader.get();
+	return mMaterialShaders.Get();
 }
 
 Graphics::ShaderComposite *CGPUFBScene::GetCompositeShaderPtr()
@@ -864,8 +822,7 @@ Graphics::ShaderComposite *CGPUFBScene::GetCompositeShaderPtr()
 
 void CGPUFBScene::ReloadUberShader()
 {
-	mUberShader.reset(nullptr);
-	mNeedUberShader = true;
+	mMaterialShaders.Clear();
 }
 
 void CGPUFBScene::ReloadCompositeShader()
@@ -891,7 +848,8 @@ void CGPUFBScene::ChangeContext(FBRenderOptions *pFBRenderOptions)
 
 	//mFrameBufferBack.reset(nullptr);
 	
-	mUberShader.reset(nullptr);
+	mMaterialShaders.Clear();
+
 	mShaderComposite.reset(nullptr);
 
 	mShadersInspector.ChangeContext();
@@ -1315,21 +1273,26 @@ const int CGPUFBScene::FindMeshIndex( FBModel *pModel, FBMaterial *pMaterial, FB
 
 bool CGPUFBScene::BindProjectors( const CProjectors *pProjectors, const GLuint muteTextureId )
 {
-	if (mUberShader.get() == nullptr || pProjectors == nullptr)
-		return false;
-
-	const int count = pProjectors->GetNumberOfProjectors();
-	mUberShader->UpdateNumberOfProjectors( count );
+	bool lSuccess = false;
+	Graphics::BaseMaterialShaderFX	*pShader = mMaterialShaders.Get();
 	
-	if ( count > 0 )
+	if ( nullptr != pProjectors && IsShader(pShader, Graphics::ProjectorsShaderFX) )
 	{
-		GLint loc = mUberShader->GetCustomEffectShaderLocationsPtr()->GetFragmentLocation(Graphics::eCustomLocationAllTheProjectors);
-		pProjectors->Bind( mUberShader->GetFragmentProgramId(), loc, muteTextureId );
+		Graphics::ProjectorsShaderFX *pProjectorsFX = (Graphics::ProjectorsShaderFX*) pShader;
 
-		return true;
+		const int count = pProjectors->GetNumberOfProjectors();
+		pProjectorsFX->UpdateNumberOfProjectors( count );
+	
+		if ( count > 0 )
+		{
+			GLint loc = pProjectorsFX->GetCurrentEffectLocationsPtr()->fptr()->GetLocation(Graphics::eCustomLocationAllTheProjectors);
+			pProjectors->Bind( pProjectorsFX->GetFragmentProgramId(), loc, muteTextureId );
+
+			lSuccess = true;
+		}
 	}
 
-	return false;
+	return lSuccess;
 }
 
 void CGPUFBScene::BindRimTexture(const GLuint id)

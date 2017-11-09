@@ -233,7 +233,7 @@ bool CGPUFBScene::RenderAllShadowMaps( const CRenderOptions &options, FBRenderOp
 	if ( 0 == mShadowNodes.size() )
 		return false;
 
-	if (nullptr == mUberShader.get() )
+	if ( false == mMaterialShaders.IsOk() )
 		return false;
 
 	// TODO: shadow framebuffer with multisampling ?!
@@ -404,7 +404,7 @@ bool CGPUFBScene::RenderAllShadowMaps( const CRenderOptions &options, FBRenderOp
 		const mat4 &mp = lightDataIter->proj;
 		const mat4 &mv = lightDataIter->modelView;
 
-		mUberShader->UploadLightTransform( mp, mv, mat4_id ); 
+		mMaterialShaders->UploadLightTransform( mp, mv, mat4_id ); 
 
 		//
 		// global interchange with shader plugins
@@ -471,7 +471,7 @@ bool CGPUFBScene::RenderAllShadowMaps( const CRenderOptions &options, FBRenderOp
 	//!
 	RestoreFrameBuffer(&lFrameBufferInfo);
 
-	mUberShader->UploadCameraUniforms( mCameraCache );
+	mMaterialShaders->UploadCameraUniforms( mCameraCache );
 
 	return true;
 }

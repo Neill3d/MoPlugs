@@ -762,6 +762,11 @@ copy "$(ProjectDir)Shaders\LightingPS.cg" "$(OutDir)LightingPS.cg"
       <Command>
       </Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>xcopy "$(ProjectDir)\GLSL\*.*" "..\..\bin\System\GLSL" /Y /I
+xcopy "$(ProjectDir)\GLSL_CS\*.*" "..\..\bin\System\GLSL_CS" /Y /I
+xcopy "$(ProjectDir)\GLSL_FX\*.*" "..\..\bin\System\GLSL_FX" /Y /I</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <CustomBuildStep Include="Shaders\LightingPS.cg">
@@ -838,7 +843,7 @@ copy "$(ProjectDir)Shaders\LightingPS.cg" "$(OutDir)LightingPS.cg"
     <ClCompile Include="render_conveyer.cpp" />
     <ClCompile Include="render_layer_info.cpp" />
     <ClCompile Include="shaderCallbacks_blendshapeCompute.cpp" />
-    <ClCompile Include="shaderCallbacks_character.cpp" />
+    <ClCompile Include="shaderCallbacks_IBL.cpp" />
     <ClCompile Include="shared_content_events.cpp" />
     <ClCompile Include="shared_content_geomcache.cpp" />
     <ClCompile Include="shared_content_lights.cpp" />
@@ -1005,6 +1010,7 @@ copy "$(ProjectDir)Shaders\LightingPS.cg" "$(OutDir)LightingPS.cg"
     <None Include="GLSL_CS\recomputeNormalsNorm.cs" />
     <None Include="GLSL_CS\recomputeNormalsZero.cs" />
     <None Include="GLSL_FX\CompositeMaster.glslfx" />
+    <None Include="GLSL_FX\IBL.glslfx" />
     <None Include="GLSL_FX\ProjectiveMapping.glslfx" />
     <None Include="GLSL_FX\shared_common.glslfxh" />
     <None Include="GLSL_FX\shared_customcolor.glslfxh" />

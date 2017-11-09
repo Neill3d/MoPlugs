@@ -15,7 +15,7 @@
 //--- SDK include
 #include <fbsdk/fbsdk.h>
 #include "..\Common\Common_shader.h"
-#include "Shader.h"
+#include "ShaderFX.h"
 #include "..\Common_Projectors\bakeProjectors_projectors.h"
 
 #ifndef MAX_PROJECTORS_COUNT

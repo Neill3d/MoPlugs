@@ -75,13 +75,12 @@ const bool CShaderGPUCacheCallback::IsForShaderAndPass(FBShader *pShader, const 
 
 void CShaderGPUCacheCallback::PrepareInstance(const CRenderOptions &options, FBShader *pShader)
 {
-	if (true == mGPUFBScene->IsWaiting() || nullptr == pShader || nullptr == mGPUFBScene->GetUberShaderPtr() )
+	mShaderFX = mGPUFBScene->GetShaderFXPtr( mCurrentTech );
+	if (true == mGPUFBScene->IsWaiting() || nullptr == pShader || nullptr == mShaderFX )
 		return;
 
 	if ( !FBIS(pShader, ORShaderGPUCache) )
 		return;
-
-	mUberShader = mGPUFBScene->GetUberShaderPtr();
 
 	ORShaderGPUCache *pGPUCache = (ORShaderGPUCache*) pShader; // pInfo->GetFBShader();
 	CGPUCacheModel *pCacheModel = pGPUCache->GetGPUCacheModelPtr();
@@ -90,7 +89,7 @@ void CShaderGPUCacheCallback::PrepareInstance(const CRenderOptions &options, FBS
 		return;
 
 	// models normal matrix update, according to camera modelview
-	pCacheModel->PrepRender(mGPUFBScene->GetCameraCache(), mUberShader, false, nullptr);
+	pCacheModel->PrepRender(mGPUFBScene->GetCameraCache(), mShaderFX, false, nullptr);
 
 	// update projectors and local lighting gpu buffers
 	CProjTexBindedCallback::PrepareInstance(options, pShader);
@@ -98,13 +97,12 @@ void CShaderGPUCacheCallback::PrepareInstance(const CRenderOptions &options, FBS
 
 void CShaderGPUCacheCallback::PrepareModel(const CRenderOptions &options, FBModel *pModel, FBShader *pShader)
 {
-	if (true == mGPUFBScene->IsWaiting() || nullptr == pShader || nullptr == mGPUFBScene->GetUberShaderPtr())
+	mShaderFX = mGPUFBScene->GetShaderFXPtr( mCurrentTech );
+	if ( true == mGPUFBScene->IsWaiting() || nullptr == pShader || nullptr == mShaderFX )
 		return;
 
 	if ( !FBIS(pShader, ORShaderGPUCache) )
 		return;
-
-	mUberShader = mGPUFBScene->GetUberShaderPtr();
 
 	ORShaderGPUCache *pGPUCache = (ORShaderGPUCache*) pShader; // pInfo->GetFBShader();
 	CGPUCacheModel *pCacheModel = pGPUCache->GetGPUCacheModelPtr();
@@ -136,13 +134,13 @@ void CShaderGPUCacheCallback::DetachRenderContext(FBRenderOptions *pFBRenderOpti
 
 bool CShaderGPUCacheCallback::OnInstanceBegin(const CRenderOptions &options, FBRenderOptions *pFBRenderOptions, FBShader *pShader, CBaseShaderInfo *pInfo)
 {
+	mShaderFX = mGPUFBScene->GetShaderFXPtr( mCurrentTech );
+
 	if (nullptr == pShader || !FBIS(pShader, ORShaderGPUCache) )
 		return false;
-	if (true == mGPUFBScene->IsWaiting() || nullptr == mGPUFBScene->GetUberShaderPtr() )
+	if (true == mGPUFBScene->IsWaiting() || nullptr == mShaderFX )
 		return false;
 	
-	mUberShader = mGPUFBScene->GetUberShaderPtr();
-
 	mShader = pShader;
 	ORShaderGPUCache *pGPUCache = (ORShaderGPUCache*) pShader; // pInfo->GetFBShader();
 	CGPUCacheModel *pCacheModel = pGPUCache->GetGPUCacheModelPtr();
@@ -184,7 +182,7 @@ bool CShaderGPUCacheCallback::OnInstanceBegin(const CRenderOptions &options, FBR
 	// ?! why we should run it everytime ?!
 	//pCacheModel->NeedUpdateTexturePtr();
 	
-	pCacheModel->RenderBegin(mGPUFBScene->GetCameraCache(), mUberShader, isEarlyZ, 
+	pCacheModel->RenderBegin(mGPUFBScene->GetCameraCache(), mShaderFX, isEarlyZ, 
 		options.IsCubeMapRender(), options.GetCubeMapData() );
 	
 	// check for projectors and local lighting
@@ -200,9 +198,10 @@ bool CShaderGPUCacheCallback::OnInstanceBegin(const CRenderOptions &options, FBR
 
 bool CShaderGPUCacheCallback::OwnModelShade(const CRenderOptions &options, FBRenderOptions *pFBRenderOptions, FBModel *pModel, FBShader *pShader, CBaseShaderInfo *pInfo)
 {
+	mShaderFX = mGPUFBScene->GetShaderFXPtr( mCurrentTech );
 
 	if (true == mGPUFBScene->IsWaiting() || nullptr == pModel || nullptr == mShader
-		|| nullptr == mUberShader)
+		|| nullptr == mShaderFX)
 	{
 		return false;
 	}
@@ -233,7 +232,7 @@ bool CShaderGPUCacheCallback::OwnModelShade(const CRenderOptions &options, FBRen
 
 		//mUberShader->UploadModelTransform(m);
 		//pCacheModel->SetCacheMatrix(m);
-		mUberShader->UploadModelTransform(m);
+		mShaderFX->UploadModelTransform(m);
 	//
 	//
 	const ERenderGoal goal = options.GetGoal();
@@ -266,7 +265,7 @@ bool CShaderGPUCacheCallback::OwnModelShade(const CRenderOptions &options, FBRen
 	
 	if ( eShaderPassOpaque == pass )
 	{
-		pCacheModel->RenderOpaque(mGPUFBScene->GetCameraCache(), mUberShader);
+		pCacheModel->RenderOpaque(mGPUFBScene->GetCameraCache(), mShaderFX);
 	}
 	else
 	{
@@ -279,12 +278,12 @@ bool CShaderGPUCacheCallback::OwnModelShade(const CRenderOptions &options, FBRen
 		if (options.IsMultisampling() )
 			glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 			
-		pCacheModel->RenderOpaque(mGPUFBScene->GetCameraCache(), mUberShader);
+		pCacheModel->RenderOpaque(mGPUFBScene->GetCameraCache(), mShaderFX);
 		
 		if (options.IsMultisampling() )
 			glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 			
-		pCacheModel->RenderTransparent(mGPUFBScene->GetCameraCache(), mUberShader);
+		pCacheModel->RenderTransparent(mGPUFBScene->GetCameraCache(), mShaderFX);
 	}
 	
 	return true;
@@ -292,7 +291,7 @@ bool CShaderGPUCacheCallback::OwnModelShade(const CRenderOptions &options, FBRen
 
 void CShaderGPUCacheCallback::OnInstanceEnd(const CRenderOptions &options, FBShader *pShader, CBaseShaderInfo *pInfo)
 {
-	if (true == mGPUFBScene->IsWaiting() || nullptr == mShader || nullptr == mUberShader)
+	if (true == mGPUFBScene->IsWaiting() || nullptr == mShader || nullptr == mShaderFX)
 		return;
 
 	ORShaderGPUCache *pGPUCache = (ORShaderGPUCache*) mShader; // pShader; // pInfo->GetFBShader();
@@ -309,7 +308,7 @@ void CShaderGPUCacheCallback::OnInstanceEnd(const CRenderOptions &options, FBSha
 	//
 	//
 	
-	pCacheModel->RenderEnd(mGPUFBScene->GetCameraCache(), mUberShader);
+	pCacheModel->RenderEnd(mGPUFBScene->GetCameraCache(), mShaderFX);
 
 	
 

@@ -175,9 +175,6 @@
     <ClCompile Include="render_layer_info.cpp">
       <Filter>scenegraph_shared</Filter>
     </ClCompile>
-    <ClCompile Include="shaderCallbacks_character.cpp">
-      <Filter>scenegraph_shared</Filter>
-    </ClCompile>
     <ClCompile Include="shaderCallbacks_blendshapeCompute.cpp">
       <Filter>scenegraph_shared</Filter>
     </ClCompile>
@@ -197,6 +194,9 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="gpucache_saver_mobu.cpp">
+      <Filter>scenegraph_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="shaderCallbacks_IBL.cpp">
       <Filter>scenegraph_shared</Filter>
     </ClCompile>
   </ItemGroup>
@@ -527,6 +527,9 @@
       <Filter>GLSL_FX</Filter>
     </None>
     <None Include="GLSL_FX\TexturesBrowser.glslfx">
+      <Filter>GLSL_FX</Filter>
+    </None>
+    <None Include="GLSL_FX\IBL.glslfx">
       <Filter>GLSL_FX</Filter>
     </None>
   </ItemGroup>

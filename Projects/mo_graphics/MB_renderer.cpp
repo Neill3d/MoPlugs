@@ -848,7 +848,8 @@ void MoRendererCallback::Attach()
 		gCallbackAttached = true;
 		mNeedToRender = true;
 
-		mGPUFBScene->GetUberShaderPtr();
+		// TODO: what is a default shader to initialize ?!
+		mGPUFBScene->GetShaderFXPtr(Graphics::MATERIAL_SHADER_PROJECTORS);
     }
 
     // Increase attachment count.
@@ -1273,10 +1274,9 @@ void MoRendererCallback::Render(FBRenderOptions* pFBRenderOptions)
 		{
 			const bool moreColorAttachments = (mCompositionOutput != nullptr);
 
-			if (nullptr != mGPUFBScene->GetUberShaderPtr() )
-			{
-				mGPUFBScene->GetUberShaderPtr()->SetSoftParticles(0.0f);
-			}
+			mGPUFBScene->EvaluateOnShaderFX( [] (Graphics::BaseMaterialShaderFX *pShaderFX) {
+				pShaderFX->SetSoftParticles(0.0f);
+			} );
 
 			// TODO: check we have any "render on back" shader
 			//	check if we have a camera background image plane
@@ -1296,36 +1296,34 @@ void MoRendererCallback::Render(FBRenderOptions* pFBRenderOptions)
 
 			if (renderOptions.IsRenderToTransparencyLayer() )
 			{
-				if (nullptr != mGPUFBScene->GetUberShaderPtr() )
-				{
-					mGPUFBScene->GetUberShaderPtr()->SetSoftParticles(1.0f);
+				mGPUFBScene->EvaluateOnShaderFX( [] (Graphics::BaseMaterialShaderFX *pShaderFX) {
+					pShaderFX->SetSoftParticles(1.0f);
+				} );
 
-					glActiveTexture(GL_TEXTURE18);
-					glBindTexture(GL_TEXTURE_2D, mMainLayer.mFrameBuffer.GetFinalDepthObject() );
-					glActiveTexture(GL_TEXTURE0);
-				}
+				glActiveTexture(GL_TEXTURE18);
+				glBindTexture(GL_TEXTURE_2D, mMainLayer.mFrameBuffer.GetFinalDepthObject() );
+				glActiveTexture(GL_TEXTURE0);
+				
 
 				// render to secondary layer
 				RenderShadingToFramebuffer( eRenderLayerSecondary, mSecondaryLayer.mFrameBuffer, moreColorAttachments,
 						renderOptions.GetWidth(), renderOptions.GetHeight(), samples2, coverageSamples2,
 						renderOptions.GetScaleFactor(), true, renderOptions, pFBRenderOptions, false, stats );
 
-				if (nullptr != mGPUFBScene->GetUberShaderPtr() )
-				{
-					mGPUFBScene->GetUberShaderPtr()->SetSoftParticles(0.0f);
-
-					glActiveTexture(GL_TEXTURE18);
-					glBindTexture(GL_TEXTURE_2D, 0 );
-					glActiveTexture(GL_TEXTURE0);
-				}
+				mGPUFBScene->EvaluateOnShaderFX( [] (Graphics::BaseMaterialShaderFX *pShaderFX) {
+					pShaderFX->SetSoftParticles(0.0f);
+				} );
+				
+				glActiveTexture(GL_TEXTURE18);
+				glBindTexture(GL_TEXTURE_2D, 0 );
+				glActiveTexture(GL_TEXTURE0);
 			}
 		}
 		else
 		{
-			if (nullptr != mGPUFBScene->GetUberShaderPtr() )
-			{
-				mGPUFBScene->GetUberShaderPtr()->SetSoftParticles(0.0f);
-			}
+			mGPUFBScene->EvaluateOnShaderFX( [] (Graphics::BaseMaterialShaderFX *pShaderFX) {
+				pShaderFX->SetSoftParticles(0.0f);
+			} );
 
 			// render to background
 
@@ -1337,28 +1335,27 @@ void MoRendererCallback::Render(FBRenderOptions* pFBRenderOptions)
 			// render to secondary layer
 			if (renderOptions.IsRenderToTransparencyLayer() )
 			{
-				if (nullptr != mGPUFBScene->GetUberShaderPtr() )
-				{
-					mGPUFBScene->GetUberShaderPtr()->SetSoftParticles(1.0f);
-
-					glActiveTexture(GL_TEXTURE18);
-					glBindTexture(GL_TEXTURE_2D, mMainLayer.mFrameBuffer.GetFinalDepthObject() );
-					glActiveTexture(GL_TEXTURE0);
-				}
+				mGPUFBScene->EvaluateOnShaderFX( [] (Graphics::BaseMaterialShaderFX *pShaderFX) {
+					pShaderFX->SetSoftParticles(1.0f);
+				} );
+				
+				glActiveTexture(GL_TEXTURE18);
+				glBindTexture(GL_TEXTURE_2D, mMainLayer.mFrameBuffer.GetFinalDepthObject() );
+				glActiveTexture(GL_TEXTURE0);
+				
 
 				// render to secondary layer
 				RenderTilesToFramebuffer( eRenderLayerSecondary, mSecondaryLayer.mFrameBuffer, mTileLayer.mFrameBuffer,
 						renderOptions.GetWidth(), renderOptions.GetHeight(), samples2, coverageSamples2,
 						renderOptions.GetScaleFactor(), true, renderOptions, pFBRenderOptions, bComps, stats );
 
-				if (nullptr != mGPUFBScene->GetUberShaderPtr() )
-				{
-					mGPUFBScene->GetUberShaderPtr()->SetSoftParticles(0.0f);
+				mGPUFBScene->EvaluateOnShaderFX( [] (Graphics::BaseMaterialShaderFX *pShaderFX) {
+					pShaderFX->SetSoftParticles(0.0f);
+				} );
 
-					glActiveTexture(GL_TEXTURE18);
-					glBindTexture(GL_TEXTURE_2D, 0 );
-					glActiveTexture(GL_TEXTURE0);
-				}
+				glActiveTexture(GL_TEXTURE18);
+				glBindTexture(GL_TEXTURE_2D, 0 );
+				glActiveTexture(GL_TEXTURE0);
 			}
 		}
 		

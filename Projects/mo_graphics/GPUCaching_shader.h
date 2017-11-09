@@ -22,7 +22,7 @@
 //--- SDK include
 #include <fbsdk/fbsdk.h>
 
-#include "Shader.h"
+#include "ShaderFX.h"
 #include "..\Common\Common_shader.h"
 
 #include "ProjTex_shader.h"

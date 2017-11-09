@@ -30,7 +30,7 @@ public:
 		: CBaseShaderCallback(uniqueId)
 	{
 		mGPUFBScene = &CGPUFBScene::instance();
-		mUberShader = nullptr;
+		mShaderFX = nullptr;
 		mLastModel = nullptr;
 		mLastMaterial = nullptr;
 
@@ -39,7 +39,8 @@ public:
 		mNeedOverrideShading = false;
 		mRenderToNormalAndMaskOutput = false;
 
-		mCurrentTech = Graphics::eEffectTechniqueWallMaterial;
+		//mCurrentTech = Graphics::eEffectTechniqueWallMaterial;
+		mCurrentTech = Graphics::MATERIAL_SHADER_PROJECTORS;
 	}
 
 	virtual const char *shaderName() const override
@@ -69,7 +70,8 @@ public:
 
 protected:
 
-	Graphics::EEffectTechnique		mCurrentTech;
+	//Graphics::EEffectTechnique		mCurrentTech;
+	int					mCurrentTech;
 
 	bool				mIsBindless;
 	bool				mIsEarlyZ;
@@ -77,8 +79,8 @@ protected:
 
 	bool				mRenderToNormalAndMaskOutput;
 
-	CGPUFBScene					*mGPUFBScene;
-	Graphics::ShaderEffect		*mUberShader;
+	CGPUFBScene							*mGPUFBScene;
+	Graphics::BaseMaterialShaderFX		*mShaderFX;
 
 	OGLCullFaceInfo		mCullFaceInfo;
 	
@@ -278,7 +280,8 @@ public:
 		: CUberShaderCallback(uniqueId)
 	{
 		mShader = nullptr;
-		mCurrentTech = Graphics::eEffectTechniqueIBL;
+		//mCurrentTech = Graphics::eEffectTechniqueIBL;
+		mCurrentTech = Graphics::MATERIAL_SHADER_IBL;
 		eyePass = false;
 	}
 
@@ -366,13 +369,16 @@ protected:
 	// TODO: assign eye pass if needed
 	virtual bool OnTypeBeginPredefine(const CRenderOptions &options, bool useMRT) override
 	{
-		mUberShader = mGPUFBScene->GetUberShaderPtr();
+		bool lSuccess = false;
+		mShaderFX = mGPUFBScene->GetShaderFXPtr(mCurrentTech);
 
-		if (nullptr == mUberShader)
-			return false;
-
-		mUberShader->SetEyePass(eyePass);
-		return true;
+		if ( nullptr != mShaderFX )
+		{
+			mShaderFX->ModifyShaderFlags( Graphics::eShaderFlag_EyePass, eyePass );
+			lSuccess = true;
+		}
+		
+		return lSuccess;
 	}
 	
 public:

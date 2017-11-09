@@ -636,27 +636,24 @@ void ORShaderGPUCache::ShadeModel( FBRenderOptions* pRenderOptions, FBShaderMode
     bool lIsSelectBufferPicking = lViewingOptions->IsInSelectionBufferPicking();
     bool lIsColorBufferPicking  = lViewingOptions->IsInColorBufferPicking();
 
-	if (nullptr == mGPUFBScene->GetUberShaderPtr() )
-	{
-		mShaderCallback = nullptr;
-	}
-	else
+	mShaderCallback = nullptr;
+	if (nullptr != mGPUFBScene->GetShaderFXPtr(Graphics::MATERIAL_SHADER_PROJECTORS) )
 	{
 		CRenderOptions &options = GetLastRenderOptions();
 
-		if (lIsSelectBufferPicking || lIsColorBufferPicking)
-		{
-			mShaderCallback = mShadersFactory.FindTypeByShaderAndGoal(this, eRenderGoalSelectionId);
-			mShaderPass = eShaderPassOpaque;
-
-			options.SetGoal(eRenderGoalSelectionId);
-		}
-		else
+		if (false == lIsSelectBufferPicking && false == lIsColorBufferPicking)
 		{
 			mShaderCallback = mShadersFactory.FindTypeByShaderAndGoal(this, eRenderGoalShading);
 			mShaderPass = eShaderPassTransparency;
 
 			options.SetGoal(eRenderGoalShading);
+		}
+		else
+		{
+			mShaderCallback = mShadersFactory.FindTypeByShaderAndGoal(this, eRenderGoalSelectionId);
+			mShaderPass = eShaderPassOpaque;
+
+			options.SetGoal(eRenderGoalSelectionId);
 		}
 
 		options.SetPass( mShaderPass );

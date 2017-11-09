@@ -449,7 +449,7 @@ void ProjTexShader::ShaderPassTypeBegin    ( FBRenderOptions* pRenderOptions, FB
 		(kFBPassLighted == pPass),
 		8192, 2048, false, nullptr, 0);
 
-	if (nullptr == mGPUFBScene->GetUberShaderPtr() )
+	if (nullptr == mGPUFBScene->GetShaderFXPtr(Graphics::MATERIAL_SHADER_PROJECTORS) )
 	{
 		mShaderCallback = nullptr;
 	}
@@ -611,7 +611,7 @@ void ProjTexShader::ShaderPassMaterialEnd  ( FBRenderOptions* pRenderOptions, FB
 void ProjTexShader::ShaderPassModelDraw ( FBRenderOptions* pRenderOptions, FBRenderingPass pPass, FBShaderModelInfo *pInfo)
 {
 	if (mGPUFBScene->IsWaiting()  // || pRenderOptions->IsIDBufferRendering()
-		|| nullptr == mGPUFBScene->GetUberShaderPtr())
+		|| nullptr == mGPUFBScene->GetShaderFXPtr(Graphics::MATERIAL_SHADER_PROJECTORS))
 		return;
 
 	if (true == mSelectionMode)
@@ -670,7 +670,7 @@ void ProjTexShader::ShaderPassModelDraw ( FBRenderOptions* pRenderOptions, FBRen
 						meshIndex = meshIndex + regionIndex;
 					}
 					*/
-					mGPUFBScene->GetUberShaderPtr()->UpdateMeshIndex( meshIndex );
+					mGPUFBScene->GetShaderFXPtr(Graphics::MATERIAL_SHADER_PROJECTORS)->UpdateMeshIndex( meshIndex );
 					lInfo->Bind();
 				//}
 		}

@@ -237,7 +237,7 @@ void CGPUFBScene::PrepCubeMapMatrices(const int faceId, const float nearPlane, c
 
 void CGPUFBScene::RenderCubeMap(std::auto_ptr<FrameBuffer> &framebuffer, FBRenderOptions *pFBRenderOptions, CubeMapRenderingData &data, const bool logDepth, bool videoRendering, RenderingStats &stats)
 {
-	if (mUberShader.get() == nullptr)
+	if ( false == mMaterialShaders.IsOk() )
 		return;
 
 	if (framebuffer.get() == nullptr)
@@ -453,7 +453,7 @@ void CGPUFBScene::UploadCubeMapUniforms(const GLuint textureId)
 
 		if (data.outputId == textureId)
 		{
-			mUberShader->UploadCubeMapUniforms(data.zmin, data.zmax, data.worldToLocal, data.position, data.max, data.min, data.useParallax );
+			mMaterialShaders->UploadCubeMapUniforms(data.zmin, data.zmax, data.worldToLocal, data.position, data.max, data.min, data.useParallax );
 
 			//if (data.useParallax > 0.0f)
 			//{
@@ -658,7 +658,7 @@ void CGPUFBScene::RenderScene( ERenderLayer layerId, CRenderOptions &options,
 
 void CGPUFBScene::RenderCamera(FBRenderOptions *pFBRenderOptions, CubeMapRenderingData &data, const bool logDepth, RenderingStats &stats)
 {
-	if (mUberShader.get() == nullptr)
+	if ( false == mMaterialShaders.IsOk() )
 		return;
 
 	stats.Reset();
@@ -754,7 +754,7 @@ void CGPUFBScene::RenderCamera(FBRenderOptions *pFBRenderOptions, CubeMapRenderi
 
 bool CGPUFBScene::RenderModel(bool bindTextures, FBModel *pModel, const int modelIndex)
 {
-	const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
+	//const auto &loc = mMaterialShaders->GetCurrentEffectLocationsPtr().vertex;
 
 	FBModelVertexData *pData = pModel->ModelVertexData;
 
@@ -780,7 +780,7 @@ bool CGPUFBScene::RenderModel(bool bindTextures, FBModel *pModel, const int mode
 		int offset = pData->GetSubPatchIndexOffset(i);
 		int size = pData->GetSubPatchIndexSize(i);
 
-		mUberShader->UpdateMeshIndex(meshIndex + i);
+		mMaterialShaders->UpdateMeshIndex(meshIndex + i);
 		//mBufferMesh.BindAsAttribute( 5, sizeof(MeshGLSL)*(meshIndex+i) );
 		
 		// TODO: replace with bindless textures !
@@ -1123,10 +1123,10 @@ void CGPUFBScene::RenderSceneShaderGroups(const CRenderOptions &options, FBRende
 bool CGPUFBScene::PrepRenderForFBModel(FBModel *pModel)
 {
 
-	if (mUberShader.get() == nullptr || pModel == nullptr)
+	if ( false == mMaterialShaders.IsOk() || nullptr == pModel )
 		return false;
 
-	const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
+	//const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
 
 	FBModelVertexData *pData = pModel->ModelVertexData;
 
@@ -1150,7 +1150,7 @@ bool CGPUFBScene::PrepRenderForFBModel(FBModel *pModel)
 
 bool CGPUFBScene::RenderPassModelDraw(CBaseShaderCallback *pCallback, const CRenderOptions &options, FBModel *pModel, const int meshIndex)
 {
-	const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
+	//const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
 
 	FBModelVertexData *pData = pModel->ModelVertexData;
 	
@@ -1188,7 +1188,7 @@ bool CGPUFBScene::RenderPassModelDraw(CBaseShaderCallback *pCallback, const CRen
 		int indexOffset = pData->GetSubPatchIndexOffset(i);
 		int indexSize = pData->GetSubPatchIndexSize(i);
 
-		mUberShader->UpdateMeshIndex(meshIndex + i);
+		mMaterialShaders->UpdateMeshIndex(meshIndex + i);
 		//mBufferMesh.BindAsAttribute( 5, sizeof(MeshGLSL)*(meshIndex+i) );
 		
 		// TODO: replace with bindless textures !
@@ -1250,15 +1250,15 @@ void CGPUFBScene::RenderSceneClassic(FBRenderOptions *pRenderOptions)
   
 	int numberOfModels = lRenderer->DisplayableGeometryCount;
 
-	if (mUberShader.get() == nullptr || numberOfModels == 0)
+	if ( false == mMaterialShaders.IsOk() || 0 == numberOfModels )
 		return;
 
 	//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	//glDepthMask(GL_TRUE);
 
-	mUberShader->SetBindless(false);
-	mUberShader->SetEarlyZ(true);
-	
+	mMaterialShaders->ModifyShaderFlags( Graphics::eShaderFlag_Bindless, false );
+	mMaterialShaders->ModifyShaderFlags( Graphics::eShaderFlag_EarlyZ, false );
+
 	//
 	PrepRender();
 

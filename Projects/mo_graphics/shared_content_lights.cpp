@@ -590,7 +590,7 @@ bool CGPUFBScene::PrepShaderLights( const bool useSceneLights, FBPropertyListCom
 bool CGPUFBScene::PrepShaderLights( const bool useSceneLights, FBPropertyListObject *AffectingLights, 
 	std::vector<FBLight*> &shaderLightsPtr, CGPUShaderLights *shaderLights )
 {
-	if (nullptr == mUberShader.get() || nullptr == shaderLights )
+	if (nullptr == mMaterialShaders.Get() || nullptr == shaderLights )
 		return false;
 
 	const int numberOfExlLights = AffectingLights->GetCount();
@@ -616,7 +616,7 @@ bool CGPUFBScene::PrepShaderLights( const bool useSceneLights, FBPropertyListObj
 
 bool CGPUFBScene::BindLights( const bool resetLastBind, const CGPUShaderLights *pUserLights )
 {
-	if (nullptr == mUberShader.get() )
+	if ( nullptr == mMaterialShaders.Get() )
 		return false;
 
 	const CGPUShaderLights *pShaderLights = (nullptr!=mCompositionLights) ? mCompositionLights : mGPUSceneLights.get();
@@ -631,7 +631,7 @@ bool CGPUFBScene::BindLights( const bool resetLastBind, const CGPUShaderLights *
 
 	if (nullptr == pShaderLights)
 	{
-		mUberShader->UploadLightingInformation( 0, 0 );
+		mMaterialShaders->UploadLightingInformation( 0, 0 );
 		return false;
 	}
 
@@ -645,19 +645,19 @@ bool CGPUFBScene::BindLights( const bool resetLastBind, const CGPUShaderLights *
 	}
 
 	// bind a new buffer
-	const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
-	const GLint dirLights = loc->GetFragmentLocation( Graphics::eCustomLocationDirLights );
-	const GLint lights = loc->GetFragmentLocation( Graphics::eCustomLocationLights );
+	const auto loc = mMaterialShaders->GetCurrentEffectLocationsPtr()->fptr();
+	const GLint dirLights = loc->GetLocation( Graphics::eCustomLocationDirLights );
+	const GLint lights = loc->GetLocation( Graphics::eCustomLocationLights );
 	if ( dirLights >= 0 || lights >= 0)
 	{
-		pShaderLights->Bind( mUberShader->GetFragmentProgramId(), dirLights, lights );
-		mUberShader->UploadLightingInformation( pShaderLights->GetNumberOfDirLights(), pShaderLights->GetNumberOfLights() );
+		pShaderLights->Bind( mMaterialShaders->GetFragmentProgramId(), dirLights, lights );
+		mMaterialShaders->UploadLightingInformation( pShaderLights->GetNumberOfDirLights(), pShaderLights->GetNumberOfLights() );
 
 		mLastLightsBinded = (CGPUShaderLights*) pShaderLights;
 	}
 	else
 	{
-		mUberShader->UploadLightingInformation( 0, 0 );
+		mMaterialShaders->UploadLightingInformation( 0, 0 );
 		return false;
 	}
 	return true;

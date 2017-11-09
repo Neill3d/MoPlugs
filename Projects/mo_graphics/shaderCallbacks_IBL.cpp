@@ -71,7 +71,7 @@ const bool CIBLBindedCallback::IsForShaderAndPass(FBShader *pShader, const EShad
 
 bool CIBLBindedCallback::OnInstanceBegin(const CRenderOptions &options, FBRenderOptions *pFBRenderOptions, FBShader *pShader, CBaseShaderInfo *pInfo)
 {
-	if (nullptr == mUberShader)
+	if (nullptr == mShaderFX)
 		return false;
 
 	//mShader = pInfo->GetFBShader();
@@ -252,7 +252,7 @@ void CIBLBindedCallback::OnInstanceEnd(const CRenderOptions &options, FBShader *
 
 void CIBLBindedCallback::InternalInstanceEnd()
 {
-	if (nullptr == mUberShader)
+	if (nullptr == mShaderFX)
 		return;
 
 	if (FBIS(mShader, ORIBLShader))
@@ -286,7 +286,7 @@ void CIBLBindedCallback::OnMaterialEnd(const CRenderOptions &options, FBMaterial
 
 bool CIBLBindedCallback::OnModelDraw(const CRenderOptions &options, FBRenderOptions *pFBRenderOptions, FBModel *pModel, CBaseShaderInfo *pInfo)
 {
-	if (nullptr == mUberShader)
+	if (nullptr == mShaderFX)
 		return false;
 
 	// TODO: bind model sprite sheet property values !
@@ -306,19 +306,19 @@ bool CIBLBindedCallback::OnModelDraw(const CRenderOptions &options, FBRenderOpti
 			FBVector3d	v;
 			pAnimProp->GetData(v, sizeof(double)*3);
 
-			mUberShader->UpdateTextureOffset( vec4( (float)v[0], (float)v[1], (float)v[2], 0.0) );
+			mShaderFX->UpdateTextureOffset( vec4( (float)v[0], (float)v[1], (float)v[2], 0.0) );
 
 			pAnimProp = (FBPropertyAnimatable*) pModel->PropertyList.Find( "SpriteSheet Scaling" );
 			if (pAnimProp)
 			{
 				pAnimProp->GetData(v, sizeof(double)*3);
-				mUberShader->UpdateTextureScaling( vec4( (float)v[0], (float)v[1], (float)v[2], 0.0) );
+				mShaderFX->UpdateTextureScaling( vec4( (float)v[0], (float)v[1], (float)v[2], 0.0) );
 			}
 		}
 		else
 		{
-			mUberShader->UpdateTextureOffset( vec4( 0.0, 0.0, 0.0, 0.0) );
-			mUberShader->UpdateTextureScaling( vec4( 1.0, 1.0, 1.0, 1.0) );
+			mShaderFX->UpdateTextureOffset( vec4( 0.0, 0.0, 0.0, 0.0) );
+			mShaderFX->UpdateTextureScaling( vec4( 1.0, 1.0, 1.0, 1.0) );
 		}
 	}
 
@@ -519,10 +519,10 @@ const bool CEyeBindedCallback::IsForShaderAndPass(FBShader *pShader, const EShad
 
 void CEyeBindedCallback::CheckForSamplerSlots()
 {
-	if (nullptr == mUberShader)
+	if (nullptr == mShaderFX)
 		return;
 
-	auto locPtr = mUberShader->GetIBLPassLocationsPtr(Graphics::eTechCharacterPass_Eye);
+	const auto locPtr = mShaderFX->GetCurrentEffectLocationsPtr()->fptr(); // (Graphics::eTechCharacterPass_Eye);
 
 	if (eyeEnvReflSamplerSlot < 0)
 	{
@@ -603,16 +603,17 @@ void CEyeBindedCallback::InternalInstanceBegin(const bool textureMapping, const 
 	//
 	// uniforms
 
-	const auto locPtr = mUberShader->GetCustomEffectShaderLocationsPtr();
+	const auto locVertexPtr = mShaderFX->GetCurrentEffectLocationsPtr()->vptr();
+	const auto locPtr = mShaderFX->GetCurrentEffectLocationsPtr()->fptr();
 
 	double irisSize, pupilSize;
 
 	pMBShader->IrisSize.GetData( &irisSize, sizeof(double) );
 	pMBShader->PupilSize.GetData( &pupilSize, sizeof(double) );
 
-	locPtr->VertexUniform1f( Graphics::eCustomVertexLocationIrisSize, 0.01f * (float) irisSize );
-	locPtr->VertexUniform1f( Graphics::eCustomVertexLocationCorneaBumpAmount, 0.1f );
-	locPtr->VertexUniform1f( Graphics::eCustomVertexLocationCorneaBumpRadiusMult, 0.9f );
+	locVertexPtr->SetUniform1f( Graphics::eCustomVertexLocationIrisSize, 0.01f * (float) irisSize );
+	locVertexPtr->SetUniform1f( Graphics::eCustomVertexLocationCorneaBumpAmount, 0.1f );
+	locVertexPtr->SetUniform1f( Graphics::eCustomVertexLocationCorneaBumpRadiusMult, 0.9f );
 
 	locPtr->SetUniform1f( Graphics::eCustomLocationIrisSize, 0.01f * (float) irisSize );
 	locPtr->SetUniform1f( Graphics::eCustomLocationPupilSize, 0.01f * (float) pupilSize );

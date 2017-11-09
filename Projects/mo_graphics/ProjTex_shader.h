@@ -15,7 +15,7 @@
 //--- SDK include
 #include <fbsdk/fbsdk.h>
 #include "..\Common\Common_shader.h"
-#include "Shader.h"
+#include "ShaderFX.h"
 #include "shared_content.h"
 #include "..\Common_Projectors\bakeProjectors_projectors.h"
 #include "FX_shader.h"

@@ -251,11 +251,8 @@ void ORIBLShader::ShaderPassTypeBegin    ( FBRenderOptions* pRenderOptions, FBRe
 		(kFBPassLighted == pPass),
 		8192, 2048, false, nullptr, 0);
 
-	if (nullptr == mGPUFBScene->GetUberShaderPtr() )
-	{
-		mShaderCallback = nullptr;
-	}
-	else
+	mShaderCallback = nullptr;
+	if ( nullptr != mGPUFBScene->GetShaderFXPtr(Graphics::MATERIAL_SHADER_IBL) )
 	{
 		if (lIsSelectBufferPicking || lIsColorBufferPicking)
 		{
@@ -412,8 +409,10 @@ void ORIBLShader::ShaderPassMaterialEnd  ( FBRenderOptions* pRenderOptions, FBRe
 
 void ORIBLShader::ShaderPassModelDraw ( FBRenderOptions* pRenderOptions, FBRenderingPass pPass, FBShaderModelInfo *pInfo)
 {
+	Graphics::BaseMaterialShaderFX *pShaderFX = mGPUFBScene->GetShaderFXPtr(Graphics::MATERIAL_SHADER_IBL);
+
 	if (mGPUFBScene->IsWaiting()  // || pRenderOptions->IsIDBufferRendering()
-		|| nullptr == mGPUFBScene->GetUberShaderPtr())
+		|| nullptr == pShaderFX)
 		return;
 
 	if (true == mSelectionMode)
@@ -472,7 +471,7 @@ void ORIBLShader::ShaderPassModelDraw ( FBRenderOptions* pRenderOptions, FBRende
 						meshIndex = meshIndex + regionIndex;
 					}
 					*/
-					mGPUFBScene->GetUberShaderPtr()->UpdateMeshIndex( meshIndex );
+					pShaderFX->UpdateMeshIndex( meshIndex );
 					lInfo->Bind();
 				//}
 		}

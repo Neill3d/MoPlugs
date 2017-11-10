@@ -54,6 +54,7 @@ GLSLShader
 
 #include "shared_depth.glslfxh"
 #include "shared_texturing.glslfxh"
+#include "shared_lighting.glslfxh"
 
 //////////////////////////////////////////////////////////////
 // GLSL Globals : meaning that all the GLSL domains (vertex, fragments etc.) will have a copy

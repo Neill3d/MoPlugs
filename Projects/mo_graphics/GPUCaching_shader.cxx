@@ -674,6 +674,7 @@ void ORShaderGPUCache::ShadeModel( FBRenderOptions* pRenderOptions, FBShaderMode
 
 		// draw opaque
 
+
 		mShaderCallback->OwnModelShade( options, pRenderOptions, pShaderModelInfo->GetFBModel(), this, mShaderInfo );
 
 		// draw transparency

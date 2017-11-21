@@ -135,5 +135,11 @@
     <None Include="GLSL_FX\Particles_generation.glslfxh">
       <Filter>GLSL_FX</Filter>
     </None>
+    <None Include="GLSL_CS\prepSurfaceData.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
+    <None Include="GLSL_CS\resetParticles.cs">
+      <Filter>GLSL_CS</Filter>
+    </None>
   </ItemGroup>
 </Project>

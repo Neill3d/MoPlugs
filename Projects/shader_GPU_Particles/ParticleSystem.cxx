@@ -38,7 +38,7 @@ using namespace ParticlesSystem;
 
 #define INVALID_UNIFORM_LOCATION	-1
 
-
+#define PREP_SURFACE_COMPUTE_SHADER		"\\GLSL_CS\\prepSurfaceData.cs"
 
 float RandomFloat()
 {
@@ -159,6 +159,7 @@ ParticleSystem::ParticleSystem(unsigned int maxparticles)
 	mTime = 0;
 
 	mNeedReset = false;
+	mNeedShader = true;
 
 	mParticleCount = 0;
 	mUseRate = false;
@@ -238,6 +239,10 @@ void ParticleSystem::FreeNoiseTexture()
 
 bool ParticleSystem::ReloadShaders()
 {
+	// free a shader
+	mNeedShader = true;
+	mComputeSurface.reset(nullptr);
+
 	mShader->ChangeContext();
 	return mShader->Initialize();
 }
@@ -478,6 +483,17 @@ void ParticleSystem::PrepareParticles(unsigned int maxparticles, const int rando
 bool ParticleSystem::ResetParticles(unsigned int maxparticles, const int randomSeed, const int rate, const int preCount, const double extrudeDist)
 {
 	CHECK_GL_ERROR();
+
+	//
+	// read surface data from gpu
+
+	if ( 0 == mBufferSurface.GetBufferId() )
+		return false;
+
+	// copy data back to surface data on cpu
+	glBindBuffer(GL_UNIFORM_BUFFER, mBufferSurface.GetBufferId() );
+	glGetBufferSubData(GL_UNIFORM_BUFFER, 0, mBufferSurface.GetSize() * mBufferSurface.GetCount(), mSurfaceData.data() );
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	bool newAssignment = (mMaxParticles != maxparticles);
 
@@ -771,7 +787,8 @@ const unsigned int ParticleSystem::SimulateParticles(const double timeStep, doub
 	return cycles;
 }
     
-bool ParticleSystem::EmitterSurfaceUpdateOnCPU(const int vertexCount, float *positionsArray, float *normalArray, float *uvArray, const int indexCount, const int *indexArray, const GLuint textureId )
+bool ParticleSystem::EmitterSurfaceUpdateOnCPU(const int vertexCount, float *positionsArray, 
+	float *normalArray, float *uvArray, const int indexCount, const int *indexArray, const GLuint textureId )
 {
 	if (indexCount < 3 || vertexCount < 1)
 		return false;
@@ -822,13 +839,151 @@ bool ParticleSystem::EmitterSurfaceUpdateOnCPU(const int vertexCount, float *pos
 	return true;
 }
 
-// TODO:
-bool ParticleSystem::EmitterSurfaceUpdateOnGPU(const GLuint positionsId, const GLuint normalsId, const GLuint uvId, const int indexCount, const GLuint indexId, const GLuint textureId)
+bool ParticleSystem::LoadComputeShaders()
 {
-	mSurfaceTextureId = textureId;
-	return false;
+	if (true == mNeedShader && nullptr == mComputeSurface.get() )
+	{
+		mNeedShader = false;
+
+		CComputeProgram *pNewProgram = nullptr; 
+		try
+		{
+			pNewProgram = new CComputeProgram();
+
+			if (nullptr == pNewProgram)
+				throw std::exception("not enough memory");
+
+			bool lSuccess;
+			FBString effectPath, effectFullName;
+
+			lSuccess = FindEffectLocation( PREP_SURFACE_COMPUTE_SHADER, effectPath, effectFullName );
+			
+			if (false == lSuccess)
+				throw std::exception("failed to locate a shader file");
+
+			lSuccess = pNewProgram->PrepProgram(effectFullName);
+
+			if (false == lSuccess)
+				throw std::exception("prep program failed");
+		}
+		catch (const std::exception &e)
+		{
+			FBTrace ("Failed to load a shader - %s\n", e.what() );
+
+			if (nullptr != pNewProgram)
+			{
+				delete pNewProgram;
+				pNewProgram = nullptr;
+			}
+		}
+		
+		//
+		mComputeSurface.reset(pNewProgram);
+	}
+
+	return (nullptr != mComputeSurface.get() );
 }
 
+// DONE: run a computer shader
+bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLuint textureId)
+{
+	
+	if (false == LoadComputeShaders() )
+		return false;
+	
+	//
+	// 
+	FBModelVertexData *pData = (FBModelVertexData*) pModelVertexData;
+
+	//FBGeometry *pGeometry = pModel->Geometry;
+	//FBModelVertexData *pData = pModel->ModelVertexData;
+
+	if ( nullptr == pData || false == pData->IsDrawable() )
+		return false;
+
+	const int numberOfVertices = pData->GetVertexCount();
+	
+	if (0 == numberOfVertices)
+		return false;
+
+
+	int numberOfIndices = 0;
+	
+	for (int i=0, count=pData->GetSubPatchCount(); i<count; ++i)
+	{
+		int offset = pData->GetSubPatchIndexOffset(i);
+		int size = pData->GetSubPatchIndexSize(i);
+
+		int localCount = offset+size;
+		if ( localCount > numberOfIndices )
+			numberOfIndices = localCount;
+	}
+
+	const int numberOfTriangles = numberOfIndices / 3;
+
+	// output surface data - allocate and upload on gpu
+	//	do only once - when number of triangles has beend changed
+	if ( numberOfTriangles != (int)mSurfaceData.size() )
+	{
+		mSurfaceData.resize(numberOfTriangles);
+		mBufferSurface.UpdateData( sizeof(TTriangle), (int)mSurfaceData.size(), mSurfaceData.data() );
+	}
+
+	//
+	// run a compute program
+
+	const GLuint posId = pData->GetVertexArrayVBOId( kFBGeometryArrayID_Point, true );
+	const GLuint norId = pData->GetVertexArrayVBOId( kFBGeometryArrayID_Normal, true );
+	const GLuint uvId = pData->GetUVSetVBOId();
+	const GLuint indId = pData->GetIndexArrayVBOId();
+	const GLuint surfaceId = mBufferSurface.GetBufferId();
+
+	if ( 0 == posId || 0 == norId || 0 == uvId || 0 == indId || 0 == surfaceId )
+		return false;
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, posId );
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, norId );
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, uvId );
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, indId );
+	// and output into a triangles buffer
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, surfaceId );
+
+	//
+	// ACCUM NORMALS
+	{
+	const GLuint programId = mComputeSurface->GetProgramId();
+	if (programId == 0)
+		return false;
+
+	mComputeSurface->Bind();
+
+	GLint loc = glGetUniformLocation( programId, "numberOfTriangles" );
+	if (loc >= 0)
+		glProgramUniform1i( programId, loc, numberOfTriangles );
+	
+	const int computeLocalX = 1024;
+	const int x = numberOfTriangles / computeLocalX + 1;
+
+	mComputeSurface->DispatchPipeline( x, 1, 1 );
+
+	mComputeSurface->UnBind();
+
+//	CHECK_GL_ERROR_MOBU();
+	}
+
+	glMemoryBarrier( GL_SHADER_STORAGE_BARRIER_BIT );
+
+	//
+	//
+	mEvaluateData.gPositionCount = numberOfTriangles;
+	mEvaluateData.gUseEmitterTexture = (textureId > 0);
+	mSurfaceTextureId = textureId;
+
+	return true;
+
+}
+
+// that's only for the case when data is updating on CPU
 void ParticleSystem::UploadSurfaceDataToGPU()
 {
 	mBufferSurface.UpdateData( sizeof(TTriangle), (int)mSurfaceData.size(), mSurfaceData.data() );

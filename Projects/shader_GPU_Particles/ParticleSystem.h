@@ -19,6 +19,7 @@
 #include "ParticleSystem_types.h"
 #include "Shader_ParticleSystem.h"
 #include "graphics\UniformBuffer.h"
+#include "graphics\glslComputeShader.h"
 
 #include <vector>
 #include <random>
@@ -117,6 +118,9 @@ public:
 	{
 		return mNeedReset;
 	}
+
+	// TODO: generate and reset particles on GPU (by using a compute shader)
+
 	// generate launchers and startup particles
 	void	GenerateParticle(const int emitType, const bool local, const double extrudeDist, vec4 &pos, vec4 &vel, vec4 &color);
 	bool	ResetParticles(unsigned int maxparticles, const int randomSeed, const int rate, const int preCount, const double extrudeDist);
@@ -163,9 +167,11 @@ public:
 
 public:
 
+	bool LoadComputeShaders();
+
 	// this is for surface particles emitting
 	bool EmitterSurfaceUpdateOnCPU(const int vertexCount, float *positionsArray, float *normalArray, float *uvArray, const int indexCount, const int *indexArray, const GLuint textureId );
-	bool EmitterSurfaceUpdateOnGPU(const GLuint positionsId, const GLuint normalsId, const GLuint uvId, const int indexCount, const GLuint indexId, const GLuint textureId);
+	bool EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLuint textureId);
 
 	void	UploadSurfaceDataToGPU();
 
@@ -295,6 +301,9 @@ protected:
 	// TODO: replace buffer texture with a NV pointer uniform buffer
 	//BufferTexture				mPositionTexture;	// hold vertices positions in a buffer texture
 	//BufferTexture				mNormalTexture;		// hold vertices normals in a buffer texture
+
+	bool							mNeedShader;
+	std::auto_ptr<CComputeProgram>	mComputeSurface; // prepare surface tri data directly on GPU
 
 	CGPUBufferNV				mBufferSurface;
 

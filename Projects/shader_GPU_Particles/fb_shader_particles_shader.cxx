@@ -576,6 +576,11 @@ void GPUshader_Particles::DestroyShaderModelInfo( FBRenderOptions* pOptions, FBS
 void GPUshader_Particles::DoReloadShader()
 {
 	mNeedReloadShaders = true;
+	
+	for (auto iter=begin(mParticleMap); iter!=end(mParticleMap); ++iter)
+	{
+		iter->second->ReloadShaders();
+	}
 }
 
 void GPUshader_Particles::DoReset()
@@ -846,13 +851,13 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 			if (mLastTimelineTime == FBTime::Infinity 
 				|| (currTimelineTime == ResetTime && currTimelineTime != mLastTimelineTime))
 			{
-				UpdateEmitterGeometryBuffer(pModel, pParticles);
+				UpdateEmitterGeometryBufferOnGPU(pModel, pParticles);
 			}
 		}
 		else
 		if (mLastTimelineTime == FBTime::Infinity || currTimelineTime != mLastTimelineTime)
 		{
-			UpdateEmitterGeometryBuffer(pModel, pParticles);
+			UpdateEmitterGeometryBufferOnGPU(pModel, pParticles);
 		}
 	}
 
@@ -1437,7 +1442,7 @@ void GPUshader_Particles::SyncForcesPropWithComponents()
 	}
 }
 
-void GPUshader_Particles::UpdateEmitterGeometryBuffer(FBModel *pModel, ParticlesSystem::ParticleSystem *pParticles)
+void GPUshader_Particles::UpdateEmitterGeometryBufferOnCPU(FBModel *pModel, ParticlesSystem::ParticleSystem *pParticles)
 {
 	FBModelVertexData *pVertexData = pModel->ModelVertexData;
 
@@ -1476,6 +1481,31 @@ void GPUshader_Particles::UpdateEmitterGeometryBuffer(FBModel *pModel, Particles
 	pParticles->UploadSurfaceDataToGPU();
 
 	pVertexData->VertexArrayMappingRelease();
+}
+
+void GPUshader_Particles::UpdateEmitterGeometryBufferOnGPU(FBModel *pModel, ParticlesSystem::ParticleSystem *pParticles)
+{
+	FBModelVertexData *pVertexData = pModel->ModelVertexData;
+
+	GLuint textureId = 0;
+
+	if (pModel->Materials.GetCount() > 0 )
+	{
+		FBMaterial *pMaterial = pModel->Materials[0];
+		if (pMaterial->GetTexture() != nullptr )
+		{
+			FBTexture *pTexture = pMaterial->GetTexture();
+
+			textureId = pTexture->TextureOGLId;
+			if (0 == textureId)
+			{
+				pTexture->OGLInit();
+				textureId = pTexture->TextureOGLId;
+			}
+		}
+	}
+
+	pParticles->EmitterSurfaceUpdateOnGPU( pVertexData, textureId );
 }
 
 void GPUshader_Particles::UpdateConnectedTerrain()

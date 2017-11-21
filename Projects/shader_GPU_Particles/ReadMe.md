@@ -20,6 +20,11 @@ Particle System
  1) for transfer real 4 32bit float values, you should specify GL_RGBA32F internal format!
 
  TODO
+ 
+ - write compute shader for particles generation. That will help to keep surfaceData always on gpu and complex models will work more stable
+ 
+ - render self-shadowing for particles (like cloud rendering)
+
  - add texture matrix support for the emitter texture
 
  - shadows slices
@@ -49,6 +54,9 @@ Particle System
   + add support of transparency modes (old task - sort particles and draw after everything)
 
 LOG
+
+20.11.2017
+ + making compute shaders to prepare surface data and pre-generate particles on gpu
 
 30.08.2016
  + added a first test of self collision shader

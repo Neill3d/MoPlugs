@@ -287,8 +287,22 @@ void ParticleSystem::GetRandomSurfaceColor(const int vertIndex, float r1, float 
 		x -= 1;
 		y -= 1;
 
-		if (x < 0) x = 0;
-		if (y < 0) y = 0;
+		if (x < 0) 
+		{
+			x = 0;
+		}
+		else if (x >= mSurfaceTextureInfo.width)
+		{
+			x = mSurfaceTextureInfo.width - 1;
+		}
+		if (y < 0) 
+		{
+			y = 0;
+		}
+		else if (y >= mSurfaceTextureInfo.height)
+		{
+			y = mSurfaceTextureInfo.height - 1;
+		}
 
 		int pixelSize = mSurfaceTextureInfo.GetPixelMemorySize();
 

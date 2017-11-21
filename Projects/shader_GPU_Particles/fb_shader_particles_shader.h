@@ -352,7 +352,8 @@ protected:
 	void SyncForcesPropWithComponents();
 	void RemoveForceFromComponents();
 
-	void UpdateEmitterGeometryBuffer(FBModel *pModel, ParticlesSystem::ParticleSystem *pParticles);
+	void UpdateEmitterGeometryBufferOnCPU(FBModel *pModel, ParticlesSystem::ParticleSystem *pParticles);
+	void UpdateEmitterGeometryBufferOnGPU(FBModel *pModel, ParticlesSystem::ParticleSystem *pParticles);
 
 	void	UpdateConnectedCollisionsData();
 	void	UpdateConnectedForcesData();

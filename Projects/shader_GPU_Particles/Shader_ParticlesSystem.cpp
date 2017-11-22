@@ -32,6 +32,9 @@ int					fx_computeSelfCollisionsStrLen;
 char				fx_integrateLocation[256];
 int					fx_integrateStrLen;
 
+char				g_computeSurfacePath[256];
+int					g_computeSurfacePathLen;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
@@ -160,6 +163,15 @@ bool Shader::SetComputeIntegrateLocation(const char *shaderLocation, const int s
 	return (fx_integrateStrLen > 0);
 }
 
+bool Shader::SetComputeSurfaceDataPath(const char *path, const int pathLen)
+{
+	memset( g_computeSurfacePath, 0, sizeof(char) * 256 );
+	memcpy_s( g_computeSurfacePath, sizeof(char)*256, path, pathLen );
+	g_computeSurfacePathLen = pathLen;
+
+	return (g_computeSurfacePathLen > 0);
+}
+
 bool Shader::Initialize()
 {
 	// check for bindless extensions
@@ -171,16 +183,21 @@ bool Shader::Initialize()
 
 	//
 	// load glslfx shader
-	
-	if (false == loadEffect( fx_location ) )
-	{	
-		return false;
-	}
-
-	programCompute = loadComputeShader(fx_computeLocation);
-	
-	if (programCompute > 0)
+	bool lSuccess = false;
+	try
 	{
+
+		lSuccess = loadEffect( fx_location );
+
+		if (false == lSuccess)
+			throw std::exception( "failed to load particles effect" );
+	
+		//
+		programCompute = loadComputeShader(fx_computeLocation);
+	
+		if (0 == programCompute)
+			throw std::exception( "failed to load particles program compute" );
+
 		locComputeDeltaTime = glGetUniformLocation(programCompute, "DeltaTimeSecs");
 		locComputeTime = glGetUniformLocation(programCompute, "gTime");
 
@@ -193,38 +210,37 @@ bool Shader::Initialize()
 		locComputeUseSizeAtten = glGetUniformLocation(programCompute, "gUseSizeAttenuation");
 
 		locComputeUpdatePosition = glGetUniformLocation(programCompute, "gUpdatePosition");
-	}
-	else
-	{
-		return false;
-	}
+		
+		// self collisions shader
+		programSelfCollisions = loadComputeShader(fx_computeSelfCollisionsLocation);
 
-	// self collisions shader
-	programSelfCollisions = loadComputeShader(fx_computeSelfCollisionsLocation);
-
-	if (programSelfCollisions > 0)
-	{
+		if ( 0 == programSelfCollisions )
+			throw std::exception( "failed to load particles self collisions shader" );
+	
 		locSelfCollisionsDeltaTime = glGetUniformLocation(programSelfCollisions, "DeltaTimeSecs");
-	}
-	else
-	{
-		return false;
-	}
+	
+		// integrate shader
+		programIntegrate = loadComputeShader(fx_integrateLocation);
 
-	// integrate shader
-	programIntegrate = loadComputeShader(fx_integrateLocation);
-
-	if (programIntegrate > 0)
-	{
+		if ( 0 == programIntegrate )
+			throw std::exception( "failed to load particles integrate shader" );
+		
 		locIntegrateDeltaTime = glGetUniformLocation(programIntegrate, "DeltaTimeSecs");
 		locIntegrateNumCollisions = glGetUniformLocation(programIntegrate, "gNumCollisions");
+		
+		// surface data prep
+		lSuccess = LoadSurfaceComputeShaders(g_computeSurfacePath, g_computeSurfacePathLen);
+
+		if (false == lSuccess)
+			throw std::exception( "failed to load surface data shader" );
 	}
-	else
+	catch( const std::exception &e )
 	{
-		return false;
+		printf ("[ERROR particles] - %s\n", e.what() );
+		clearResources();
 	}
 
-	return true;
+	return lSuccess;
 }
 
 void Shader::ChangeContext()
@@ -281,6 +297,9 @@ void Shader::clearResources()
 		glDeleteProgram(programIntegrate);
 		programIntegrate = 0;
 	}
+
+	//
+	mComputeSurface.reset(nullptr);
 }
 
 
@@ -811,4 +830,68 @@ GLuint Shader::loadComputeShader(const char* computeShaderName)
 	}
 
     return 0;
+}
+
+bool Shader::LoadSurfaceComputeShaders(const char *path, const int pathLen)
+{
+	if ( nullptr == mComputeSurface.get() )
+	{
+		CComputeProgram *pNewProgram = nullptr; 
+		try
+		{
+			pNewProgram = new CComputeProgram();
+
+			if (nullptr == pNewProgram)
+				throw std::exception("not enough memory");
+
+			bool lSuccess;
+			
+			lSuccess = pNewProgram->PrepProgram(path);
+
+			if (false == lSuccess)
+				throw std::exception("prep program failed");
+		}
+		catch (const std::exception &e)
+		{
+			printf ("Failed to load a shader - %s\n", e.what() );
+
+			if (nullptr != pNewProgram)
+			{
+				delete pNewProgram;
+				pNewProgram = nullptr;
+			}
+		}
+		
+		//
+		mComputeSurface.reset(pNewProgram);
+	}
+
+	return (nullptr != mComputeSurface.get() );
+}
+
+bool Shader::RunSurfaceComputeShader(const int numberOfTriangles)
+{
+	if (nullptr == mComputeSurface.get() )
+		return false;
+
+	const GLuint programId = mComputeSurface->GetProgramId();
+	if (programId == 0)
+		return false;
+
+	mComputeSurface->Bind();
+
+	GLint loc = glGetUniformLocation( programId, "numberOfTriangles" );
+	if (loc >= 0)
+		glProgramUniform1i( programId, loc, numberOfTriangles );
+	
+	const int computeLocalX = 1024;
+	const int x = numberOfTriangles / computeLocalX + 1;
+
+	mComputeSurface->DispatchPipeline( x, 1, 1 );
+
+	mComputeSurface->UnBind();
+
+//	CHECK_GL_ERROR_MOBU();
+
+	glMemoryBarrier( GL_SHADER_STORAGE_BARRIER_BIT );
 }

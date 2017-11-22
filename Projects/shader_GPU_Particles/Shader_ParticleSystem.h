@@ -23,6 +23,7 @@
 #include "Delegate.h"
 
 #include "ParticleSystem_types.h"
+#include "graphics\glslComputeShader.h"
 
 namespace ParticlesSystem
 {
@@ -99,6 +100,7 @@ public:
 	static bool SetComputeShaderLocation(const char *shaderLocation, const int shaderStrLen);
 	static bool SetComputeSelfCollisionsShaderLocation(const char *shaderLocation, const int shaderStrLen);
 	static bool SetComputeIntegrateLocation(const char *shaderLocation, const int shaderStrLen);
+	static bool SetComputeSurfaceDataPath(const char *path, const int pathLen);
 	bool Initialize();
 
 	// very important function to recreate resources on context change
@@ -158,6 +160,10 @@ public:
 	{
 		return bindlessTexturesSupported;
 	}
+
+	//
+	//
+	bool RunSurfaceComputeShader(const int numberOfTriangles);
 
 protected:
 
@@ -246,6 +252,9 @@ protected:
 	GLuint				techTerrainPreviewFragment;
 	GLuint				locTerrainTextureAddress;
 
+	//
+	// compute shader for surface data preparation
+	std::auto_ptr<CComputeProgram>	mComputeSurface; // prepare surface tri data directly on GPU
 
 	bool loadEffect(const char *effectFileName );
 	void clearResources();
@@ -255,6 +264,8 @@ protected:
     static void checkLinkStatus(GLuint program, const char * programName);
 
 	static GLuint loadComputeShader(const char* computeShaderName);
+
+	bool LoadSurfaceComputeShaders(const char *path, const int pathLen);
 };
 
 };

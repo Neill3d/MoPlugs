@@ -38,7 +38,7 @@ using namespace ParticlesSystem;
 
 #define INVALID_UNIFORM_LOCATION	-1
 
-#define PREP_SURFACE_COMPUTE_SHADER		"\\GLSL_CS\\prepSurfaceData.cs"
+
 
 float RandomFloat()
 {
@@ -159,7 +159,6 @@ ParticleSystem::ParticleSystem(unsigned int maxparticles)
 	mTime = 0;
 
 	mNeedReset = false;
-	mNeedShader = true;
 
 	mParticleCount = 0;
 	mUseRate = false;
@@ -239,12 +238,8 @@ void ParticleSystem::FreeNoiseTexture()
 
 bool ParticleSystem::ReloadShaders()
 {
-	// free a shader
-	mNeedShader = true;
-	mComputeSurface.reset(nullptr);
-
 	mShader->ChangeContext();
-	return mShader->Initialize();
+	return true; // mShader->Initialize();
 }
 
 void ParticleSystem::ChangeDisplayContext()
@@ -465,7 +460,7 @@ void ParticleSystem::PrepareParticles(unsigned int maxparticles, const int rando
 
 	const unsigned int localRate = (useRate) ? rate : 0;
 
-	if (mNeedReset || (mUseRate != useRate) || (mParticleRate != localRate) || (mParticleCount != particleCount) )
+	if ( true == mNeedReset )
 	{
 		mUseRate = useRate;
 		mParticleRate = localRate;
@@ -512,9 +507,15 @@ bool ParticleSystem::ResetParticles(unsigned int maxparticles, const int randomS
 	srand(randomSeed);
 
 	//
-	ReadSurfaceTextureData();
-	CHECK_GL_ERROR();
-
+	if (true == mInheritSurfaceColor)
+	{
+		ReadSurfaceTextureData();
+		CHECK_GL_ERROR();
+	}
+	else if (mSurfaceTextureData.size() > 0)
+	{
+		mSurfaceTextureData.resize(0);
+	}
 
 	// assign launchers (pre generated pos, vel, color and size)
 	auto iter = begin(particles);
@@ -839,58 +840,9 @@ bool ParticleSystem::EmitterSurfaceUpdateOnCPU(const int vertexCount, float *pos
 	return true;
 }
 
-bool ParticleSystem::LoadComputeShaders()
-{
-	if (true == mNeedShader && nullptr == mComputeSurface.get() )
-	{
-		mNeedShader = false;
-
-		CComputeProgram *pNewProgram = nullptr; 
-		try
-		{
-			pNewProgram = new CComputeProgram();
-
-			if (nullptr == pNewProgram)
-				throw std::exception("not enough memory");
-
-			bool lSuccess;
-			FBString effectPath, effectFullName;
-
-			lSuccess = FindEffectLocation( PREP_SURFACE_COMPUTE_SHADER, effectPath, effectFullName );
-			
-			if (false == lSuccess)
-				throw std::exception("failed to locate a shader file");
-
-			lSuccess = pNewProgram->PrepProgram(effectFullName);
-
-			if (false == lSuccess)
-				throw std::exception("prep program failed");
-		}
-		catch (const std::exception &e)
-		{
-			FBTrace ("Failed to load a shader - %s\n", e.what() );
-
-			if (nullptr != pNewProgram)
-			{
-				delete pNewProgram;
-				pNewProgram = nullptr;
-			}
-		}
-		
-		//
-		mComputeSurface.reset(pNewProgram);
-	}
-
-	return (nullptr != mComputeSurface.get() );
-}
-
 // DONE: run a computer shader
 bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLuint textureId)
-{
-	
-	if (false == LoadComputeShaders() )
-		return false;
-	
+{	
 	//
 	// 
 	FBModelVertexData *pData = (FBModelVertexData*) pModelVertexData;
@@ -941,37 +893,33 @@ bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLu
 	if ( 0 == posId || 0 == norId || 0 == uvId || 0 == indId || 0 == surfaceId )
 		return false;
 
+	const GLvoid* positionOffset = pData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Point);
+	const GLvoid* normalOffset = pData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Normal);
+	const GLvoid* uvOffset = pData->GetUVSetVBOOffset();
+
+	
+	//TODO: not correct for GPU skinning, we should use ptr offset
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, posId );
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, norId );
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, uvId );
+	/*
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, indId );
+	// and output into a triangles buffer
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, surfaceId );
+	*/
+	/*
+	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 0, posId, (GLintptr) positionOffset, numberOfVertices * sizeof(vec4));
+	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 1, norId, (GLintptr) normalOffset, numberOfVertices * sizeof(vec4));
+	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 2, uvId, (GLintptr) uvOffset, numberOfVertices * sizeof(vec2));
+	*/
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, indId );
 	// and output into a triangles buffer
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, surfaceId );
 
 	//
 	// ACCUM NORMALS
-	{
-	const GLuint programId = mComputeSurface->GetProgramId();
-	if (programId == 0)
-		return false;
-
-	mComputeSurface->Bind();
-
-	GLint loc = glGetUniformLocation( programId, "numberOfTriangles" );
-	if (loc >= 0)
-		glProgramUniform1i( programId, loc, numberOfTriangles );
 	
-	const int computeLocalX = 1024;
-	const int x = numberOfTriangles / computeLocalX + 1;
-
-	mComputeSurface->DispatchPipeline( x, 1, 1 );
-
-	mComputeSurface->UnBind();
-
-//	CHECK_GL_ERROR_MOBU();
-	}
-
-	glMemoryBarrier( GL_SHADER_STORAGE_BARRIER_BIT );
+	mShader->RunSurfaceComputeShader( numberOfTriangles );
 
 	//
 	//

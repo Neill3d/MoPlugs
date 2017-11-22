@@ -231,6 +231,8 @@ bool GPUshader_Particles::FBCreate()
 
 	mLastResetState = false;
 
+	SetShaderCapacity( kFBShaderCapacityMaterialEffect, false );
+
 	//
 	// Particle generation
 	//
@@ -587,7 +589,7 @@ void GPUshader_Particles::DoReset()
 {
 	// TODO: add some functionality here
 	//mParticleSystem.UploadSimulationData( MaximumParticles, ParticleCount, UseParticleRate, ParticleRate, 0.0f, LifeTime, LifeTimeVariation, FixPosition, true );
-
+	
 	for (auto iter=begin(mParticleMap); iter!=end(mParticleMap); ++iter)
 	{
 		iter->second->NeedReset();
@@ -844,21 +846,26 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 	FBTime currTimelineTime = FBGetDisplayInfo()->GetLocalTime(); // mSystem.LocalTime;
 	int lFrame = currTimelineTime.GetFrame();
 
-	if (Emitter != kFBParticleEmitterVolume)
+	const bool isNeedReset = pParticles->IsNeedReset();
+	bool needToUpdateEmitter = isNeedReset;
+
+	if ( kFBParticleEmitterVolume != Emitter && false == isNeedReset )
 	{
 		if (pregeneratedEmit)
 		{
-			if (mLastTimelineTime == FBTime::Infinity 
-				|| (currTimelineTime == ResetTime && currTimelineTime != mLastTimelineTime))
-			{
-				UpdateEmitterGeometryBufferOnGPU(pModel, pParticles);
-			}
+			needToUpdateEmitter = ( mLastTimelineTime == FBTime::Infinity 
+									|| (currTimelineTime == ResetTime && currTimelineTime != mLastTimelineTime) );
 		}
 		else
-		if (mLastTimelineTime == FBTime::Infinity || currTimelineTime != mLastTimelineTime)
 		{
-			UpdateEmitterGeometryBufferOnGPU(pModel, pParticles);
+			needToUpdateEmitter = (	 mLastTimelineTime == FBTime::Infinity 
+									|| currTimelineTime != mLastTimelineTime);
 		}
+	}
+
+	if (true == needToUpdateEmitter)
+	{
+		UpdateEmitterGeometryBufferOnGPU(pModel, pParticles);
 	}
 
 	//
@@ -879,7 +886,8 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 
 	FBTime localTime = (PlayMode == kFBParticleLife) ? mSystem.SystemTime : mSystem.LocalTime;
 
-	if (PlayMode == kFBParticlePlay || pRenderOptions->IsOfflineRendering())
+	const int currPlayMode = PlayMode;
+	if ( kFBParticlePlay == currPlayMode || true == pRenderOptions->IsOfflineRendering())
 	{
 		localTime = FBGetDisplayInfo()->GetLocalTime();
 	}
@@ -1368,17 +1376,20 @@ bool GPUshader_Particles::UpdateInstanceData()
 
 }
 
-/*
+
 bool GPUshader_Particles::PlugDataNotify(FBConnectionAction pAction,FBPlug* pThis,void* pData,void* pDataOld,int pDataSize)
 {
-	if (pThis == &Forces)
+	if ( kFBCandidated == pAction )
 	{
-		printf ("we need this\n" );
+		if (pThis == &UseRate || pThis == &ParticleRate || pThis == &ResetCount || pThis == &ExtrudeResetPosition )
+		{
+			DoReset();
+		}
 	}
 
 	return ParentClass::PlugDataNotify(pAction, pThis, pData, pDataOld, pDataSize);
 }
-
+/*
 bool GPUshader_Particles::PlugStateNotify(FBConnectionAction pAction,FBPlug* pThis,void* pData,void* pDataOld,int pDataSize)
 {
 	return ParentClass::PlugStateNotify(pAction, pThis, pData, pDataOld, pDataSize);

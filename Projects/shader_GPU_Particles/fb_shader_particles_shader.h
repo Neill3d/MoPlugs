@@ -146,7 +146,7 @@ public:
 	  * \param pDataSize Size of data.
 	  * \return unused should return true
 	*/
-	//virtual	bool PlugDataNotify(FBConnectionAction pAction,FBPlug* pThis,void* pData=NULL,void* pDataOld=NULL,int pDataSize=0);
+	virtual	bool PlugDataNotify(FBConnectionAction pAction,FBPlug* pThis,void* pData=NULL,void* pDataOld=NULL,int pDataSize=0) override;
 
 	/** PlugStateNotify when overloaded is equivalent of FBSystem.OnConnectionStateNotify but in the context of the derived object only
 	  * \param pAction Plug action, the event type.
@@ -167,7 +167,7 @@ public:
 	  * \param pNewPlug New plug (for the replace event).
 	  * \return should by default return true except in the case of connection requests (kFBRequestConnectSrc or kFBRequestConnectDst)
 	*/
-	virtual	bool PlugNotify(FBConnectionAction pAction,FBPlug* pThis,int pIndex,FBPlug* pPlug = NULL,FBConnectionType pConnectionType=kFBConnectionTypeNone,FBPlug* pNewPlug=NULL );
+	virtual	bool PlugNotify(FBConnectionAction pAction,FBPlug* pThis,int pIndex,FBPlug* pPlug = NULL,FBConnectionType pConnectionType=kFBConnectionTypeNone,FBPlug* pNewPlug=NULL ) override;
 
 //
 // Common particles properties

@@ -27,6 +27,7 @@
 #include "IO\FileUtils.h"
 
 #define PARTICLES_EFFECT				"Particles.glslfx"
+#define PREP_SURFACE_COMPUTE_SHADER		"\\GLSL_CS\\prepSurfaceData.cs"
 
 //--- Library declaration
 FBLibraryDeclare( gpushader_particles )
@@ -81,6 +82,9 @@ bool FBLibrary::LibReady()	{
 
 		FBString computeIntegrateLocation(effectPath, "\\GLSL_CS\\Particles_integrate.cs");
 		ParticlesSystem::Shader::SetComputeIntegrateLocation( computeIntegrateLocation, computeIntegrateLocation.GetLen() );
+
+		FBString strComputeSurfaceData(effectPath, PREP_SURFACE_COMPUTE_SHADER);
+		ParticlesSystem::Shader::SetComputeSurfaceDataPath(strComputeSurfaceData, strComputeSurfaceData.GetLen() );
 	}
 
 	return true; 

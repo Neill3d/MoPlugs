@@ -19,7 +19,7 @@
 #include "ParticleSystem_types.h"
 #include "Shader_ParticleSystem.h"
 #include "graphics\UniformBuffer.h"
-#include "graphics\glslComputeShader.h"
+
 
 #include <vector>
 #include <random>
@@ -167,8 +167,6 @@ public:
 
 public:
 
-	bool LoadComputeShaders();
-
 	// this is for surface particles emitting
 	bool EmitterSurfaceUpdateOnCPU(const int vertexCount, float *positionsArray, float *normalArray, float *uvArray, const int indexCount, const int *indexArray, const GLuint textureId );
 	bool EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLuint textureId);
@@ -301,9 +299,6 @@ protected:
 	// TODO: replace buffer texture with a NV pointer uniform buffer
 	//BufferTexture				mPositionTexture;	// hold vertices positions in a buffer texture
 	//BufferTexture				mNormalTexture;		// hold vertices normals in a buffer texture
-
-	bool							mNeedShader;
-	std::auto_ptr<CComputeProgram>	mComputeSurface; // prepare surface tri data directly on GPU
 
 	CGPUBufferNV				mBufferSurface;
 

@@ -471,8 +471,10 @@ bool CGPUFBScene::RenderAllShadowMaps( const CRenderOptions &options, FBRenderOp
 	//!
 	RestoreFrameBuffer(&lFrameBufferInfo);
 
-	mMaterialShaders->UploadCameraUniforms( mCameraCache );
-
+	if ( true == mMaterialShaders.IsOk() )
+	{
+		mMaterialShaders->UploadCameraUniforms( mCameraCache );
+	}
 	return true;
 }
 

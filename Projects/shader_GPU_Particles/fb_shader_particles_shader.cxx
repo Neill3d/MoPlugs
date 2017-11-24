@@ -153,6 +153,10 @@ void GPUshader_Particles::AddPropertiesToPropertyViewManager()
 	AddPropertyViewForParticles("Life Time", "Particle generation");
 	AddPropertyViewForParticles("Life Time Variation", "Particle generation");
 
+	AddPropertyViewForParticles("Generation Skip Zero Alpha", "Particle generation");
+	AddPropertyViewForParticles("Use Generation Mask", "Particle generation");
+	AddPropertyViewForParticles("Generation Mask", "Particle generation");
+
 	//
 	AddPropertyViewForParticles("Particle generation.Start Direction", "Particle generation", true);
 	AddPropertyViewForParticles("Emit Direction", "Particle generation.Start Direction");
@@ -261,7 +265,11 @@ bool GPUshader_Particles::FBCreate()
 	FBPropertyPublish( this, ResetTime, "Reset Time", nullptr, nullptr );
 	FBPropertyPublish( this, ResetCount, "Reset Quantity", nullptr, nullptr );
 
+	FBPropertyPublish( this, UseGenerationMask, "Use Generation Mask", nullptr, nullptr );
+	FBPropertyPublish( this, GenerationMask, "Generation Mask", nullptr, nullptr );
+
 	FBPropertyPublish( this, ExtrudeResetPosition, "Extrude Reset Position", nullptr, nullptr );
+	FBPropertyPublish( this, GenerationSkipZeroAlpha, "Generation Skip Zero Alpha", nullptr, nullptr );
 
 	FBPropertyPublish( this, EmitterDirection, "Emit Direction", nullptr, nullptr );
 	FBPropertyPublish( this, EmitterDirRandom, "Emit Dir Random", nullptr, nullptr );
@@ -311,6 +319,10 @@ bool GPUshader_Particles::FBCreate()
 	ResetCount.SetMinMax(0.0, MaximumParticles, true, false);
 
 	ExtrudeResetPosition = 0.0;
+	GenerationSkipZeroAlpha = true;
+	UseGenerationMask = true;
+	GenerationMask.SetFilter( FBTexture::GetInternalClassId() );
+	GenerationMask.SetSingleConnect(true);
 
 	UseRate = true;
 	ParticleRate = 100;			// particles per second
@@ -858,8 +870,12 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 		}
 		else
 		{
+			/*
 			needToUpdateEmitter = (	 mLastTimelineTime == FBTime::Infinity 
 									|| currTimelineTime != mLastTimelineTime);
+									*/
+			// update on gpu every frame (or every n-th frame even better)
+			needToUpdateEmitter = true;
 		}
 	}
 
@@ -1516,7 +1532,21 @@ void GPUshader_Particles::UpdateEmitterGeometryBufferOnGPU(FBModel *pModel, Part
 		}
 	}
 
-	pParticles->EmitterSurfaceUpdateOnGPU( pVertexData, textureId );
+	GLuint maskId = 0;
+
+	if ( true == UseGenerationMask && GenerationMask.GetCount() > 0 )
+	{
+		FBTexture *pTexture = (FBTexture*) GenerationMask.GetAt(0);
+
+		maskId = pTexture->TextureOGLId;
+		if ( 0 == maskId )
+		{
+			pTexture->OGLInit();
+			maskId = pTexture->TextureOGLId;
+		}
+	}
+
+	pParticles->EmitterSurfaceUpdateOnGPU( pVertexData, textureId, maskId );
 }
 
 void GPUshader_Particles::UpdateConnectedTerrain()
@@ -1609,4 +1639,6 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticlesSystem:
 	vec4 color((float)dColor[0], (float)dColor[1], (float)dColor[2], (float)dColor[3]);
 	
 	data.gColor = color;
+
+	data.gSkipZeroAlpha = (true == GenerationSkipZeroAlpha) ? 1.0f : 0.0f;
 }

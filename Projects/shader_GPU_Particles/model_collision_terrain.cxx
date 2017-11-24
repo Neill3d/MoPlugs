@@ -259,9 +259,10 @@ void RenderModel(FBModel *pModel)
 			//Set up vertex buffer object (VBO) or vertex array
 			lModelVertexData->EnableOGLVertexData();
 
-			GLuint id = lModelVertexData->GetVertexArrayVBOId( kFBGeometryArrayID_Point );
+			const GLuint id = lModelVertexData->GetVertexArrayVBOId( kFBGeometryArrayID_Point );
+			const GLvoid* positionOffset = lModelVertexData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Point);
 			glBindBuffer( GL_ARRAY_BUFFER, id );
-			glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) 0 ); 
+			glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) positionOffset ); 
 
 			glEnableVertexAttribArray(0);	
 

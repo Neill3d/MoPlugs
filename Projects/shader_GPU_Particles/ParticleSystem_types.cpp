@@ -19,10 +19,17 @@ using namespace ParticlesSystem;
 //
 void EvaluationExchange::SetDirection(evaluateBlock &data, const vec3 &dir, const vec3 &random, bool useNormals)
 {
-	data.gDirection[0] = dir[0];
-	data.gDirection[1] = dir[1];
-	data.gDirection[2] = dir[2];
-	data.gDirection[3] = (useNormals) ? 1.0 : 0.0;
+	vec3 ldir(dir);
+	float mag = ldir.normalize();
+
+	if ( nv_zero == mag )
+	{
+		data.gDirection = vec4( 1.0f, 0.0f, 0.0f, (useNormals) ? 1.0f : 0.0f );
+	}
+	else
+	{
+		data.gDirection = vec4( ldir, (useNormals) ? 1.0f : 0.0f );
+	}
 	data.gDirRandom = random;
 }
 void EvaluationExchange::SetVelocity(evaluateBlock &data, const vec3 &vel, const vec3 &random, const vec4 &emittervel)

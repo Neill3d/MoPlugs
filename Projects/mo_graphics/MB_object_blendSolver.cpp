@@ -406,12 +406,19 @@ const ObjectBlendSolver::PerModelBlendshapes ObjectBlendSolver::PrepareModelBlen
 
 		//
 		// Output 
-
+		
 		const GLuint deformId = pData->GetVertexArrayVBOId( kFBGeometryArrayID_Normal, true );
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, deformId );
-
 		const GLuint deformPosId = pData->GetVertexArrayVBOId( kFBGeometryArrayID_Point, true );
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, deformPosId );
+		
+		const GLvoid* positionOffset = pData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Point);
+		const GLvoid* normalOffset = pData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Normal);
+
+		//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, deformId );
+		//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, deformPosId );
+
+		// correct bind for a GPU skinning mode
+		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 3, deformPosId, (GLintptr) positionOffset, vertexCount * sizeof(vec4));
+		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 2, deformId, (GLintptr) normalOffset, vertexCount * sizeof(vec4));
 
 		// bind cluster buffers
 		mClusterCache.BindBuffers();
@@ -640,14 +647,21 @@ bool ObjectBlendSolver::RunReComputeNormals(FBModel *pModel)
 	// run a compute program
 
 	const GLuint posId = pData->GetVertexArrayVBOId( kFBGeometryArrayID_Point, true );
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, posId );
-
+	const GLuint deformId = pData->GetVertexArrayVBOId( kFBGeometryArrayID_Normal, true );
 	const GLuint indId = pData->GetIndexArrayVBOId();
+
+	const GLvoid* positionOffset = pData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Point);
+	const GLvoid* normalOffset = pData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Normal);
+
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, deformId );
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, deformPosId );
+
+	// correct bind for a GPU skinning mode
+	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 0, posId, (GLintptr) positionOffset, numberOfVertices * sizeof(vec4));
+	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 2, deformId, (GLintptr) normalOffset, numberOfVertices * sizeof(vec4));
+
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, indId );
 
-	const GLuint deformId = pData->GetVertexArrayVBOId( kFBGeometryArrayID_Normal, true );
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, deformId );
-	
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, mBufferDuplicates );
 
 	CHECK_GL_ERROR_MOBU();

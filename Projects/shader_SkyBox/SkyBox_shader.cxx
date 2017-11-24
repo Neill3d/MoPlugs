@@ -475,6 +475,9 @@ void ORShaderSkyBox::Render( FBRenderOptions* pRenderOptions, FBShaderModelInfo*
 			const GLuint norId = pVertexData->GetVertexArrayVBOId( kFBGeometryArrayID_Normal );
 			const GLuint elemId = pVertexData->GetIndexArrayVBOId();
 
+			const GLvoid* positionOffset = pVertexData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Point);
+			const GLvoid* normalOffset = pVertexData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Normal);
+
 			const int normalStride = GetStrideFromArrayElementType( pVertexData->GetVertexArrayType(kFBGeometryArrayID_Normal) );
 
 			glDisableClientState(GL_NORMAL_ARRAY);
@@ -484,10 +487,10 @@ void ORShaderSkyBox::Render( FBRenderOptions* pRenderOptions, FBShaderModelInfo*
 			glEnableVertexAttribArray(1);
 
 			glBindBuffer(GL_ARRAY_BUFFER, posId);
-			glVertexAttribPointer (0, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) NULL);
+			glVertexAttribPointer (0, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) positionOffset);
 
 			glBindBuffer(GL_ARRAY_BUFFER, norId);
-			glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, normalStride, (const GLvoid*) NULL);
+			glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, normalStride, (const GLvoid*) normalOffset);
 
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elemId);
 

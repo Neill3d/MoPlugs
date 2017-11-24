@@ -169,7 +169,7 @@ public:
 
 	// this is for surface particles emitting
 	bool EmitterSurfaceUpdateOnCPU(const int vertexCount, float *positionsArray, float *normalArray, float *uvArray, const int indexCount, const int *indexArray, const GLuint textureId );
-	bool EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLuint textureId);
+	bool EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLuint textureId, const GLuint maskId );
 
 	void	UploadSurfaceDataToGPU();
 
@@ -260,6 +260,8 @@ protected:
 
 	GLuint						mSurfaceTextureId;
 	std::vector<TTriangle>		mSurfaceData;
+
+	GLuint						mSurfaceMaskId;
 
 	
 

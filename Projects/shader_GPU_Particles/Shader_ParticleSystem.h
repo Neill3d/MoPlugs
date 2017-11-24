@@ -146,7 +146,7 @@ public:
 		return emitGeometryProgram[type];
 	}
 
-	const GLuint	GetEmitMeshLocation(const ETechEmitType	type) const
+	const GLint	GetEmitMeshLocation(const ETechEmitType	type) const
 	{
 		return locEmitMesh[type];
 	}
@@ -201,56 +201,56 @@ protected:
 	nvFX::IUniform		*fx_terrainModelTM;
 
 	// locations for evaluate GS uniforms
-	GLuint				locPositionBuffer;
-	GLuint				locNormalBuffer;
+	GLint				locPositionBuffer;
+	GLint				locNormalBuffer;
 
-	GLuint				locTerrainData;	// terrain 2d sampler
+	GLint				locTerrainData;	// terrain 2d sampler
 
-	GLuint				locCollisions;	// pointer uniform
-	GLuint				locForces;		// pointer uniform
+	GLint				locCollisions;	// pointer uniform
+	GLint				locForces;		// pointer uniform
 	/*
 	GLuint				techEmitGeometry;
 	GLuint				locEmitMesh;
 	GLuint				locEmitTexture;
 	*/
 	GLuint				emitGeometryProgram[eTechEmitCount];
-	GLuint				locEmitMesh[eTechEmitCount];
+	GLint				locEmitMesh[eTechEmitCount];
 
 	//
 	//
 	//GLuint				shaderCompute;
 	GLuint				programCompute;
 
-	GLuint				locComputeDeltaTime;
-	GLuint				locComputeTime;
+	GLint				locComputeDeltaTime;
+	GLint				locComputeTime;
 
-	GLuint				locComputeDynamic;
-	GLuint				locComputeTurbulence;
-	GLuint				locComputeGravity;
-	GLuint				locComputeFloor;
-	GLuint				locComputeNumForces;
-	GLuint				locComputeNumCollisions;
-	GLuint				locComputeUseSizeAtten;
-	GLuint				locComputeUpdatePosition;	// do we have to run integrate shader after ?!
+	GLint				locComputeDynamic;
+	GLint				locComputeTurbulence;
+	GLint				locComputeGravity;
+	GLint				locComputeFloor;
+	GLint				locComputeNumForces;
+	GLint				locComputeNumCollisions;
+	GLint				locComputeUseSizeAtten;
+	GLint				locComputeUpdatePosition;	// do we have to run integrate shader after ?!
 
 	//
 	// self collisions compute shader
 	//GLuint				shaderSelfCollisions;
 	GLuint				programSelfCollisions;
 
-	GLuint				locSelfCollisionsDeltaTime;
+	GLint				locSelfCollisionsDeltaTime;
 
 	//
 	// euler integration compute shader
 	GLuint				programIntegrate;
 
-	GLuint				locIntegrateDeltaTime;
-	GLuint				locIntegrateNumCollisions;
+	GLint				locIntegrateDeltaTime;
+	GLint				locIntegrateNumCollisions;
 
 	// terrain uniforms
 
 	GLuint				techTerrainPreviewFragment;
-	GLuint				locTerrainTextureAddress;
+	GLint				locTerrainTextureAddress;
 
 	//
 	// compute shader for surface data preparation

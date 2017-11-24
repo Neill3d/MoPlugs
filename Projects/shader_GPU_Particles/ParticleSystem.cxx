@@ -158,13 +158,14 @@ ParticleSystem::ParticleSystem(unsigned int maxparticles)
 	mIsFirst = true;
 	mTime = 0;
 
-	mNeedReset = false;
+	mNeedReset = true;
 
 	mParticleCount = 0;
 	mUseRate = false;
 	mParticleRate = 0;
 
 	mSurfaceTextureId = 0;
+	mSurfaceMaskId = 0;
 	mTexture = 0;
 
 	mQuery = 0;
@@ -507,7 +508,7 @@ bool ParticleSystem::ResetParticles(unsigned int maxparticles, const int randomS
 	srand(randomSeed);
 
 	//
-	if (true == mInheritSurfaceColor)
+	if (true == mInheritSurfaceColor && PARTICLE_EMIT_FROM_VOLUME != EMITTER_TYPE )
 	{
 		ReadSurfaceTextureData();
 		CHECK_GL_ERROR();
@@ -637,8 +638,17 @@ void ParticleSystem::EmitParticles(const double deltaTime, const ETechEmitType	t
 		// layout(location=128) 	uniform 	TTriangle 	*gEmitMesh;
 		mBufferSurface.BindAsUniform(mShader->GetEmitGeometryProgramId(type), mShader->GetEmitMeshLocation(type), 0);
 	
+		if (mSurfaceMaskId > 0)
+		{
+			glActiveTexture( GL_TEXTURE1 );
+			glBindTexture( GL_TEXTURE_2D, mSurfaceMaskId );
+			glActiveTexture( GL_TEXTURE0 );
+		}
+
 		if (mSurfaceTextureId > 0)
+		{
 			glBindTexture(GL_TEXTURE_2D, mSurfaceTextureId);
+		}
 	}
 
 	if (mIsFirst == false)
@@ -695,6 +705,13 @@ void ParticleSystem::EmitParticles(const double deltaTime, const ETechEmitType	t
 	{
 		mBufferSurface.UnBind();
 	
+		if (mSurfaceMaskId > 0)
+		{
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE0);
+		}
+
 		if (mSurfaceTextureId > 0)
 			glBindTexture(GL_TEXTURE_2D, 0);
 	}
@@ -835,13 +852,14 @@ bool ParticleSystem::EmitterSurfaceUpdateOnCPU(const int vertexCount, float *pos
 	//
 	mEvaluateData.gPositionCount = triCount;
 	mEvaluateData.gUseEmitterTexture = (textureId > 0);
+	mEvaluateData.gUseEmitterMask = 0;
 	mSurfaceTextureId = textureId;
 
 	return true;
 }
 
 // DONE: run a computer shader
-bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLuint textureId)
+bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLuint textureId, const GLuint maskId)
 {	
 	//
 	// 
@@ -899,19 +917,20 @@ bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLu
 
 	
 	//TODO: not correct for GPU skinning, we should use ptr offset
+	/*
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, posId );
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, norId );
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, uvId );
-	/*
+	
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, indId );
 	// and output into a triangles buffer
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, surfaceId );
 	*/
-	/*
+	
 	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 0, posId, (GLintptr) positionOffset, numberOfVertices * sizeof(vec4));
 	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 1, norId, (GLintptr) normalOffset, numberOfVertices * sizeof(vec4));
 	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 2, uvId, (GLintptr) uvOffset, numberOfVertices * sizeof(vec2));
-	*/
+	
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, indId );
 	// and output into a triangles buffer
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, surfaceId );
@@ -925,7 +944,9 @@ bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLu
 	//
 	mEvaluateData.gPositionCount = numberOfTriangles;
 	mEvaluateData.gUseEmitterTexture = (textureId > 0);
+	mEvaluateData.gUseEmitterMask = (maskId > 0);
 	mSurfaceTextureId = textureId;
+	mSurfaceMaskId = maskId;
 
 	return true;
 

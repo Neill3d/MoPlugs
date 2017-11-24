@@ -50,8 +50,8 @@ ConstantBuffer global evaluateBlock
 	
 	uniform	float					gSize;
 	uniform	float					gInheritEmitterColor;
-	uniform	float					gEvalTemp2;
-	uniform float					gEvalTemp3;
+	uniform	float					gUseEmitterMask;
+	uniform float					gSkipZeroAlpha;
 	
 	uniform	vec4					gEmitColor;
 }
@@ -397,7 +397,7 @@ namespace Evaluate
 		//layout(location=6) flat in TTriangle	*inMesh[];
 		uniform 	TTriangle 	*gEmitMesh;
 		layout(binding=0) 		uniform		sampler2D	gEmitTexture;	// particles will inherit texture texel under the surface point
-		
+		layout(binding=1)		uniform		sampler2D	gEmitMask;	// mask out particles emitting (model UV-based mask)
 		
 		void GetEmitPos(in vec2 randN, out vec4 pos, out int vertIndex, out vec3 bary)
 		{
@@ -443,25 +443,31 @@ namespace Evaluate
 			int triIndex = vertIndex / 3;
 			TTriangle	*surfaceData = gEmitMesh;
 			
-			if (gUseEmitterTexture == 0)
+			// read from texture image
+
+			vec2 uv0 = surfaceData[triIndex].uv[0];
+			vec2 uv1 = surfaceData[triIndex].uv[1];
+			vec2 uv2 = surfaceData[triIndex].uv[2];
+
+			uv0 *= bary.x;
+			uv1 *= bary.y;
+			uv2 *= bary.z;
+
+			vec2 uv = uv0 + uv1 + uv2;
+
+			// color
+			if (gUseEmitterTexture > 0)
 			{
-				color = surfaceData[triIndex].n;
+				color = texture(gEmitTexture, uv);
 			}
 			else
 			{
-				// read from texture image
-
-				vec2 uv0 = surfaceData[triIndex].uv[0];
-				vec2 uv1 = surfaceData[triIndex].uv[1];
-				vec2 uv2 = surfaceData[triIndex].uv[2];
-
-				uv0 *= bary.x;
-				uv1 *= bary.y;
-				uv2 *= bary.z;
-
-				vec2 uv = uv0 + uv1 + uv2;
-
-				color = texture(gEmitTexture, uv);
+				color = surfaceData[triIndex].n;
+			}
+			// mask
+			if (gUseEmitterMask > 0)
+			{
+				color.a = texture(gEmitMask, uv).a;
 			}
 		}
 	}
@@ -604,17 +610,19 @@ namespace Evaluate
 				
 				GenerateNewParticle(randomF, newPosition, newVelocity, newRotation, newRotVel, newColor);
 				
-				Position1 = newPosition;
-				Velocity1 = newVelocity; 	
-				Rot1 = newRotation;
-				RotVel1 = newRotVel;
-				Color1 = newColor;
+				if (0.0 == gSkipZeroAlpha || newColor.a > 0.5)
+				{
+					Position1 = newPosition;
+					Velocity1 = newVelocity; 	
+					Rot1 = newRotation;
+					RotVel1 = newRotVel;
+					Color1 = newColor;
 				
-				EmitVertex();                                                           
-				EndPrimitive();                                                         
-				
-				// reset launcher age to next time (one launch per second)
-				Age = -1.0f * lifetime - 1.0;  
+					EmitVertex();                                                           
+					EndPrimitive();                                                         
+					// reset launcher age to next time (one launch per second)
+					Age = -1.0f * lifetime - 1.0;  
+				}
 			}
 			
 			//

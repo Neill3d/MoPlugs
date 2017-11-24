@@ -93,8 +93,8 @@ struct evaluateBlock
 	
 	float					gSize;
 	float					gInheritEmitterColor;
-	float					gEvalTemp2;
-	float					gEvalTemp3;
+	float					gUseEmitterMask;
+	float					gSkipZeroAlpha;
 	
 	vec4					gColor;
 };

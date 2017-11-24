@@ -188,10 +188,15 @@ public:
 	FBPropertyInt								ResetCount;			// this a startup count of particles!
 
 	FBPropertyDouble							ExtrudeResetPosition;
+	FBPropertyBool								GenerationSkipZeroAlpha;
 
 	FBPropertyBool								UseRate;
 	FBPropertyInt								ParticleRate;		// particles / second
 	FBPropertyBool								UsePreGeneratedParticles;	// pre-cache launchers or generate dynamically in a glsl shader
+
+	// mask out particles when generating from a surface
+	FBPropertyBool								UseGenerationMask;
+	FBPropertyListObject						GenerationMask;
 
 	// how fast we should reach a reset pose
 	FBPropertyAnimatableDouble					ConstraintMagnitude;

@@ -218,6 +218,9 @@ void CRenderVertexConveyer::CopyBufferSubData(int bufferType, FBModelVertexData 
 		break;
 	}
 
+	// TODO: take care about GPU skinning offset in the buffer
+	// const GLvoid* positionOffset = pVertexData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Point);
+
 	if (srcBufferId > 0)
 	{
 		glBindBuffer( GL_ARRAY_BUFFER, srcBufferId );

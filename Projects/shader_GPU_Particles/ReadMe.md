@@ -21,8 +21,6 @@ Particle System
 
  TODO
  
- - write compute shader for particles generation. That will help to keep surfaceData always on gpu and complex models will work more stable
- 
  - render self-shadowing for particles (like cloud rendering)
 
  - add texture matrix support for the emitter texture
@@ -54,6 +52,15 @@ Particle System
   + add support of transparency modes (old task - sort particles and draw after everything)
 
 LOG
+
+24.11.2017
+ + write compute shader for particles generation. That will help to keep surfaceData always on gpu and complex models will work more stable
+ + add particle generation masking (uv-model based mask)
+ new properties in the mb shader:
+ * GenerationSkipZeroAlpha
+ * Use Generation Mask
+ * Generation Mask
+
 
 20.11.2017
  + making compute shaders to prepare surface data and pre-generate particles on gpu

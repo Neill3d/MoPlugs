@@ -178,7 +178,9 @@ void ORShaderPanorama::PrepareModelVAO()
 	}
 
 	FBModelVertexData *pVertexData = mModel->ModelVertexData;
-	GLuint posId = pVertexData->GetVertexArrayVBOId( kFBGeometryArrayID_Point, true );
+	const GLuint posId = pVertexData->GetVertexArrayVBOId( kFBGeometryArrayID_Point, true );
+	const GLvoid* positionOffset = pVertexData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Point);
+
 	int posStride = sizeof(FBVertex);
 	GLuint indId = pVertexData->GetIndexArrayVBOId();
 	mNumberOfVertices = pVertexData->GetVertexCount();
@@ -188,7 +190,7 @@ void ORShaderPanorama::PrepareModelVAO()
 	glBindVertexArray(mVao);
 
 	glBindBuffer( GL_ARRAY_BUFFER, posId );
-	glVertexAttribPointer (0, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer (0, 4, GL_FLOAT, GL_FALSE, 0, positionOffset);
 
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indId );
 

@@ -242,9 +242,14 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)\GLSL_CS\*.*" "..\..\bin\System\GLSL_CS" /Y /I
 xcopy "$(ProjectDir)\GLSL_FX\*.*" "..\..\bin\System\GLSL_FX" /Y /I</Command>
-    </PreBuildEvent>
+      <Message>copy project shaders</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>

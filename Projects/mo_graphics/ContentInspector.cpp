@@ -1457,18 +1457,39 @@ void CModelsInspector::SortModels()
 		//if (pModel->Shaders.GetCount() > 0)
 		//	pShader = pModel->Shaders[0];
 
-		for (int i=0, numShaders=pModel->Shaders.GetCount(); i<numShaders; ++i)
+		const int numShaders = pModel->Shaders.GetCount();
+
+		if (numShaders > 0)
 		{
-			FBShader *pShader = pModel->Shaders[i];
-
-			// find a callback for that shader
-			if ( FBIS(pShader, FXShadingShader) || FBIS(pShader, FXColorCorrectionShader)
-				|| FBIS(pShader, FXProjectionMapping) )
+			for (int i=0, numShaders=pModel->Shaders.GetCount(); i<numShaders; ++i)
 			{
-				printf ( "what these shaders are here ?!\n" );
-				continue;
-			}
+				FBShader *pShader = pModel->Shaders[i];
 
+				// find a callback for that shader
+				if ( FBIS(pShader, FXShadingShader) || FBIS(pShader, FXColorCorrectionShader)
+					|| FBIS(pShader, FXProjectionMapping) )
+				{
+					printf ( "what these shaders are here ?!\n" );
+					continue;
+				}
+
+				CBaseShaderCallback *pCallback = mShadersFactory.FindTypeByShaderAndGoal(pShader, eRenderGoalShading);
+		
+				if (nullptr != pCallback)
+				{
+					const int id = pCallback->Id();
+					const int index = mSortedCounts[id]; 
+			
+					//mSortedMeshes[id][index] = meshIndex;
+					SortModelWrap wrap = {meshIndex, pModel};
+					mSortedModels[id].insert( std::make_pair(pShader, wrap) );
+					mSortedCounts[id] = index + 1;
+				}
+			}
+		}
+		else
+		{
+			FBShader *pShader = nullptr;
 			CBaseShaderCallback *pCallback = mShadersFactory.FindTypeByShaderAndGoal(pShader, eRenderGoalShading);
 		
 			if (nullptr != pCallback)

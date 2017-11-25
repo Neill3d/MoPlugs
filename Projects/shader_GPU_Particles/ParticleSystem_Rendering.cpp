@@ -108,7 +108,7 @@ void ParticleSystem::RenderParticles(int type, const bool pointSmooth)
 
 	if (mSizeTextureId > 0 && mRenderData.gUseSizeCurve > 0)
 	{
-		glActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_1D, 0);
 		glActiveTexture(GL_TEXTURE0);
 	}

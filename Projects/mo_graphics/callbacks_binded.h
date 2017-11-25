@@ -39,8 +39,7 @@ public:
 		mNeedOverrideShading = false;
 		mRenderToNormalAndMaskOutput = false;
 
-		//mCurrentTech = Graphics::eEffectTechniqueWallMaterial;
-		mCurrentTech = Graphics::MATERIAL_SHADER_PROJECTORS;
+		mCurrentTech = Graphics::MATERIAL_SHADER_LEGACY;
 	}
 
 	virtual const char *shaderName() const override
@@ -151,6 +150,7 @@ public:
 		mFXProjectionBinded = false;
 		hasProjectors = false;
 		mShader = nullptr;
+		mCurrentTech = Graphics::MATERIAL_SHADER_PROJECTORS;
 	}
 
 	//! a destructor

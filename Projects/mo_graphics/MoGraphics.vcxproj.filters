@@ -532,6 +532,9 @@
     <None Include="GLSL_FX\IBL.glslfx">
       <Filter>GLSL_FX</Filter>
     </None>
+    <None Include="GLSL_FX\LegacyShading.glslfx">
+      <Filter>GLSL_FX</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="CompositerMaster">

@@ -15,7 +15,7 @@
 
 
 // GLSLFX shader
-#include "Shader.h"
+#include "ShaderFX.h"
 #include "graphics\Framebuffer.h"
 #include "graphics\UniformBuffer.h"
 

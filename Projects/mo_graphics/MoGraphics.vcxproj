@@ -1012,6 +1012,7 @@ xcopy "$(ProjectDir)\GLSL_FX\*.*" "..\..\bin\System\GLSL_FX" /Y /I</Command>
     <None Include="GLSL_CS\recomputeNormalsZero.cs" />
     <None Include="GLSL_FX\CompositeMaster.glslfx" />
     <None Include="GLSL_FX\IBL.glslfx" />
+    <None Include="GLSL_FX\LegacyShading.glslfx" />
     <None Include="GLSL_FX\ProjectiveMapping.glslfx" />
     <None Include="GLSL_FX\shared_common.glslfxh" />
     <None Include="GLSL_FX\shared_customcolor.glslfxh" />

@@ -1,0 +1,740 @@
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+// Legacy Shading support for MoPlugs Renderer
+//
+// Shader plugin for the Autodesk MotionBuilder
+//
+// Author Sergey Solokhin (Neill3d) 2014-2017. Based on nvFX library
+//
+//	GitHub page - https://github.com/Neill3d/MoPlugs
+//	Licensed under BSD 3-Clause - https://github.com/Neill3d/MoPlugs/blob/master/LICENSE
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+#extension GL_ARB_separate_shader_objects : enable
+
+//////////////////////////////////////////////////////////
+
+#include "shared_globals.glslfxh"
+
+
+uniform float	AlphaPass = 0.0f;
+uniform float	normal_length = 10.0f;
+uniform int 	numProjectors = 0;
+//uniform float	depthDisplacement = 0.0f;
+
+uniform int		gMeshIndex = 0;
+
+uniform vec4	textureOffset;
+uniform vec4	textureScaling;
+//uniform vec4	shaderMask;
+
+//uniform float	useRim = 1.0;
+//uniform float	rimPower = 1.0;
+//uniform vec4 	gRimOptions;			// x - useRim, y-rimPower, z-useRimSampler
+//uniform vec4	gRimColor;			// w - rim blend mode
+
+// its very important for clustering lights
+uniform vec4	SCREEN_SIZE;	// contains offsets and 1.0/width(height)
+
+uniform float	softParticles = 0.0f;
+
+//////////////////////////////////////////////////////////
+
+GLSLShader 
+{
+    #version 430 compatibility
+	#extension GL_ARB_bindless_texture : enable
+	#extension GL_ARB_shader_storage_buffer_object : require
+	#extension GL_ARB_shader_draw_parameters : require
+	#extension GL_NV_shader_buffer_load : require
+	#extension GL_NV_shader_atomic_float : require
+}
+
+#include "shared_lighting.glslfxh"
+#include "shared_depth.glslfxh"
+#include "shared_texturing.glslfxh"
+
+//////////////////////////////////////////////////////////////
+// GLSL Globals : meaning that all the GLSL domains (vertex, fragments etc.) will have a copy
+// of these data
+//
+GLSLShader 
+{
+	//! Note: all structures are aligned to 16-bit
+	
+	
+	
+	struct TMaterial
+	{
+		// textures for material channels
+		int			ambientChannel;
+		int			diffuseChannel;
+		int			specularChannel;
+		int			emissiveChannel;
+		int			transparencyChannel;
+		int			normalmapChannel;
+		int			reflectChannel;
+		
+		float		specExp;
+		
+		float 		useAmbient;
+		float		useDiffuse;
+		float		useSpecular;
+		float		useEmissive;
+		float		useTransparency;
+		float		useNormalmap;
+		float		useReflect;
+		
+		// values for PBR
+		float		roughness;
+		float 		metal;
+		float 		dummy3;
+		float 		dummy1;
+		float 		dummy2;
+		
+		//
+		/// Current material
+		//
+		vec4		emissiveColor;
+		vec4     	diffuseColor;
+		vec4     	ambientColor;
+		vec4		reflectColor;
+		vec4     	transparencyColor;
+		vec4     	specularColor;
+		
+		// 160 in total
+	};
+	
+	struct TShader
+	{
+		int			shadingType;
+		int			shaderType;
+		int			shader1;
+		int			shader2;
+		
+		int 		shader3;
+		int			shader4;
+		int			shader5;
+		float		transparency;
+	
+		//
+		/// shader parameters
+		//
+		float		toonEnabled;
+		float		toonSteps;
+		float		toonDistribution;
+		float		toonShadowPosition;
+		
+		vec4		customColor;
+		
+		float		contrast;
+		float		saturation;
+		float		brightness;
+		float		gamma;
+		
+		float		depthDisplacement;
+		float		alphaFromColor;
+		float		dummy2;
+		float		applyColorCorrection;
+		
+		//
+		vec4		mask;
+		vec4		rimOptions;	// x - useRim, y-rimPower, z-useRimSampler
+		vec4		rimColor;	// w - rim blend mode
+		
+		// 16
+		vec4		shadow; // rgb - Color;	w-intensity
+		// 16
+		
+		// total - 96 bytes
+	};
+	
+	struct TModel
+	{
+		mat4		transform;		// local mesh matrix
+		mat4		normalMatrix;	// transpose(inverse(WorldViewIT))
+		
+		// total 128 bytes
+	};
+	
+	struct TMesh
+	{
+		int				material;		// pointer to the mesh material
+		int				lightmap;		// pointer to the lightmap texture (if needed)
+		
+		int				model;			// index to the model struct	
+		int				shader;			// index to the shader struct
+		// 16
+		
+		vec4		color;			// flat color id (buffer id rendering)
+		// 16
+		
+		// total - 32 bytes
+	};
+
+}
+
+////////////////////////////////////////////////////////////////////
+/// Main things
+////////////////////////////////////////////////////////////////////
+namespace Main
+{
+
+    ////////////////////////////////////////////////////////////////////
+    /// MAIN's VERTEX PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+	GLSLShader VS_Simple
+	{
+		layout(location=0) in vec4 inPosition;
+		layout(location=1) in vec2 inTexCoords;
+		layout(location=2) in vec4 inNormal;
+		//layout(location=5) in float inMeshIndex;
+		
+		layout(location=1) smooth out vec2 outTC;	// 8 bytes
+		layout(location=4) flat out TMesh	*fMesh;
+		
+		out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+
+		uniform TMesh			*allTheMeshes;
+		uniform	TModel			*allTheModels;
+		
+		void main(void)
+        {
+			TMesh 	*theMesh = allTheMeshes + gl_BaseInstanceARB + gMeshIndex; // + gl_DrawIDARB;
+			TModel	*theModel = allTheModels + theMesh->model;
+			
+			// Surface normal in eye coords
+			mat4 normalMatrix = theModel->normalMatrix; // m4_WorldIT; //	transpose(inverse(matrix));
+			//mat4 normalMatrix = m4_WorldIT;
+			vec4 N = normalMatrix * vec4(inNormal.xyz, 1.0);
+		
+			vec4 Po    = m4_World * theModel->transform * vec4(inPosition.xyz, 1.0);
+			vec4 vPosition4 = m4_View * Po;
+			
+			float depthDisplacement = 0.0;
+			gl_Position = m4_Proj * vPosition4;
+			gl_Position.z += depthDisplacement;
+			
+			VS_Depth( depthDisplacement, gl_Position );
+			
+			outTC           = inTexCoords;
+			fMesh = theMesh;
+        }
+	}
+	
+	GLSLShader FS_Simple
+	{
+		layout(location=1) smooth in vec2 inTC;		// input 8 bytes
+		layout(location=4) flat in TMesh *fMesh;
+	
+        layout(location=0) out vec4 	outColor;
+		
+		uniform	TMaterial			*allTheMaterials;
+		uniform TShader 			*allTheShaders;		// pointer to the array with shaders
+		
+		void main(void)
+		{
+			TShader *theShader = allTheShaders + fMesh->shader;
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			
+			vec4 difColor = vec4(theMaterial->diffuseColor.rgb, 1.0);
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			if (theMaterial->useDiffuse > 0.0f)
+			{
+				getDiffuseTexture( theMaterial->diffuseChannel, coords, difColor );
+			}
+		
+			if (theMaterial->useTransparency > 0.0f)
+			{
+				getTransparencyTexture( theMaterial->transparencyChannel, coords, difColor.a );
+			}
+			
+			outColor = vec4(fMesh->color.rgb, difColor.a);
+			
+			FS_Depth();
+		}
+	}
+	
+    GLSLShader VS
+    {
+        layout(location=0) in vec4 inPosition;
+		layout(location=1) in vec2 inTexCoords;
+		layout(location=2) in vec4 inNormal;
+		// TODO: make them as allTheMeshes, allTheModels uniforms instead of per vertex attribute
+		//layout(location=5) in TMesh*		inMesh;		// (material, shader)
+		//layout(location=6) in TModel*		inModel;	// (transformation)
+		
+		layout(location=0) smooth out vec3 outNw;	// 12 bytes
+		layout(location=1) smooth out vec2 outTC;	// 8 bytes
+		layout(location=2) smooth out vec3 outPw;	// 12 bytes
+		layout(location=3) smooth out vec3 outWV;	// 12 bytes
+		layout(location=4) flat out TMesh	*fMesh;
+		
+		out vec3	n_eye;
+		
+		
+        out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+
+		uniform TMesh			*allTheMeshes;
+		uniform	TModel			*allTheModels;
+
+        void main(void)
+        {
+			TMesh 	*theMesh = allTheMeshes + gl_BaseInstanceARB + gMeshIndex; // + gl_DrawIDARB;
+			TModel	*theModel = allTheModels + theMesh->model;
+			
+			// Surface normal in eye coords
+			mat4 normalMatrix = theModel->normalMatrix; // m4_WorldIT; //	transpose(inverse(matrix));
+			//normalMatrix = transpose(inverse(m4_World * theModel->transform));
+			//normalMatrix = transpose(inverse(m4_View * normalMatrix));
+			vec4 N = normalMatrix * vec4(inNormal.xyz, 1.0);
+			//N = vec4(1.0, 0.0, 0.0, 1.0);
+			
+			vec3 offset = inNormal.xyz * 0.0;
+			vec4 vertex = vec4(inPosition.xyz + offset, 1.0);
+			vec4 Po    = m4_World * theModel->transform * vertex;
+			vec4 vPosition4 = m4_View * Po;
+			vec3 vPosition3 = vPosition4.xyz; // / vPosition4.w;
+		
+			gl_Position = m4_Proj * vPosition4;
+			
+			// compose objects with user defined rules
+			float depthDisplacement = 0.0;
+			gl_Position.z += depthDisplacement;
+			
+			VS_Depth( depthDisplacement, gl_Position );
+			
+			outNw           = N.xyz; // / N.w;
+			outTC           = inTexCoords;
+			outPw           = vPosition3; // / vPosition4.w;
+			outWV           =  /*eyePos -*/ Po.xyz; // / Po.w; //(Po.xyz - eyePos);
+			//outPw = -m4_View[3].xyz;
+			//outPw.y = -outPw.y;
+			//n_eye = vec3(m4_View * m4_World * theModel->transform * vec4(inNormal.xyz, 0.0));
+			//normalMatrix = transpose(inverse(m4_View * m4_World * theModel->transform));
+			normalMatrix = transpose(inverse(m4_World * theModel->transform));
+			n_eye = (normalMatrix * vec4(inNormal.xyz, 1.0)).xyz; // inNormal.xyz;
+			//n_eye = inNormal.xyz;
+			
+			//n_eye = (normalMatrix * vec4(inNormal.xyz, 1.0)).xyz; // inNormal.xyz;
+			
+			fMesh = theMesh;
+        }
+    }
+	
+	////////////////////////////////////////////////////////////////////
+    /// CUBEMAP's GEOMETRY PROGRAM /////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+	GLSLShader GS_CubeMap
+	{
+		layout(triangles, invocations = 6) in;
+		layout(triangle_strip, max_vertices = 3) out;
+ 
+		in gl_PerVertex
+		{
+			vec4 gl_Position;
+		} gl_in[];
+ 
+		layout(location=0) smooth in vec3 inNw[];	// 12 bytes
+		layout(location=1) smooth in vec2 inTC[];	// 8 bytes
+		layout(location=2) smooth in vec3 inPw[];	// 12 bytes
+		layout(location=3) smooth in vec3 inWV[];	// 12 bytes
+		layout(location=4) flat in TMesh	*inMesh[];
+ 
+		in vec3	in_eye0[];
+ 
+		//
+		out int gl_Layer;
+		out gl_PerVertex
+		{
+			vec4 gl_Position;
+		};
+ 
+		layout(location=0) smooth out vec3 outNw;	// 12 bytes
+		layout(location=1) smooth out vec2 outTC;	// 8 bytes
+		layout(location=2) smooth out vec3 outPw;	// 12 bytes
+		layout(location=3) smooth out vec3 outWV;	// 12 bytes
+		layout(location=4) flat out TMesh	*fMesh;
+ 
+		out vec3 in_eye;
+ 
+		void main() {
+			 
+			for(int i=0; i<gl_in.length(); ++i) 
+			{				
+				gl_Position = cubeMapProjections[gl_InvocationID] * gl_in[i].gl_Position;
+				//gl_Position = gl_in[i].gl_Position;
+				outNw = inNw[i];
+				outTC = inTC[i];
+				outPw = inPw[i];
+				outWV = inWV[i];
+				fMesh = inMesh[i];
+				in_eye = in_eye0[i];
+				
+				gl_Layer = gl_InvocationID;
+				EmitVertex();
+			}
+			EndPrimitive();
+		}
+	}
+	
+    ////////////////////////////////////////////////////////////////////
+    /// MAIN's FRAGMENT PROGRAM ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+	
+    GLSLShader FS
+    {
+		#define	PI	3.14159265358979323846264
+	
+		layout(location=0) smooth in vec3 inNw;
+		layout(location=1) smooth in vec2 inTC;		// input 8 bytes
+		layout(location=2) smooth in vec3 inPw;
+		layout(location=3) smooth in vec3 inWV;
+		
+		layout(location=4) flat in TMesh *fMesh;
+	
+		in vec3		n_eye;
+		
+        layout(location=0) out vec4 	color;
+		layout(location=1) out vec4		outNormal;	// output a view space normal
+		layout(location=2) out vec4		outMask;
+		layout(location=3) out vec4		outPosition;
+		
+		uniform	TMaterial			*allTheMaterials;
+		uniform TShader 			*allTheShaders;		// pointer to the array with shaders
+		
+		/////////////////////////////////////////////////////////////////////
+		
+		uniform sampler2D	backgroundSampler;	// for matte shading
+		
+		uniform samplerCube		reflectionCubeSampler;
+		
+		// for soft particles effect
+		uniform sampler2D		mainDepthSampler;
+		////////////////////////////////////////////////////////////////////
+		
+		void ApplyLighting(in TMaterial *theMaterial, in TShader *theShader, in vec3 Vd, in vec3 Vn, in vec3 Nn, float toonShading, inout vec4 difColor)
+		{
+			//
+			// calculate lighting indices
+			
+			LIGHTINFOS lInfo;
+			lInfo.viewDistance = Vd;
+			lInfo.viewDir = Vn;
+			lInfo.normal = Nn;
+			lInfo.worldPosition = inWV;
+			lInfo.position = inPw;
+			lInfo.shininess = theMaterial->specExp;
+			
+			LIGHTRES	lResult;
+			lResult.ambientContrib = vec3(0.0);
+			lResult.diffContrib = vec3(0.0);
+			lResult.specContrib = vec3(0.0);
+			//lResult.R = vec3(0.0);
+		
+			if (numDirLights > 0)
+			{
+				evalDirLighting(lInfo, numDirLights, lResult);
+			}
+			if (numPointLights > 0)
+			{
+				evalLighting(lInfo, lResult);
+			}
+
+			/*
+			// rim lighting
+			if( useRim > 0. ) {
+				float f = rimPower * abs( dot( Nn, normalize(inPw.xyz) ) );
+				f = useRim * ( 1. - smoothstep( 0.0, 1., f ) );
+				lResult.diffContrib.rgb += mix( vec3(0.0), rimColor.rgb, f);
+			}
+			*/
+			if (toonShading > 0.0)
+			{
+				float toonF = 1.0 / theShader->toonDistribution * theShader->toonSteps;
+			
+				lResult.diffContrib = clamp(lResult.diffContrib - vec3(0.5) + theShader->toonShadowPosition, vec3(0.0), vec3(1.0));
+				lResult.diffContrib = round( lResult.diffContrib * toonF ) / theShader->toonSteps;
+			
+				lResult.specContrib = clamp(lResult.specContrib - 0.5 + theShader->toonShadowPosition, 0.0, 1.0);
+				lResult.specContrib = round( lResult.specContrib * toonF ) / theShader->toonSteps;
+			}
+			
+			// material diffuse factor and global shader transparency
+			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			
+			vec3 ambientColor = theMaterial->ambientColor.rgb * globalAmbientLight.rgb * theMaterial->ambientColor.w;
+			//difColor += vec4(ambientColor, theShader->transparency);
+			difColor *= vec4(ambientColor + lResult.diffContrib * difFactor, theShader->transparency); // ambientColor +
+			
+			//
+			difColor.rgb = /*theMaterial->emissiveColor.w * theMaterial->emissiveColor.xyz +*/ difColor.rgb + theMaterial->specularColor.w * lResult.specContrib;
+		}
+		
+		vec3 ApplyReflection( in TMaterial *theMaterial, in vec3 Vd )
+		{
+			vec3 reflColor = theMaterial->reflectColor.rgb;
+			
+			if (theMaterial->useReflect > 0.0f)
+			{
+				
+				vec3 PositionWS = inWV;
+				vec3 NormalWS = normalize(n_eye);
+				
+				// calculations are done in eye space... so the eyePos is in vec3(0.0)
+				vec3 dirWS = normalize(PositionWS - eyePos); // PositionWS - eyePos
+				
+				vec3 reflection = normalize(reflect(dirWS, NormalWS)); // inWV - eyePos
+				
+				// Parallax-correction
+				if (cubeMapParallaxCorrection > 0.0)
+				{
+					vec3 CubemapPositionWS = cubeMapPosition.xyz;
+					
+					// Intersection with OBB convertto unit box space
+					// Transform in local unit parallax cube space (scaled and rotated)
+					mat4 worldToLocal = cubeMapWorldToLocal;
+					//worldToLocal[3] = vec4(0.0, 0.0, 0.0, 1.0);
+					
+					vec3 RayLS = mat3(worldToLocal) * reflection;
+					vec3 PositionLS = (worldToLocal * vec4(PositionWS, 1.0)).xyz;
+					
+					vec3 Unitary = vec3(1.0, 1.0, 1.0);
+					//vec3 boxMax = CubemapPositionWS + cubeMapMax.xyz;
+					//vec3 boxMin = CubemapPositionWS + cubeMapMin.xyz;
+					vec3 firstPlaneIntersect = (Unitary - PositionLS) / RayLS;
+					vec3 secondPlaneIntersect = (-Unitary - PositionLS) / RayLS;
+					
+					// Looking only for intersections in the forward direction of the ray.    
+					vec3 furthestPlane = max(firstPlaneIntersect, secondPlaneIntersect);
+					
+					float dist = min(min(furthestPlane.x, furthestPlane.y), furthestPlane.z); // 0.2 * ...
+					vec3 intersectPositionWS = PositionWS + reflection * dist;
+					reflection = intersectPositionWS - CubemapPositionWS;
+					//reflection = 0.2 * (PositionWS - CubemapPositionWS) + reflection;
+ 					//reflColor = texture( reflectionCubeSampler, refl ection ).rgb;
+				}
+				else
+				{
+					//float yaw = .5 - atan( reflection.x, -reflection.z ) / ( 2.0 * PI );
+					//float pitch = .5 - asin( reflection.y ) / PI;
+				
+					//getReflectivityTexture( theMaterial->reflectChannel, vec4(1.0-pitch, 1.0-yaw, 0.0, 1.0), reflColor );
+					
+					//reflColor = texture( reflectionCubeSampler, vec3(reflection.x, reflection.y, -reflection.z) ).rgb;
+				}
+				
+				reflColor = texture( reflectionCubeSampler, reflection ).rgb;
+				//reflColor = NormalWS;
+			}
+			
+			//difColor.rgb += reflColor * theMaterial->reflectColor.w;
+			return reflColor * theMaterial->reflectColor.w;
+		}
+		
+		//////////////////////////////////////////////////////////////////////
+	
+		// declare functions
+		vec4 PhongShade()
+		{
+			TMaterial *theMaterial = allTheMaterials + fMesh->material;
+			TShader *theShader = allTheShaders + fMesh->shader;
+			
+			vec3 Nn = normalize(inNw);
+			vec3 Vd = eyePos - inWV;
+			vec3 Vn = normalize(Vd);
+			
+			vec4 difColor = vec4(theMaterial->diffuseColor.rgb, 1.0);
+			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
+			
+			if (theMaterial->useDiffuse > 0.0f)
+			{
+				getDiffuseTexture( theMaterial->diffuseChannel, coords, difColor );
+				
+				if (theShader->alphaFromColor > 0.0)
+				{
+					difColor.a = difColor.r;
+				}
+			}
+			if (theMaterial->useTransparency > 0.0f)
+			{
+				getTransparencyTexture( theMaterial->transparencyChannel, coords, difColor.a );
+			}
+			
+			//
+			// calculate lighting indices
+			
+			LIGHTINFOS lInfo;
+			lInfo.viewDistance = Vd;
+			lInfo.viewDir = Vn;
+			lInfo.normal = Nn;
+			lInfo.worldPosition = inWV;
+			lInfo.position = inPw;
+			lInfo.shininess = theMaterial->specExp;
+			
+			LIGHTRES	lResult;
+			lResult.ambientContrib = vec3(0.0);
+			lResult.diffContrib = vec3(0.0);
+			lResult.specContrib = vec3(0.0);
+			//lResult.R = vec3(0.0);
+			
+			if (numDirLights > 0)
+			{
+				evalDirLighting(lInfo, numDirLights, lResult);
+			}
+			if (numPointLights > 0)
+			{
+				evalLighting(lInfo, lResult);
+			}
+			
+			// material diffuse factor and global shader transparency
+			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			vec3 ambientColor = theMaterial->ambientColor.rgb * globalAmbientLight.rgb * theMaterial->ambientColor.w;
+			//difColor += vec4(ambientColor, theShader->transparency);
+			difColor *= vec4(ambientColor + lResult.diffContrib * difFactor, theShader->transparency); // ambientColor +
+			
+			//
+			/*theMaterial->emissiveColor.w * theMaterial->emissiveColor.xyz +*/
+			difColor.rgb =  difColor.rgb + theMaterial->specularColor.w * lResult.specContrib;
+			
+			vec3 reflColor = ApplyReflection(theMaterial, Vd);
+			difColor.rgb += lResult.diffContrib * reflColor;
+			//difColor.rgb = lResult.diffContrib;
+			return difColor;
+		}
+		
+        void main() 
+        {
+			TShader *theShader = allTheShaders + fMesh->shader;
+			
+			// calculate shading
+			vec4 shadeColor = PhongShade();		// theShader->shadingType
+			
+			color = shadeColor;
+			
+			outNormal = vec4( normalize(inNw), shadeColor.a );
+			//outNormal = normalize(inNw);
+			outPosition = vec4(inWV, fMesh->lightmap);
+			outMask = theShader->mask;
+			
+			FS_Depth();
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+// Material Technique
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
+Technique Init
+{
+    Pass init
+    {
+        PolygonOffset = {1.0,1.0};
+        DEPTH_TEST = True;
+        DEPTH_FUNC = LEQUAL;
+        DEPTH_MASK = True;
+    }
+}
+
+// technique for output geometry with a very simple shading and MRT (normal, mask, etc.)
+
+Technique LegacyMaterial
+{
+	Pass pEarlyZNoTextures
+	{
+		VertexProgram = { Main::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = Main::FS_Simple;
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+	
+	Pass pBindedEarlyZ
+	{
+		VertexProgram = { Main::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = Main::FS_Simple;
+		FragmentProgram<"texturing"> = BindedTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+	
+    Pass pNoTextures
+    {
+        VertexProgram = Main::VS;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		FragmentProgram = { Main::FS, Lighting };
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+    }
+	
+	Pass pBindedTextures
+	{
+		VertexProgram = Main::VS;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
+		
+		//FragmentProgram = ;
+		FragmentProgram = { Main::FS, Lighting };
+		FragmentProgram<"texturing"> = BindedTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+	}
+}
+
+Technique LegacyMaterialLog
+{
+	Pass pEarlyZNoTextures
+	{
+		VertexProgram = { Main::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		
+		FragmentProgram = Main::FS_Simple;
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+	}
+	
+	Pass pBindedEarlyZ
+	{
+		VertexProgram = { Main::VS_Simple };
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		
+		FragmentProgram = Main::FS_Simple;
+		FragmentProgram<"texturing"> = BindedTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+	}
+	
+    Pass pNoTextures
+    {
+        VertexProgram = Main::VS;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		
+		FragmentProgram = { Main::FS, Lighting };
+		FragmentProgram<"texturing"> = NoneTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+    }
+	
+	Pass pBindedTextures
+	{
+		VertexProgram = Main::VS;
+		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::logDepth;
+		
+		//FragmentProgram = ;
+		FragmentProgram = { Main::FS, Lighting };
+		FragmentProgram<"texturing"> = BindedTextures::texturing;
+		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::logDepth;
+	}
+	
+}

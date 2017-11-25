@@ -21,6 +21,13 @@ Particle System
 
  TODO
  
+ - separate emit and sim executions. Split it into iterations,
+ and interpolate emitter matrix during each iteration between prev matrix and current
+
+ - emit only when particles rate > 0
+
+ - compressed textures are supported by pregenerated particles
+
  - render self-shadowing for particles (like cloud rendering)
 
  - add texture matrix support for the emitter texture

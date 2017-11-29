@@ -74,7 +74,7 @@ public:
 
 	void SetWindVectors( const FBVector4d wind1, const FBVector4d wind2, const FBVector4d wind3, const FBVector4d wind4 );
 
-	void FillForceData( ParticlesSystem::TForce &forcedata, const float elapsedTime );
+	void FillForceData( GPUParticles::TForce &forcedata, const float elapsedTime );
 
 protected:
     int					mPickedSubItem;

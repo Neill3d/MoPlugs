@@ -19,7 +19,7 @@
 #include "FBCommon.h"
 #include "algorithm\math3d_mobu.h"
 
-using namespace ParticlesSystem;
+using namespace GPUParticles;
 
 FBClassImplementation( ForceWind );								                //!< Register class
 FBStorableCustomModelImplementation( ForceWind, FORCEWIND__DESCSTR );			//!< Register to the store/retrieve system
@@ -288,7 +288,7 @@ FBVector3d QuatMultVect(const FBQuaternion &q, const FBVector3d &p)
 	return res;
 }
 
-void ForceWind::FillForceData( ParticlesSystem::TForce &data, const float elapsedTime )
+void ForceWind::FillForceData( TForce &data, const float elapsedTime )
 {
 	FBVector4d wind1, wind2, wind3, wind4;
 

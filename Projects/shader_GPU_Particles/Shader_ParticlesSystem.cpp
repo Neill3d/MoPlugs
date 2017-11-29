@@ -16,7 +16,7 @@
 
 #include <iostream>
 
-using namespace ParticlesSystem;
+using namespace GPUParticles;
 
 /////////////////////////////////////// Global vars
 
@@ -39,15 +39,15 @@ int					g_computeSurfacePathLen;
 //
 
 int numberOfShaderInstances = 0;
-Shader	*gShader = nullptr;
+ParticleShaderFX	*gShader = nullptr;
 
-Shader *ParticlesSystem::QueryShader()
+ParticleShaderFX *GPUParticles::QueryShader()
 {
 	numberOfShaderInstances++;
 
 	if (gShader == nullptr)
 	{
-		gShader = new Shader();
+		gShader = new ParticleShaderFX();
 	}
 
 	return gShader;
@@ -58,7 +58,7 @@ void ReloadShader()
 
 }
 
-void ParticlesSystem::FreeShader()
+void GPUParticles::FreeShader()
 {
 	numberOfShaderInstances--;
 
@@ -76,7 +76,7 @@ void ParticlesSystem::FreeShader()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-Shader::Shader()
+ParticleShaderFX::ParticleShaderFX()
 {
 	fx_Effect = nullptr;
     
@@ -120,18 +120,18 @@ Shader::Shader()
 	bindlessTexturesSupported = true;
 }
 
-Shader::~Shader()
+ParticleShaderFX::~ParticleShaderFX()
 {
 	clearResources();
 }
 
 
-bool Shader::IsInitialized()
+bool ParticleShaderFX::IsInitialized()
 {
 	return (fx_Effect != nullptr);
 }
 
-bool Shader::SetShaderEffectLocation(const char *effectLocation, const int effectStrLen)
+bool ParticleShaderFX::SetShaderEffectLocation(const char *effectLocation, const int effectStrLen)
 {
 	memcpy_s( fx_location, sizeof(char)*256, effectLocation, effectStrLen );
 	fx_locationStrLen = effectStrLen;
@@ -139,7 +139,7 @@ bool Shader::SetShaderEffectLocation(const char *effectLocation, const int effec
 	return (fx_locationStrLen > 0);
 }
 
-bool Shader::SetComputeShaderLocation(const char *shaderLocation, const int shaderLen)
+bool ParticleShaderFX::SetComputeShaderLocation(const char *shaderLocation, const int shaderLen)
 {
 	memcpy_s( fx_computeLocation, sizeof(char)*256, shaderLocation, shaderLen );
 	fx_computeStrLen = shaderLen;
@@ -147,7 +147,7 @@ bool Shader::SetComputeShaderLocation(const char *shaderLocation, const int shad
 	return (fx_computeStrLen > 0);
 }
 
-bool Shader::SetComputeSelfCollisionsShaderLocation(const char *shaderLocation, const int shaderLen)
+bool ParticleShaderFX::SetComputeSelfCollisionsShaderLocation(const char *shaderLocation, const int shaderLen)
 {
 	memcpy_s( fx_computeSelfCollisionsLocation, sizeof(char)*256, shaderLocation, shaderLen );
 	fx_computeSelfCollisionsStrLen = shaderLen;
@@ -155,7 +155,7 @@ bool Shader::SetComputeSelfCollisionsShaderLocation(const char *shaderLocation, 
 	return (fx_computeSelfCollisionsStrLen > 0);
 }
 
-bool Shader::SetComputeIntegrateLocation(const char *shaderLocation, const int shaderLen)
+bool ParticleShaderFX::SetComputeIntegrateLocation(const char *shaderLocation, const int shaderLen)
 {
 	memcpy_s( fx_integrateLocation, sizeof(char)*256, shaderLocation, shaderLen );
 	fx_integrateStrLen = shaderLen;
@@ -163,7 +163,7 @@ bool Shader::SetComputeIntegrateLocation(const char *shaderLocation, const int s
 	return (fx_integrateStrLen > 0);
 }
 
-bool Shader::SetComputeSurfaceDataPath(const char *path, const int pathLen)
+bool ParticleShaderFX::SetComputeSurfaceDataPath(const char *path, const int pathLen)
 {
 	memset( g_computeSurfacePath, 0, sizeof(char) * 256 );
 	memcpy_s( g_computeSurfacePath, sizeof(char)*256, path, pathLen );
@@ -172,7 +172,7 @@ bool Shader::SetComputeSurfaceDataPath(const char *path, const int pathLen)
 	return (g_computeSurfacePathLen > 0);
 }
 
-bool Shader::Initialize()
+bool ParticleShaderFX::Initialize()
 {
 	// check for bindless extensions
 
@@ -243,12 +243,12 @@ bool Shader::Initialize()
 	return lSuccess;
 }
 
-void Shader::ChangeContext()
+void ParticleShaderFX::ChangeContext()
 {
 	clearResources();
 }
 
-void Shader::clearResources()
+void ParticleShaderFX::clearResources()
 {
 	if(fx_Effect)
     {
@@ -330,7 +330,7 @@ const GLuint nvGetProgramId(nvFX::IPass *pass, const int programPipeline, const 
 //-----------------------------------------------------------------------------
 // Load scene effect
 //-----------------------------------------------------------------------------
-bool Shader::loadEffect(const char *effectFileName)
+bool ParticleShaderFX::loadEffect(const char *effectFileName)
 {
     if(fx_Effect)
     {
@@ -485,7 +485,7 @@ bool Shader::loadEffect(const char *effectFileName)
 	return true;
 }
 
-void Shader::UploadEvaluateDataBlock(const evaluateBlock &_evaluateBlock)
+void ParticleShaderFX::UploadEvaluateDataBlock(const evaluateBlock &_evaluateBlock)
 {
 	// copy the block to OGL
 	if(fx_evaluateBlock)
@@ -528,7 +528,7 @@ void Shader::UploadEvaluateDataBlock(const evaluateBlock &_evaluateBlock)
 	}
 }
 
-void Shader::UploadRenderDataBlock(const renderBlock	&_renderBlock)
+void ParticleShaderFX::UploadRenderDataBlock(const renderBlock	&_renderBlock)
 {
 	// copy the block to OGL
 	if(fx_renderBlock)
@@ -544,7 +544,7 @@ void Shader::UploadRenderDataBlock(const renderBlock	&_renderBlock)
 	CHECK_GL_ERROR();
 }
 
-void Shader::UploadTerrainDataBlock(const terrainBlock &data)
+void ParticleShaderFX::UploadTerrainDataBlock(const terrainBlock &data)
 {
 	// copy the block to OGL
 	if(fx_terrainBlock)
@@ -560,7 +560,7 @@ void Shader::UploadTerrainDataBlock(const terrainBlock &data)
 	CHECK_GL_ERROR();
 }
 
-void Shader::BindEmit(const ETechEmitType	type)
+void ParticleShaderFX::BindEmit(const ETechEmitType	type)
 {
 	switch (type)
 	{
@@ -586,7 +586,7 @@ void Shader::BindEmit(const ETechEmitType	type)
 	CHECK_GL_ERROR();
 }
 
-void Shader::UnBindEmit()
+void ParticleShaderFX::UnBindEmit()
 {
 	if (fx_passEmitCurrent)
 		fx_passEmitCurrent->unbindProgram();
@@ -594,7 +594,7 @@ void Shader::UnBindEmit()
 	fx_passEmitCurrent = nullptr;
 }
 
-void Shader::BindSimulation(const bool updatePosition)
+void ParticleShaderFX::BindSimulation(const bool updatePosition)
 {
 	if (programCompute > 0)
 	{
@@ -605,7 +605,7 @@ void Shader::BindSimulation(const bool updatePosition)
 
 }
 
-void Shader::DispatchSimulation(const float dt, const float gTime, const int size, const int group_x, const int group_y, const int group_z)
+void ParticleShaderFX::DispatchSimulation(const float dt, const float gTime, const int size, const int group_x, const int group_y, const int group_z)
 {
 	if (programCompute > 0)
 	{
@@ -618,13 +618,13 @@ void Shader::DispatchSimulation(const float dt, const float gTime, const int siz
 
 }
 
-void Shader::UnBindSimulation()
+void ParticleShaderFX::UnBindSimulation()
 {
 	if (programCompute > 0)
 		glUseProgram(0);
 }
 
-void Shader::BindSelfCollisions()
+void ParticleShaderFX::BindSelfCollisions()
 {
 	if (programSelfCollisions > 0)
 	{
@@ -633,7 +633,7 @@ void Shader::BindSelfCollisions()
 
 }
 
-void Shader::DispatchSelfCollisions(const float dt, const int size, const int group_x, const int group_y, const int group_z)
+void ParticleShaderFX::DispatchSelfCollisions(const float dt, const int size, const int group_x, const int group_y, const int group_z)
 {
 	if (programSelfCollisions > 0)
 	{
@@ -645,13 +645,13 @@ void Shader::DispatchSelfCollisions(const float dt, const int size, const int gr
 
 }
 
-void Shader::UnBindSelfCollisions()
+void ParticleShaderFX::UnBindSelfCollisions()
 {
 	if (programSelfCollisions > 0)
 		glUseProgram(0);
 }
 
-void Shader::BindIntegrate()
+void ParticleShaderFX::BindIntegrate()
 {
 	if (programIntegrate > 0)
 	{
@@ -660,7 +660,7 @@ void Shader::BindIntegrate()
 
 }
 
-void Shader::DispatchIntegrate(const float dt, const int size, const int group_x, const int group_y, const int group_z)
+void ParticleShaderFX::DispatchIntegrate(const float dt, const int size, const int group_x, const int group_y, const int group_z)
 {
 	if (programIntegrate > 0)
 	{
@@ -672,13 +672,13 @@ void Shader::DispatchIntegrate(const float dt, const int size, const int group_x
 
 }
 
-void Shader::UnBindIntegrate()
+void ParticleShaderFX::UnBindIntegrate()
 {
 	if (programIntegrate > 0)
 		glUseProgram(0);
 }
 
-void Shader::BindRenderPoints()
+void ParticleShaderFX::BindRenderPoints()
 {
 	fx_passRender = (fx_TechRenderPoints) ? fx_TechRenderPoints->getPass(0) : nullptr;
 
@@ -686,52 +686,52 @@ void Shader::BindRenderPoints()
 		fx_passRender->execute();
 }
 
-void Shader::UnBindRenderPoints()
+void ParticleShaderFX::UnBindRenderPoints()
 {
 	if (fx_passRender)
 		fx_passRender->unbindProgram();
 }
 
-void Shader::BindTerrainDepth()
+void ParticleShaderFX::BindTerrainDepth()
 {
 	if (fx_passTerrainPrep)
 		fx_passTerrainPrep->execute();
 }
 
-void Shader::UnBindTerrainDepth()
+void ParticleShaderFX::UnBindTerrainDepth()
 {
 	if (fx_passTerrainPrep)
 		fx_passTerrainPrep->unbindProgram();
 }
 
-void Shader::BindTerrainPreview()
+void ParticleShaderFX::BindTerrainPreview()
 {
 	if (fx_passTerrainPreview)
 		fx_passTerrainPreview->execute();
 }
 
-void Shader::UnBindTerrainPreview()
+void ParticleShaderFX::UnBindTerrainPreview()
 {
 	if (fx_passTerrainPreview)
 		fx_passTerrainPreview->unbindProgram();
 }
 
-void Shader::SetTime(const float value)
+void ParticleShaderFX::SetTime(const float value)
 {
 	fx_gTime->setValue1f(value);
 }
 
-void Shader::SetDeltaTime(const float value)
+void ParticleShaderFX::SetDeltaTime(const float value)
 {
 	fx_gDeltaTime->setValue1f(value);
 }
 
-void Shader::UpdateTerrainModelTM(const mat4 &tm)
+void ParticleShaderFX::UpdateTerrainModelTM(const mat4 &tm)
 {
 	fx_terrainModelTM->updateMatrix4f( (float*)tm.mat_array, fx_passTerrainPrep);
 }
 
-void Shader::SetUniformTerrainTextureAddress(const GLuint64 address)
+void ParticleShaderFX::SetUniformTerrainTextureAddress(const GLuint64 address)
 {
 	//if (bind && fx_passTerrainPreview)
 	//	fx_passTerrainPreview->execute();
@@ -745,7 +745,7 @@ void Shader::SetUniformTerrainTextureAddress(const GLuint64 address)
 }
 
 
-void Shader::checkCompileStatus(GLuint shader, const char *shadername)
+void ParticleShaderFX::checkCompileStatus(GLuint shader, const char *shadername)
 {
     GLint  compiled;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
@@ -761,7 +761,7 @@ void Shader::checkCompileStatus(GLuint shader, const char *shadername)
     }
 }
 
-void Shader::checkLinkStatus(GLuint program, const char * programName)
+void ParticleShaderFX::checkLinkStatus(GLuint program, const char * programName)
 {
     GLint  linked;
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
@@ -779,7 +779,7 @@ void Shader::checkLinkStatus(GLuint program, const char * programName)
     }
 }
 
-GLuint Shader::loadComputeShader(const char* computeShaderName)
+GLuint ParticleShaderFX::loadComputeShader(const char* computeShaderName)
 {
 	FILE *fp = nullptr;
 	fopen_s(&fp, computeShaderName, "r");
@@ -832,7 +832,7 @@ GLuint Shader::loadComputeShader(const char* computeShaderName)
     return 0;
 }
 
-bool Shader::LoadSurfaceComputeShaders(const char *path, const int pathLen)
+bool ParticleShaderFX::LoadSurfaceComputeShaders(const char *path, const int pathLen)
 {
 	if ( nullptr == mComputeSurface.get() )
 	{
@@ -869,7 +869,7 @@ bool Shader::LoadSurfaceComputeShaders(const char *path, const int pathLen)
 	return (nullptr != mComputeSurface.get() );
 }
 
-bool Shader::RunSurfaceComputeShader(const int numberOfTriangles)
+bool ParticleShaderFX::RunSurfaceComputeShader(const int numberOfTriangles)
 {
 	if (nullptr == mComputeSurface.get() )
 		return false;
@@ -894,4 +894,5 @@ bool Shader::RunSurfaceComputeShader(const int numberOfTriangles)
 //	CHECK_GL_ERROR_MOBU();
 
 	glMemoryBarrier( GL_SHADER_STORAGE_BARRIER_BIT );
+	return true;
 }

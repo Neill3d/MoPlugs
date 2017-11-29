@@ -95,9 +95,12 @@ void main()
 
 		outputBuffer.tris[flattened_id].p[i] = vec4(positionBuffer.positions[index].xyz, 1.0);
 		outputBuffer.tris[flattened_id].uv[i] = uvBuffer.uvs[index];
-		n = n + normalBuffer.normals[index].xyz;
+		n = normalBuffer.normals[index].xyz;
 	}
 	// average normal for the tri
-	n = normalize(n.xyz / 3.0);
+	//n = normalize(n.xyz / 3.0);
+	//vec4 edge0 = outputBuffer.tris[flattened_id].p[1] - outputBuffer.tris[flattened_id].p[0];
+	//vec4 edge1 = outputBuffer.tris[flattened_id].p[2] - outputBuffer.tris[flattened_id].p[0];
+	//vec3 n = normalize(cross(edge0.xyz, edge1.xyz));
 	outputBuffer.tris[flattened_id].n = vec4(n.xyz, 1.0);
 }

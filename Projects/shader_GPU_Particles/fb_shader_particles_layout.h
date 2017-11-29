@@ -39,11 +39,12 @@ enum EGenerationProperties
 	ePropertyNextCollumn,
 
 	ePropertyEditDirection,
-	ePropertyEditDirRandom,
+	ePropertyEditDirSpreadHor,
+	ePropertyEditDirSpreadVer,
 	ePropertyEditUseNormalsAsDir,
 
-	ePropertyEditVelocity,
-	ePropertyEditVelRandom,
+	ePropertyEditSpeed,
+	ePropertyEditSpeedSpread,
 	ePropertyEditInheritEmitterVel,
 
 	ePropertyEditLifeTime,
@@ -169,6 +170,7 @@ protected:
 
 	FBEditProperty		mButtonActive;
 	FBEditProperty		mButtonReset;
+	FBEditProperty		mButtonResetAll;
 	FBEditProperty		mButtonReload;
 
 	FBTabPanel			mTabs;

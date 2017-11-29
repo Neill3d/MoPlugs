@@ -135,17 +135,17 @@ public:
 
 	void DoUpdate();
 
-	void FillCollisionData( ParticlesSystem::TCollision &coldata );
+	void FillCollisionData( GPUParticles::TCollision &coldata );
 
 protected:
     
 	FBSystem						mSystem;
 
-	ParticlesSystem::terrainBlock	mShaderData;
+	GPUParticles::terrainBlock		mShaderData;
 
 		
 	// ! Use particles system shader (terrain technique)
-	ParticlesSystem::Shader			*mShader;
+	GPUParticles::ParticleShaderFX		*mShader;
 
 	bool							mNeedUpdate;
 	FBVector3d						mLastTranslation;

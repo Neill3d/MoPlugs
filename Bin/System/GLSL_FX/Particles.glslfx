@@ -18,12 +18,19 @@
 ConstantBuffer global evaluateBlock
 {
 	uniform mat4					gTM;			// emitter transform
+	uniform mat4					gRotationTM;	// only rotation
 	uniform mat4					gNormalTM;
 	
 	uniform vec4					gDirection;		// vec3 - direction, 4th - use normals as dir or not
-	uniform vec4					gDirRandom;
-	uniform vec4					gVelocity;		// start particle velocity
-	uniform vec4					gVelRandom;		// randomize start velocity
+	
+	uniform float					gDirSpreadHor;	// spread direction vector in horizontal plane
+	uniform float					gDirSpreadVer;	// spread in vertical plane
+	uniform float					gEmitSpeed;
+	uniform float					gSpeedSpread;
+	
+	//uniform vec4					gDirRandom;
+	//uniform vec4					gVelocity;		// start particle velocity
+	//uniform vec4					gVelRandom;		// randomize start velocity
 	uniform vec4					gEmitterVelocity; // use this velocity to inherit emitter speed
 	uniform vec4					gDynamic;		// 1st - mass, 2nd - damping
 	uniform vec4					gGravity;		// vec3 - gravity direction XYZ, 4-th component - use or not to use gravity
@@ -201,7 +208,7 @@ GLSLShader
 	// DONE: can be overrided in different techniques, depends on user choise
 	highp float rand(vec2 co);
 	void GetRandomDir(in vec4 inDir, in vec2 dirRnd, out vec4 dir);
-	vec3 GetRandomVelocity(float randomF);
+	float GetRandomSpeed(float randomF);
 	
 	// choose a shader between volume, vertex and surface generation
 	void GetEmitPos(in vec2 randN, out vec4 pos, out int vertIndex, out vec3 bary);
@@ -277,12 +284,10 @@ namespace Evaluate
 			ConvertSphericalToUnitVector(r, theta, phi, dir);
 		}  
 		
-		vec3 GetRandomVelocity(float randomF)
+		float GetRandomSpeed(float randomF)
 		{
-			vec3 rnd = vec3(2.0*gVelocity.x*rand(vec2(randomF, 1.0))-gVelocity.x, 
-							2.0*gVelocity.y*rand(vec2(randomF, 1.0))-gVelocity.y, 
-							2.0*gVelocity.z*rand(vec2(randomF, 1.0))-gVelocity.z);
-			return (gVelocity.xyz - rnd * gVelRandom.xyz);
+			float rnd = 2.0*gEmitSpeed*rand(vec2(randomF, 1.0))-gEmitSpeed;
+			return (gEmitSpeed - rnd * gSpeedSpread);
 		}
 	}
 	
@@ -296,6 +301,7 @@ namespace Evaluate
 			
 			rot.w = 0.0; // Age1 = 0.0;                  
 			// new lifetime
+			vel = gRotationTM * vec4(vel.xyz, 1.0);
 			vel.xyz = vel.xyz + gEmitterVelocity.w * gEmitterVelocity.xyz; 
 			vel.w = gShellLifetime + (rand(vec2(randomF,0.487)) * 2.0 - 1.0) * gShellLifetime * gShellLifetimeVariation;
 			rotVel.w = 1.0; // Index1 = 1.0; // rand(vec2(randomF, 1.0));
@@ -329,12 +335,12 @@ namespace Evaluate
 			pos.z = (lMax.z - lMin.z) * rnd.z + lMin.z;
 			pos.w = 1.0;
 			
-			pos = gTM * pos;
+			//pos = gTM * pos;
 		}
 		
 		void GetEmitDir(in int vertIndex, in float randomF, out vec4 vel)
 		{
-			vel = vec4(0.0, 1.0, 0.0, 1.0);
+			GetRandomDir(gDirection, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), vel);
 		}
 		
 		void GetEmitColor(in vec4 pos, in int vertIndex, in vec3 bary, out vec4 color)
@@ -354,7 +360,8 @@ namespace Evaluate
 	GLSLShader EmitFromVertices
 	{
 		uniform 	TTriangle 	*gEmitMesh;
-		
+		layout(binding=0) 		uniform		sampler2D	gEmitTexture;	// particles will inherit texture texel under the surface point
+		layout(binding=1)		uniform		sampler2D	gEmitMask;	// mask out particles emitting (model UV-based mask)
 		
 		void GetEmitPos(in vec2 randN, out vec4 out_pos, out int vertIndex, out vec3 bary)
 		{
@@ -372,7 +379,8 @@ namespace Evaluate
 			lpos = surfaceData[triIndex].p[rndIndex];
 			vertIndex = triIndex * 3 + rndIndex;
 			
-			out_pos = gTM * vec4(lpos.xyz, 1.0);
+			//out_pos = gTM * vec4(lpos.xyz, 1.0);
+			out_pos = vec4(lpos.xyz, 1.0);
 		}
 
 		void GetEmitDir(in int vertIndex, in float randomF, out vec4 vel) 
@@ -380,13 +388,44 @@ namespace Evaluate
 			int triIndex = vertIndex / 3;
 			TTriangle	*surfaceData = gEmitMesh;
 			
-			// TODO: randomize normal vector !!
-			GetRandomDir(surfaceData[triIndex].n, vec2(gDirRandom.x * rand(vec2(randomF, 2.03)), gDirRandom.y * rand(vec2(randomF, 0.789))), vel);
+			vec4 indir = surfaceData[triIndex].n;
+
+			// DONE: randomize normal vector !!
+			GetRandomDir(indir, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), vel);
+			
 		}   
 
 		void GetEmitColor(in vec4 pos, in int vertIndex, in vec3 bary, out vec4 color)
 		{
-			color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			int triIndex = vertIndex / 3;
+			TTriangle	*surfaceData = gEmitMesh;
+			
+			// read from texture image
+
+			vec2 uv0 = surfaceData[triIndex].uv[0];
+			vec2 uv1 = surfaceData[triIndex].uv[1];
+			vec2 uv2 = surfaceData[triIndex].uv[2];
+
+			uv0 *= bary.x;
+			uv1 *= bary.y;
+			uv2 *= bary.z;
+
+			vec2 uv = uv0 + uv1 + uv2;
+
+			// color
+			if (gUseEmitterTexture > 0)
+			{
+				color = texture(gEmitTexture, uv);
+			}
+			else
+			{
+				color = surfaceData[triIndex].n;
+			}
+			// mask
+			if (gUseEmitterMask > 0)
+			{
+				color.a = texture(gEmitMask, uv).a;
+			}
 		}
 	}
 	
@@ -426,7 +465,9 @@ namespace Evaluate
 			vec4 P = p0 + p1 + p2;
 			vertIndex = triIndex * 3;
 
-			pos = gTM * vec4(P.xyz, 1.0);
+			//pos = gTM * vec4(P.xyz, 1.0);
+			pos = vec4(P.xyz, 1.0);
+			// TODO: extrusion dist is not used !
 		}
 		
 		void GetEmitDir(in int vertIndex, in float randomF, out vec4 vel)
@@ -434,8 +475,11 @@ namespace Evaluate
 			int triIndex = vertIndex / 3;
 			TTriangle	*surfaceData = gEmitMesh;
 			
-			// TODO: randomize normal vector !!
-			vel = surfaceData[triIndex].n;
+			vec4 indir = surfaceData[triIndex].n;
+
+			// DONE: randomize normal vector !!
+			//GetRandomDir(indir, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), vel);
+			vel = indir;
 		}
 		
 		void GetEmitColor(in vec4 pos, in int vertIndex, in vec3 bary, out vec4 color)
@@ -497,7 +541,8 @@ namespace Evaluate
 			vec4 newPos = vec4(0.0);
 			vec4 Dir = vec4(0.0);
 			if (USE_NORMALS_AS_DIR == 0.0)
-				GetRandomDir(gDirection, vec2(gDirRandom.x * rand(vec2(randomF, 2.03)), gDirRandom.y * rand(vec2(randomF, 0.789))), Dir);
+				Dir = gDirection;
+				//GetRandomDir(gDirection, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), Dir);
 			
 			color = vec4(1.0, 1.0, 1.0, 1.0);
 			
@@ -515,9 +560,11 @@ namespace Evaluate
 				GetRandomColor(gEmitColor, randomF, gColorVariation, color);
 			
 			float newSize = GetRandomSize(randomF);
+			newPos = gTM * vec4(newPos.xyz, 1.0);
 			pos = vec4(newPos.xyz - gEmitterVelocity.w * gEmitterVelocity.xyz, newSize);
 			
-			Dir.xyz = normalize(Dir.xyz) * GetRandomVelocity(randomF);
+			Dir.xyz = normalize(Dir.xyz) * GetRandomSpeed(randomF);
+			Dir = gRotationTM * vec4(Dir.xyz, 1.0);
 			vel.xyz = Dir.xyz + gEmitterVelocity.w * gEmitterVelocity.xyz;                                      
 			rot = vec4(0.0); // Age1 = 0.0;                  
 			

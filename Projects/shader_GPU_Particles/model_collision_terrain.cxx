@@ -22,7 +22,7 @@
 
 #include "Shader_ParticleSystem.h"
 
-using namespace ParticlesSystem;
+using namespace GPUParticles;
 
 FBClassImplementation( CollisionTerrain );								                //!< Register class
 FBStorableCustomModelImplementation( CollisionTerrain, COLLISIONTERRAIN__DESCSTR );			//!< Register to the store/retrieve system
@@ -105,7 +105,7 @@ bool CollisionTerrain::FBCreate()
 
 	//
 	//
-	mShader = ParticlesSystem::QueryShader();
+	mShader = QueryShader();
 
 	if (mShader->IsInitialized() == false )
 		if( false == mShader->Initialize() )
@@ -215,7 +215,7 @@ void CollisionTerrain::FBDestroy()
 
     ParentClass::FBDestroy();
 
-	ParticlesSystem::FreeShader();
+	GPUParticles::FreeShader();
 }
 
 void DrawPlaneSolid(const double size, const double level)

@@ -72,19 +72,19 @@ bool FBLibrary::LibReady()	{
 
 	if ( FindEffectLocation( FBString("\\GLSL_FX\\", PARTICLES_EFFECT), effectPath, effectFullName ) )
 	{
-		ParticlesSystem::Shader::SetShaderEffectLocation( effectFullName, effectFullName.GetLen() );
+		GPUParticles::ParticleShaderFX::SetShaderEffectLocation( effectFullName, effectFullName.GetLen() );
 
 		FBString computeLocation(effectPath, "\\GLSL_CS\\Particles_simulation.cs");
-		ParticlesSystem::Shader::SetComputeShaderLocation( computeLocation, computeLocation.GetLen() );
+		GPUParticles::ParticleShaderFX::SetComputeShaderLocation( computeLocation, computeLocation.GetLen() );
 
 		FBString computeSelfCollisionsLocation(effectPath, "\\GLSL_CS\\Particles_selfcollisions.cs");
-		ParticlesSystem::Shader::SetComputeSelfCollisionsShaderLocation( computeSelfCollisionsLocation, computeSelfCollisionsLocation.GetLen() );
+		GPUParticles::ParticleShaderFX::SetComputeSelfCollisionsShaderLocation( computeSelfCollisionsLocation, computeSelfCollisionsLocation.GetLen() );
 
 		FBString computeIntegrateLocation(effectPath, "\\GLSL_CS\\Particles_integrate.cs");
-		ParticlesSystem::Shader::SetComputeIntegrateLocation( computeIntegrateLocation, computeIntegrateLocation.GetLen() );
+		GPUParticles::ParticleShaderFX::SetComputeIntegrateLocation( computeIntegrateLocation, computeIntegrateLocation.GetLen() );
 
 		FBString strComputeSurfaceData(effectPath, PREP_SURFACE_COMPUTE_SHADER);
-		ParticlesSystem::Shader::SetComputeSurfaceDataPath(strComputeSurfaceData, strComputeSurfaceData.GetLen() );
+		GPUParticles::ParticleShaderFX::SetComputeSurfaceDataPath(strComputeSurfaceData, strComputeSurfaceData.GetLen() );
 	}
 
 	return true; 

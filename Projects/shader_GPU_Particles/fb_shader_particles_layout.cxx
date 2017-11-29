@@ -40,12 +40,13 @@ const char *gGenerationPropNames [ePropertyCount] = {
 	"Next Column",
 
 	"Emit Direction",
-	"Emit Dir Random",
+	"Dir Spread Latitude",
+	"Dir Spread Longitude",
 	"Use Emitter Normals As Dir",
 
-	"Emit Velocity",
-	"Emit Vel Random",
-	"Inherit Emitter Velocity",
+	"Emit Speed",
+	"Emit Speed Spread",
+	"Inherit Emitter Speed",
 
 	"Life Time",
 	"Life Time Variation"
@@ -178,8 +179,15 @@ void GPUshader_ParticlesLayout::UICreate()
 			lH,	kFBAttachNone,"", 1.0 );
 	SetControl( "ButtonReset", mButtonReset );
 
-	AddRegion( "ButtonReload", "ButtonReload",
+	AddRegion( "ButtonResetAll", "ButtonResetAll",
 			lS*3, kFBAttachRight,	"ButtonReset",	1.0,
+			lS,	kFBAttachNone,	"",	1.0,
+			lW,	kFBAttachNone,	"",	1.0,
+			lH,	kFBAttachNone,"", 1.0 );
+	SetControl( "ButtonResetAll", mButtonResetAll );
+
+	AddRegion( "ButtonReload", "ButtonReload",
+			lS*3, kFBAttachRight,	"ButtonResetAll",	1.0,
 			lS,	kFBAttachNone,	"",	1.0,
 			lW,	kFBAttachNone,	"",	1.0,
 			lH,	kFBAttachNone,"", 1.0 );
@@ -265,6 +273,10 @@ void GPUshader_ParticlesLayout::UIConfigure()
 	mButtonReset.Property = &pShader->Reset;
 	mButtonReset.Caption = "Reset";
 	mButtonReset.CaptionSize = 0;
+
+	mButtonResetAll.Property = &pShader->ResetAll;
+	mButtonResetAll.Caption = "Reset All";
+	mButtonResetAll.CaptionSize = 0;
 
 	mButtonReload.Property = pShader->PropertyList.Find("Reload Shader");
 	mButtonReload.Caption = "Reload Shader";

@@ -19,7 +19,7 @@
 #include "FBCommon.h"
 #include "algorithm\math3d_mobu.h"
 
-using namespace ParticlesSystem;
+using namespace GPUParticles;
 
 FBClassImplementation( ForceDrag );								                //!< Register class
 FBStorableCustomModelImplementation( ForceDrag, FORCEDRAG__DESCSTR );			//!< Register to the store/retrieve system
@@ -295,7 +295,7 @@ bool ForceDrag::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
 }
 
 
-void ForceDrag::FillForceData( ParticlesSystem::TForce &data )
+void ForceDrag::FillForceData( TForce &data )
 {
 	
 	FBVector3d P, T(0.0, 0.0, 1.0);

@@ -19,7 +19,7 @@
 #include "FBCommon.h"
 #include "algorithm\math3d_mobu.h"
 
-using namespace ParticlesSystem;
+using namespace GPUParticles;
 
 FBClassImplementation( ForceMotor );								                //!< Register class
 FBStorableCustomModelImplementation( ForceMotor, FORCEMOTOR__CLASSSTR );			//!< Register to the store/retrieve system
@@ -191,7 +191,7 @@ bool ForceMotor::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat
     return true;
 }
 
-void ForceMotor::FillForceData( ParticlesSystem::TForce &data )
+void ForceMotor::FillForceData( TForce &data )
 {
 	FBVector3d P, T(0.0, 0.0, 1.0);
 	FBMatrix m;

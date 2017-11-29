@@ -16,7 +16,7 @@
 #include "algorithm\math3d.h"
 #include "GL\glew.h"
 
-namespace ParticlesSystem
+namespace GPUParticles
 {
 
 #ifndef PARTICLE_EMIT_FROM_VERTICES
@@ -61,12 +61,19 @@ struct Particle
 struct evaluateBlock
 {
 	mat4					gTM;			// emitter transform
+	mat4					gRotationTM;	// only rotation
 	mat4					gNormalTM;
 
 	vec4					gDirection;		// vec3 - direction, 4th - use normals as dir or not
-	vec4					gDirRandom;
-	vec4					gVelocity;		// start particle velocity
-	vec4					gVelRandom;		// randomize start velocity
+
+	float					gDirSpreadHor;	// spread direction vector in horizontal plane
+	float					gDirSpreadVer;	// spread in vertical plane
+	float					gEmitSpeed;
+	float					gSpeedSpread;
+
+	//vec4					gDirRandom;
+	//vec4					gVelocity;		// start particle velocity
+	//vec4					gVelRandom;		// randomize start velocity
 	vec4					gEmitterVelocity; // use this velocity to inherit emitter speed
 	vec4					gDynamic;		// 1st - mass, 2nd - damping
 	vec4					gGravity;		// vec3 - gravity direction XYZ, 4-th component - use or not to use gravity
@@ -207,8 +214,10 @@ struct	TForce
 struct EvaluationExchange
 {
 	//
-	static void SetDirection(evaluateBlock &data, const vec3 &dir, const vec3 &random, bool useNormals);
-	static void SetVelocity(evaluateBlock &data, const vec3 &vel, const vec3 &random, const vec4 &emittervel);
+	static void SetDirection(evaluateBlock &data, const vec3 &dir, const float spreadH, const float spreadV, bool useNormals);
+	static void SetSpeed(evaluateBlock &data, const float speed, const float spread, const vec4 &emittervel);
+	//static void SetDirection(evaluateBlock &data, const vec3 &dir, const vec3 &random, bool useNormals);
+	//static void SetVelocity(evaluateBlock &data, const vec3 &vel, const vec3 &random, const vec4 &emittervel);
 	static void SetDynamicParameters(evaluateBlock &data, float mass, float damping);
 	static void SetGravity(evaluateBlock &data, const vec3 &gravityDir, bool useGravity);
 	static void SetFlags(evaluateBlock &data, bool useForces, bool useCollisions, int emitterType);

@@ -13,11 +13,12 @@
 
 #include "ParticleSystem_types.h"
 
-using namespace ParticlesSystem;
+using namespace GPUParticles;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-void EvaluationExchange::SetDirection(evaluateBlock &data, const vec3 &dir, const vec3 &random, bool useNormals)
+void EvaluationExchange::SetDirection(evaluateBlock &data, const vec3 &dir, 
+	const float spreadH, const float spreadV, bool useNormals)
 {
 	vec3 ldir(dir);
 	float mag = ldir.normalize();
@@ -30,14 +31,17 @@ void EvaluationExchange::SetDirection(evaluateBlock &data, const vec3 &dir, cons
 	{
 		data.gDirection = vec4( ldir, (useNormals) ? 1.0f : 0.0f );
 	}
-	data.gDirRandom = random;
+	
+	data.gDirSpreadHor = spreadH;
+	data.gDirSpreadVer = spreadV;
 }
-void EvaluationExchange::SetVelocity(evaluateBlock &data, const vec3 &vel, const vec3 &random, const vec4 &emittervel)
+void EvaluationExchange::SetSpeed(evaluateBlock &data, const float speed, const float spread, const vec4 &emittervel)
 {
-	data.gVelocity = vel;
-	data.gVelRandom = random;
+	data.gEmitSpeed = speed;
+	data.gSpeedSpread = spread;
 	data.gEmitterVelocity = emittervel;
 }
+
 void EvaluationExchange::SetDynamicParameters(evaluateBlock &data, float mass, float damping)
 {
 	data.gDynamic[0] = mass;

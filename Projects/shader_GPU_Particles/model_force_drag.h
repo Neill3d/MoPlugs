@@ -69,7 +69,7 @@ public:
 
 	static void AddPropertiesToPropertyViewManager();
 
-	void FillForceData( ParticlesSystem::TForce &forcedata );
+	void FillForceData( GPUParticles::TForce &forcedata );
 
 protected:
     int mPickedSubItem;

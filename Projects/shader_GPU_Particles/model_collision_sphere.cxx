@@ -19,7 +19,7 @@
 #include "FBCommon.h"
 #include "algorithm\math3d_mobu.h"
 
-using namespace ParticlesSystem;
+using namespace GPUParticles;
 
 FBClassImplementation( CollisionSphere );								                //!< Register class
 FBStorableCustomModelImplementation( CollisionSphere, ORMARKERCUSTOM__DESCSTR );			//!< Register to the store/retrieve system
@@ -152,7 +152,7 @@ bool CollisionSphere::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStor
     return true;
 }
 
-void CollisionSphere::FillCollisionData( ParticlesSystem::TCollision	&data )
+void CollisionSphere::FillCollisionData( TCollision	&data )
 {
 	FBVector3d T, vel;
 	GetVector(T);

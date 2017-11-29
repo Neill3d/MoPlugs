@@ -28,7 +28,7 @@
 #include "model_force_drag.h"
 #include "model_force_motor.h"
 */
-using namespace ParticlesSystem;
+using namespace GPUParticles;
 
 #define		USE_FORCES			mEvaluateData.gFlags.x
 #define		USE_COLLISIONS		mEvaluateData.gFlags.y
@@ -169,6 +169,8 @@ ParticleSystem::ParticleSystem(unsigned int maxparticles)
 	mTexture = 0;
 
 	mQuery = 0;
+
+	mTotalCycles = 0;
 
 	mTransformFeedback[0] = mTransformFeedback[1] = 0;
 	mParticleBuffer[0] = mParticleBuffer[1] = 0;
@@ -343,51 +345,7 @@ float ParticleSystem::GenerateParticleSize(const float size, const float variati
 	return size + (f - size * variation);
 }
 
-void ParticleSystem::GenerateParticle(const int emitType, const bool local, const double extrudeDist, vec4 &pos, vec4 &vel, vec4 &color)
-{
-	if (emitType == PARTICLE_EMIT_FROM_VERTICES)
-	{
-		int vertIndex = 0;
-		GetRandomVerticesPos(local, pos, vertIndex);
-		GetRandomVerticesDir(vertIndex, vel);
-		GetRandomVerticesColor(vertIndex, color);
-	}
-	else if (emitType == PARTICLE_EMIT_FROM_SURFACE)
-	{
-		int vertIndex = 0;
-		float r1, r2, r3;
 
-		GetRandomSurfacePos(local, extrudeDist, pos, vertIndex, r1, r2, r3);
-		GetRandomSurfaceDir(vertIndex, vel);
-		GetRandomSurfaceColor(vertIndex, r1, r2, r3, color);
-
-		const bool skipZeroAlpha = true;
-
-		if (true == skipZeroAlpha)
-		{
-			float alpha = color.w;
-
-			int trycount=0;
-			while (alpha < 0.5f && trycount < 10)
-			{
-				GetRandomSurfacePos(local, extrudeDist, pos, vertIndex, r1, r2, r3);
-				GetRandomSurfaceDir(vertIndex, vel);
-				GetRandomSurfaceColor(vertIndex, r1, r2, r3, color);
-
-				alpha = color.w;
-
-				trycount += 1;
-			}
-		}
-	}
-	else
-	{
-		// from volume
-		GetRandomVolumePos(local, pos);
-		GetRandomVolumeDir(vel);
-		GetRandomVolumeColor(pos, color);
-	}
-}
 
 bool ParticleSystem::ReadSurfaceTextureData()
 {
@@ -524,15 +482,9 @@ bool ParticleSystem::ResetParticles(unsigned int maxparticles, const int randomS
 
 	for ( ; iter!=ratestop; ++iter)
 	{
-		vec4 surfaceColor;
-		GenerateParticle(EMITTER_TYPE, true, extrudeDist, iter->Pos, iter->Vel, surfaceColor);
+		GenerateParticle(EMITTER_TYPE, true, extrudeDist, *iter);
 
-		if (mInheritSurfaceColor)
-			iter->Color = surfaceColor;
-		else
-			iter->Color = GenerateParticleColor(mPointColor, mPointColorVariation);
-
-		iter->Pos.w = -1.0f * GenerateParticleSize(mPointSize, mPointSizeVariation); // negative size value for launcher !
+		iter->Pos.w = -1.0f * iter->Pos.w; // negative size value for launcher !
 		iter->Vel.w = -dist(e2) - 0.001f;	// negative lifetime value for launcher !!
 		iter->Rot = vec4(0.0f, 0.0f, 0.0f, 0.0f); // AgeMillis = 1.0f; // Particles[i].Vel.w - 1000.0f;		// one launch per second for this launcher
 		iter->RotVel = vec4(0.0f, 0.0f, 0.0f, 0.0f); // Index = 1.0f;
@@ -545,18 +497,8 @@ bool ParticleSystem::ResetParticles(unsigned int maxparticles, const int randomS
 	{
 		for ( iter=ratestop; iter!=end(particles); ++iter )
 		{
-			iter->Rot = vec4(0.0f, 0.0f, 0.0f, 0.0f); // AgeMillis = 0.0f;
-			iter->RotVel = vec4(0.0f, 0.0f, 0.0f, 1.0f); // Index = 1.0f;
-
-			vec4 surfaceColor;
-			GenerateParticle(EMITTER_TYPE, false, extrudeDist, iter->Pos, iter->Vel, surfaceColor);
-	
-			if (mInheritSurfaceColor)
-				iter->Color = surfaceColor;
-			else
-				iter->Color = GenerateParticleColor(mPointColor, mPointColorVariation);
-
-			iter->Pos.w = GenerateParticleSize(mPointSize, mPointSizeVariation);	// particle size
+			GenerateParticle(EMITTER_TYPE, false, extrudeDist, *iter);
+			
 			iter->Vel.w = mEvaluateData.gShellLifetime + (dist(e2) * 2.0 - 1.0) * mEvaluateData.gShellLifetime * mEvaluateData.gShellLifetimeVariation;	// lifetime
 			if (iter->Vel.w < 0.0f)
 				iter->Vel.w = 0.0;	// this defines the particle type (launcher or shell)
@@ -720,14 +662,15 @@ void ParticleSystem::EmitParticles(const double deltaTime, const ETechEmitType	t
 	CHECK_GL_ERROR();
 }
 
-const unsigned int ParticleSystem::SimulateParticles(const double timeStep, double &DeltaTime, const double limit, const int SubSteps, const bool selfCollisions)
+const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, const ETechEmitType type, const double timeStep, 
+	double &DeltaTime, const double limit, const int SubSteps, const bool selfCollisions)
 {
 	if (mShader->IsInitialized() == false)
 		mShader->Initialize();
 	
 	unsigned int cycles = 0;
 
-
+	/*
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mParticleBuffer[mCurrTFB]);  
 	
 	mConnections->BindForces(1);
@@ -739,7 +682,7 @@ const unsigned int ParticleSystem::SimulateParticles(const double timeStep, doub
 	{
 		glBindTexture(GL_TEXTURE_2D, terrainId);
 	}
-
+	*/
 	double ltime = DeltaTime;
 	double globalTime = mTime - DeltaTime;
 
@@ -748,6 +691,11 @@ const unsigned int ParticleSystem::SimulateParticles(const double timeStep, doub
 		while(ltime > timeStep)
 		{
 			globalTime += timeStep;
+
+			if (true == emitEachStep)
+			{
+				EmitParticles( timeStep, type );
+			}
 
 			mShader->BindSimulation(false);
 			mShader->DispatchSimulation( (float)timeStep, (float)globalTime, mInstanceCount, 64, 1, 1);
@@ -777,31 +725,53 @@ const unsigned int ParticleSystem::SimulateParticles(const double timeStep, doub
 	}
 	else
 	{
-		mShader->BindSimulation(true);
+		//mShader->BindSimulation(true);
 
 		while(ltime > timeStep)
 		{
 			globalTime += timeStep;
 
+			if (true == emitEachStep)
+			{
+				EmitParticles( timeStep, type );
+			}
 		
+			//
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mParticleBuffer[mCurrTFB]);  
+	
+			mConnections->BindForces(1);
+			mConnections->BindCollisions(2);
+
+			// TODO: bind terrain 2d texture if bindless is not supported
+			const GLuint terrainId = mConnections->GetTextureTerrain();
+			if (terrainId > 0 && mShader->IsBindlessTexturesSupported() == false)
+			{
+				glBindTexture(GL_TEXTURE_2D, terrainId);
+			}
+			mShader->BindSimulation(true);
+
 			mShader->DispatchSimulation( (float)timeStep, (float)globalTime, mInstanceCount, 64, 1, 1);
 			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
 		
+			mShader->UnBindSimulation();
+			if (terrainId > 0 && mShader->IsBindlessTexturesSupported() == false)
+				glBindTexture(GL_TEXTURE_2D, 0);
+
 			ltime -= timeStep;
 			cycles += 1;
 		}
-		mShader->UnBindSimulation();
+		//mShader->UnBindSimulation();
 	}
 
 	
-	
+	/*
 	if (terrainId > 0 && mShader->IsBindlessTexturesSupported() == false)
 		glBindTexture(GL_TEXTURE_2D, 0);
-
+		*/
 	DeltaTime = ltime;
 
 	CHECK_GL_ERROR();
-
+	mTotalCycles += cycles;
 	return cycles;
 }
     

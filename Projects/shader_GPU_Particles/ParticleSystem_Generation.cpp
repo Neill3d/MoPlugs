@@ -18,10 +18,23 @@
 #include "algorithm\nv_math.h"
 #include "algorithm\math3d.h"
 
-using namespace ParticlesSystem;
+using namespace GPUParticles;
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+
+////////////////////////////////////////////////////////////////////////////
+// declaration
+
+struct SurfaceColor
+{
+	BYTE		red;
+	BYTE		green;
+	BYTE		blue;
+	BYTE		alpha;
+};
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -57,32 +70,30 @@ void ParticleSystem::GetRandomVolumePos(const bool local, vec4 &pos)
  0 <= phi <= 360 deg (2Pi)
 */
 
-void ConvertUnitVectorToSpherical(const vec4 &v, float &r, float &theta, float &phi)
+void ParticleSystem::ConvertUnitVectorToSpherical(const vec4 &v, float &r, float &theta, float &phi)
 {
 	r = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
 	theta = acos( v.z / r );
 	phi = atan( v.y / v.x );
 }
 
-void ConvertSphericalToUnitVector(const float r, const float theta, const float phi, vec4 &v)
+void ParticleSystem::ConvertSphericalToUnitVector(const float r, const float theta, const float phi, vec4 &v)
 {
 	v.x = r * sin(theta) * cos(phi);
 	v.y = r * sin(theta) * sin(phi);
 	v.z = r * cos(theta);
 }
 
-void ParticleSystem::GetRandomVolumeDir(vec4 &vel)                                                   
+void ParticleSystem::GetRandomDir(const vec4 &dir, const float randomH, const float randomV, vec4 &outdir)
 {
-	vec4 dirRnd = mEvaluateData.gDirRandom;
-
 	float r, theta, phi;
 
-	ConvertUnitVectorToSpherical(mEvaluateData.gDirection, r, theta, phi);
+	ConvertUnitVectorToSpherical(dir, r, theta, phi);
 
 	const float PiPi = 2.0f * (float)M_PI;
 
-	theta += dirRnd.x * M_PI;
-	phi += dirRnd.y * PiPi;
+	theta += randomH * M_PI;
+	phi += randomV * PiPi;
 
 	if (theta > M_PI) theta -= M_PI;
 	else if (theta < 0.0f) theta += M_PI;
@@ -90,7 +101,20 @@ void ParticleSystem::GetRandomVolumeDir(vec4 &vel)
 	if (phi > PiPi) phi -= PiPi;
 	else if (phi < 0.0f) phi += PiPi;
 
-	ConvertSphericalToUnitVector(r, theta, phi, vel);
+	ConvertSphericalToUnitVector(r, theta, phi, outdir);
+}
+
+float ParticleSystem::GetRandomSpeed()
+{
+	float rnd = 2.0 * mEvaluateData.gEmitSpeed * dist(e2) - mEvaluateData.gEmitSpeed;
+	return (mEvaluateData.gEmitSpeed - rnd * mEvaluateData.gSpeedSpread);
+}
+
+void ParticleSystem::GetRandomVolumeDir(vec4 &vel)                                                   
+{
+	const float randomH = mEvaluateData.gDirSpreadHor * (float) dist(e2);
+	const float randomV = mEvaluateData.gDirSpreadVer * (float) dist(e2);
+	GetRandomDir(mEvaluateData.gDirection, randomH, randomV, vel);
 }  
 
 void ParticleSystem::GetRandomVolumeColor(const vec4 &pos, vec4 &color)
@@ -144,34 +168,73 @@ void ParticleSystem::GetRandomVerticesPos(const bool local, vec4 &pos, int &vert
 void ParticleSystem::GetRandomVerticesDir(const int vertIndex, vec4 &vel) 
 {
 
-	int triIndex = vertIndex / 3;
+	const int triIndex = vertIndex / 3;
+	vec4 indir = mSurfaceData[triIndex].n;
 
-	// TODO: randomize normal vector !!
-
-	// USE_NORMALS_AS_DIR
-	if (mEvaluateData.gDirection.w > 0.0f)
-	{
-		vel = mSurfaceData[triIndex].n;
-	}
-	else
-	{
-		vel = mEvaluateData.gDirection;
-		vel.w = 1.0f;
-	}
+	const float randomH = mEvaluateData.gDirSpreadHor * (float) dist(e2);
+	const float randomV = mEvaluateData.gDirSpreadVer * (float) dist(e2);
+	GetRandomDir(indir, randomH, randomV, vel);
 }   
 
 void ParticleSystem::GetRandomVerticesColor(const int vertIndex, vec4 &color)
 {
-	
-	if (mSurfaceTextureId == 0)
+	if ( 0 == mSurfaceData.size() )
+		return;
+
+	int triIndex = vertIndex / 3;
+
+	if (triIndex < 0)
+		triIndex = 0;
+	if (triIndex >= mSurfaceData.size() )
+		triIndex = mSurfaceData.size()-1;
+
+	if (mSurfaceTextureId == 0 )
 	{
-		color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		color = mSurfaceData[triIndex].n;
 	}
-	else
+	else if (mSurfaceTextureData.size() > 0)
 	{
 		// read from texture image
-		color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+		vec2 uv = mSurfaceData[triIndex].uv0;
+		
+		int x = (int) (uv.x * mSurfaceTextureInfo.width);
+		int y = (int) (uv.y * mSurfaceTextureInfo.height);
+
+		x -= 1;
+		y -= 1;
+
+		if (x < 0) 
+		{
+			x = 0;
+		}
+		else if (x >= mSurfaceTextureInfo.width)
+		{
+			x = mSurfaceTextureInfo.width - 1;
+		}
+		if (y < 0) 
+		{
+			y = 0;
+		}
+		else if (y >= mSurfaceTextureInfo.height)
+		{
+			y = mSurfaceTextureInfo.height - 1;
+		}
+
+		int pixelSize = mSurfaceTextureInfo.GetPixelMemorySize();
+
+		SurfaceColor *pColor = (SurfaceColor*) &mSurfaceTextureData[ (y * mSurfaceTextureInfo.width + x) * pixelSize ];
+
+		if (pixelSize > 3)
+			color.w = 1.0f * pColor->alpha / 256.0f;
+		else
+			color.w = 1.0f;
+		color.x = 1.0f * pColor->red / 256.0f;
+		color.y = 1.0f * pColor->green / 256.0f;
+		color.z = 1.0f * pColor->blue / 256.0f;
 	}
+
+	// TODO: emitter mask ?!
 }
 
 void ParticleSystem::GetRandomSurfacePos(const bool local, const double extrudeDist, vec4 &pos, int &vertIndex, float &r1, float &r2, float &r3)
@@ -220,36 +283,23 @@ void ParticleSystem::GetRandomSurfacePos(const bool local, const double extrudeD
 		cp = mEvaluateData.gNormalTM * cp;	
 	}
 	
+	// extrudeDist direction, in local direction
+
 	cp *= extrudeDist * dist(e2);
 	pos += cp;
 }
 
 void ParticleSystem::GetRandomSurfaceDir(const int vertIndex, vec4 &vel) 
 {
-
-	int triIndex = vertIndex / 3;
-
-	// TODO: randomize normal vector !!
-
-	// USE_NORMALS_AS_DIR
-	if (mEvaluateData.gDirection.w > 0.0f)
-	{
-		vel = mSurfaceData[triIndex].n;
-	}
-	else
-	{
-		vel = mEvaluateData.gDirection;
-		vel.w = 1.0f;
-	}
+	const int triIndex = vertIndex / 3;
+	vec4 indir = mSurfaceData[triIndex].n;
+	
+	const float randomH = mEvaluateData.gDirSpreadHor * (float) dist(e2);
+	const float randomV = mEvaluateData.gDirSpreadVer * (float) dist(e2);
+	GetRandomDir(indir, randomH, randomV, vel);
 }   
 
-struct SurfaceColor
-{
-	BYTE		red;
-	BYTE		green;
-	BYTE		blue;
-	BYTE		alpha;
-};
+
 
 void ParticleSystem::GetRandomSurfaceColor(const int vertIndex, float r1, float r2, float r3, vec4 &color)
 {
@@ -316,4 +366,88 @@ void ParticleSystem::GetRandomSurfaceColor(const int vertIndex, float r1, float 
 		color.y = 1.0f * pColor->green / 256.0f;
 		color.z = 1.0f * pColor->blue / 256.0f;
 	}
+
+	// emitter mask ?!
+}
+
+
+void ParticleSystem::GenerateParticle(const int emitType, const bool local, const double extrudeDist, Particle &particle)
+{
+	if (false == mInheritSurfaceColor)
+		particle.Color = GenerateParticleColor(mPointColor, mPointColorVariation);
+
+	if (mEvaluateData.gDirection.w < 1.0f)
+	{
+		const float randomH = mEvaluateData.gDirSpreadHor * (float) dist(e2);
+		const float randomV = mEvaluateData.gDirSpreadVer * (float) dist(e2);
+		GetRandomDir(mEvaluateData.gDirection, randomH, randomV, particle.Vel);
+	}
+
+	if (emitType == PARTICLE_EMIT_FROM_VERTICES)
+	{
+		int vertIndex = 0;
+		GetRandomVerticesPos(local, particle.Pos, vertIndex);
+		
+		if (mEvaluateData.gDirection.w > 0.0f)
+			GetRandomVerticesDir(vertIndex, particle.Vel);
+	
+		if (true == mInheritSurfaceColor)
+			GetRandomVerticesColor(vertIndex, particle.Color);
+	}
+	else if (emitType == PARTICLE_EMIT_FROM_SURFACE)
+	{
+		int vertIndex = 0;
+		float r1, r2, r3;
+
+		GetRandomSurfacePos(local, extrudeDist, particle.Pos, vertIndex, r1, r2, r3);
+		
+		if (mEvaluateData.gDirection.w > 0.0f)
+			GetRandomSurfaceDir(vertIndex, particle.Vel);
+
+		if (true == mInheritSurfaceColor)
+		{
+			GetRandomSurfaceColor(vertIndex, r1, r2, r3, particle.Color);
+
+			const bool skipZeroAlpha = true;
+
+			if (true == skipZeroAlpha)
+			{
+				float alpha = particle.Color.w;
+
+				int trycount=0;
+				while (alpha < 0.5f && trycount < 10)
+				{
+					GetRandomSurfacePos(local, extrudeDist, particle.Pos, vertIndex, r1, r2, r3);
+					
+					if (mEvaluateData.gDirection.w > 0.0f)
+						GetRandomSurfaceDir(vertIndex, particle.Vel);
+					GetRandomSurfaceColor(vertIndex, r1, r2, r3, particle.Color);
+
+					alpha = particle.Color.w;
+
+					trycount += 1;
+				}
+			}
+		}
+	}
+	else
+	{
+		// from volume
+		GetRandomVolumePos(local, particle.Pos);
+		
+		if (mEvaluateData.gDirection.w > 0.0f)
+			GetRandomVolumeDir(particle.Vel);
+
+		if (true == mInheritSurfaceColor)
+			GetRandomVolumeColor(particle.Pos, particle.Color);
+	}
+
+	//
+	particle.Pos = particle.Pos - mEvaluateData.gEmitterVelocity.w * mEvaluateData.gEmitterVelocity;
+	particle.Pos.w = GenerateParticleSize(mPointSize, mPointSizeVariation); // negative size value for launcher !
+	particle.Vel = GetRandomSpeed() * normalize(particle.Vel);
+	particle.Vel = particle.Vel + mEvaluateData.gEmitterVelocity.w * mEvaluateData.gEmitterVelocity;
+	//particle.Vel.w = -dist(e2) - 0.001f;	// negative lifetime value for launcher !!
+	particle.Rot = vec4(0.0f, 0.0f, 0.0f, 0.0f); // AgeMillis = 1.0f; // Particles[i].Vel.w - 1000.0f;		// one launch per second for this launcher
+	particle.RotVel = vec4(0.0f, 0.0f, 0.0f, 0.0f); // Index = 1.0f;
 }

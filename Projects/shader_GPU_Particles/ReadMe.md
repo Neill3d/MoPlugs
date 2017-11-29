@@ -21,6 +21,9 @@ Particle System
 
  TODO
  
+ - GetEmitDir - function to get a spread emit direction is very slow.
+	Better to implement something like 4 vectors wind, interpolate inside pre-computed cone
+
  - separate emit and sim executions. Split it into iterations,
  and interpolate emitter matrix during each iteration between prev matrix and current
 

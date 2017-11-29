@@ -25,7 +25,7 @@
 #include "ParticleSystem_types.h"
 #include "graphics\glslComputeShader.h"
 
-namespace ParticlesSystem
+namespace GPUParticles
 {
 
 	enum ETechEmitType
@@ -73,24 +73,24 @@ const GLchar* Varyings[5];
 	
 
 // forward declaration
-class Shader;
+class ParticleShaderFX;
 
 ////////////////////////////////////////////////////////
 // Global functions to get a shader call
-Shader	*QueryShader();
-void	FreeShader();
+ParticleShaderFX	*QueryShader();
+void				FreeShader();
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Global GLSLFX Shader class - all techniques to populate, evaluate, sort and render particle system
 
-class Shader
+class ParticleShaderFX
 {
 public:
 
 	//! a constructor
-	Shader();
+	ParticleShaderFX();
 	//! a destructor
-	~Shader();
+	~ParticleShaderFX();
 
 	bool IsInitialized();
 

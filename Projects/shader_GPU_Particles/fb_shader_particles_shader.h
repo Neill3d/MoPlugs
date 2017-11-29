@@ -185,6 +185,7 @@ public:
 	
 	FBPropertyTime								ResetTime;			// at this frame particles will be reseted (rewind to beginning) - Start Frame
 	FBPropertyAnimatableAction					Reset;				// reset particles (start from the beginning)
+	FBPropertyAnimatableAction					ResetAll;
 	FBPropertyInt								ResetCount;			// this a startup count of particles!
 
 	FBPropertyDouble							ExtrudeResetPosition;
@@ -221,13 +222,15 @@ public:
 	FBPropertyBaseEnum<FBParticleEmitter>		Emitter;			// emitter shape
 	FBPropertyBool								InheritEmitterColors;
 
-	FBPropertyAnimatableVector3d				EmitterDirection;	// emit particles in that direction
+	FBPropertyAnimatableVector3d				EmitDirection;	// emit particles in that direction
+	FBPropertyAnimatableDouble					EmitDirSpreadHor;	// percent for dir randomize
+	FBPropertyAnimatableDouble					EmitDirSpreadVer;	// percent for dir randomize
 	FBPropertyBool								UseEmitterNormals;	// use normals for birth direction of a particle
-	FBPropertyAnimatableVector3d				EmitterDirRandom;	// percent for dir randomize
 	
-	FBPropertyAnimatableVector3d				EmitterVelocity;
-	FBPropertyBool								InheritEmitterVelocity;	// use difference between prev and current pos to calculate directions
-	FBPropertyAnimatableVector3d				EmitterVelRandom;	// randomize start velocity
+	FBPropertyAnimatableDouble					EmitSpeed;
+	FBPropertyAnimatableDouble					EmitSpeedSpread;	// randomize start speed
+	FBPropertyBool								InheritEmitterSpeed;	// use difference between prev and current pos to calculate directions
+	
 
 	//
 	// DYNAMIC parameters
@@ -312,8 +315,19 @@ public:
     static void SetTransparencyProperty(HIObject pObject, FBAlphaSource pState);
 	static void SetEmitterProperty(HIObject pObject, FBParticleEmitter pState);
 
+	//
+#ifdef _DEBUG
+	static void ReloadShaderAction(HIObject pObject, bool value);
+#endif
+	static void AboutAction(HIObject pObject, bool value);
+	static void ResetAction(HIObject pObject, bool value);
+	static void ResetAllAction(HIObject pObject, bool value);
+	static void SetColorCurve(HIObject pObject, bool value);
+	static void SetSizeCurve(HIObject pObject, bool value);
+
 	void DoReloadShader();
 	void DoReset();
+	void DoResetAll();
 	void DoColorCurve();
 	void DoSizeCurve();
 
@@ -332,6 +346,9 @@ protected:
 	bool	firstShadeModel;
 
 	bool		mLastResetState;
+	bool		mLastResetAllState;
+
+	unsigned int		mTotalCycles;		// total simulation cycles
 
 	//bool					mIsFirst;
 	FBTime					mLastTimelineTime;
@@ -351,28 +368,28 @@ protected:
 	ColorPropertyTexture		mColorCurve;		// animate color during lifetime
 	DoublePropertyTexture		mSizeCurve;			// animate size during lifetime
 
-	ParticlesSystem::ParticleSystemConnections		mParticleConnections;
-	std::map<FBModel*, ParticlesSystem::ParticleSystem*>	mParticleMap;
+	GPUParticles::ParticleSystemConnections		mParticleConnections;
+	std::map<FBModel*, GPUParticles::ParticleSystem*>	mParticleMap;
 
 	void SyncForcesPropWithComponents();
 	void RemoveForceFromComponents();
 
-	void UpdateEmitterGeometryBufferOnCPU(FBModel *pModel, ParticlesSystem::ParticleSystem *pParticles);
-	void UpdateEmitterGeometryBufferOnGPU(FBModel *pModel, ParticlesSystem::ParticleSystem *pParticles);
+	void UpdateEmitterGeometryBufferOnCPU(FBModel *pModel, GPUParticles::ParticleSystem *pParticles);
+	void UpdateEmitterGeometryBufferOnGPU(FBModel *pModel, GPUParticles::ParticleSystem *pParticles);
 
 	void	UpdateConnectedCollisionsData();
 	void	UpdateConnectedForcesData();
 
 	// ?! update altogether collisions and forces
 	void	UpdateConnectedData();
-	void	UploadConnectedDataToGPU(ParticlesSystem::ParticleSystem *pParticles);
+	void	UploadConnectedDataToGPU(GPUParticles::ParticleSystem *pParticles);
 
 	bool	UpdateInstanceData();
 
 	// update connected terrain models (render to depth)
 	void	UpdateConnectedTerrain();
 	// pass data from UI properties into the particle system
-	void	UpdateEvaluationData(FBModel *pEmitterModel, ParticlesSystem::ParticleSystem *pParticles, const bool enableEmit);
+	void	UpdateEvaluationData(FBModel *pEmitterModel, GPUParticles::ParticleSystem *pParticles, const bool enableEmit);
 
 	void SetUpPropertyTextures( FBPropertyAnimatableDouble *sizeProp, FBPropertyAnimatableColorAndAlpha *colorProp )
 	{
@@ -389,6 +406,8 @@ protected:
 
 	void LocalShaderBeginRender( FBRenderOptions* pRenderOptions, FBModel *pModel );
 	void LocalShadeModel( FBRenderOptions* pRenderOptions, FBModel *pModel, FBRenderingPass pPass );
+
+	void DebugDisplay(FBModel *pModel);
 
 };
 

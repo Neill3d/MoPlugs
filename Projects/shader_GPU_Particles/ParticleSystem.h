@@ -26,7 +26,7 @@
 
 //TODO: evaluate exchange, collision and force should have the same data struct as a shader, no need to have two struct for the same
 
-namespace ParticlesSystem
+namespace GPUParticles
 {
 
 
@@ -122,7 +122,7 @@ public:
 	// TODO: generate and reset particles on GPU (by using a compute shader)
 
 	// generate launchers and startup particles
-	void	GenerateParticle(const int emitType, const bool local, const double extrudeDist, vec4 &pos, vec4 &vel, vec4 &color);
+	void	GenerateParticle(const int emitType, const bool local, const double extrudeDist, Particle &particle);
 	bool	ResetParticles(unsigned int maxparticles, const int randomSeed, const int rate, const int preCount, const double extrudeDist);
 
 	vec4	GenerateParticleColor(const vec4 &color, const float variation);
@@ -180,19 +180,24 @@ public:
 
 	void PrepareParticles(unsigned int maxparticles, const int randomSeed, unsigned int particleCount, bool useRate, unsigned int rate, const double extrudeDist);
 
-	ParticlesSystem::evaluateBlock		&GetSimulationData();
+	evaluateBlock		&GetSimulationData();
 	bool UploadSimulationDataOnGPU();
 
 	void EmitParticles(const double timeStep, const ETechEmitType	type);
-	const unsigned int SimulateParticles(const double timeStep, double &DeltaTime, const double limit, const int SubSteps, const bool selfCollisions);
+	const unsigned int SimulateParticles(const bool emitEachStep, const ETechEmitType type, 
+		const double timeStep, double &DeltaTime, const double limit, const int SubSteps, const bool selfCollisions);
 	// todo: VP, MV, camera pos should be updated into the uniform buffer
 	
 	// run render shader
 
 	
 
-	ParticlesSystem::renderBlock		&GetRenderData();
+	renderBlock		&GetRenderData();
 	bool UploadRenderDataOnGPU();
+
+	const unsigned int GetTotalCycles() const {
+		return mTotalCycles;
+	}
 
 	// textures for size and color lookup ( 0 - to disable )
 	void	SetRenderSizeAndColorCurves( GLuint sizeTextureId, GLuint colorTextureId );
@@ -213,8 +218,8 @@ protected:
 	std::mt19937						e2;		// engine
 	std::uniform_real_distribution<>	dist;	// distribution
 
-	ParticlesSystem::evaluateBlock		mEvaluateData;			// common exchange parameters between UI and evaluate shader
-	ParticlesSystem::renderBlock		mRenderData;
+	evaluateBlock				mEvaluateData;			// common exchange parameters between UI and evaluate shader
+	renderBlock					mRenderData;
 
 	bool						mNeedReset;
 	unsigned int				mMaxParticles;			// initial amount of particles
@@ -283,7 +288,15 @@ protected:
 	void GetRandomSurfaceDir(const int vertIndex, vec4 &vel);
 	void GetRandomSurfaceColor(const int vertIndex, float r1, float r2, float r3, vec4 &color);
 
+	static void ConvertUnitVectorToSpherical(const vec4 &v, float &r, float &theta, float &phi);
+	static void ConvertSphericalToUnitVector(const float r, const float theta, const float phi, vec4 &v);
+	static void GetRandomDir(const vec4 &dir, const float randomH, const float randomV, vec4 &outdir);
+
+	float GetRandomSpeed();
+
 protected:
+
+	unsigned int				mTotalCycles;
 
     unsigned int				mCurrVB;
     unsigned int				mCurrTFB;
@@ -295,7 +308,7 @@ protected:
 	GLuint						mQuery;
 
 	// ! Use particles system shader (terrain technique)
-	ParticlesSystem::Shader			*mShader;
+	ParticleShaderFX			*mShader;
 
 	// emitter positions and normals
 	// TODO: replace buffer texture with a NV pointer uniform buffer

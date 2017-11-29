@@ -64,7 +64,7 @@ public:
 	FBPropertyAnimatableDouble		Amplitude;
 	FBPropertyAnimatableDouble		Frequency;
 
-	void FillForceData( ParticlesSystem::TForce &forcedata );
+	void FillForceData( GPUParticles::TForce &forcedata );
 
 protected:
     int mPickedSubItem;

@@ -13,7 +13,7 @@
 
 #include "ParticleSystem.h"
 
-using namespace ParticlesSystem;
+using namespace GPUParticles;
 
 
 // const mat4 &VP, const mat4 &MV, const vec3 &CameraPos, float size, bool useSizeCurve, vec4 color, bool useColorCurve, float AlphaFactor, const GLuint tex 

@@ -60,7 +60,7 @@ public:
 
 public:
 
-	void	FillCollisionData( ParticlesSystem::TCollision	&coldata );
+	void	FillCollisionData( GPUParticles::TCollision	&coldata );
 
 protected:
     int mPickedSubItem;

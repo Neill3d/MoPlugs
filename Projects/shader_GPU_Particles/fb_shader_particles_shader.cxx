@@ -58,38 +58,50 @@ static long long GetCurrentTimeMillis()
 }
 */
 
-using namespace ParticlesSystem;
+using namespace GPUParticles;
 
 
 #ifdef _DEBUG
-static void GPUshader_Particles_ReloadShader(HIObject pObject, bool value) {
+void GPUshader_Particles::ReloadShaderAction(HIObject pObject, bool value) 
+{
 	GPUshader_Particles *p = FBCast<GPUshader_Particles>(pObject);
 	if (value && p)	p->DoReloadShader();
 }
 #endif
 
-static void GPUshader_Particles_About(HIObject pObject, bool value) {
+void GPUshader_Particles::AboutAction(HIObject pObject, bool value) 
+{
 	GPUshader_Particles *p = FBCast<GPUshader_Particles>(pObject);
 	if (value && p) {
 		FBMessageBox( "Particle System Beta", 
-			"Author Sergey Solokhin (Neill3d) 2016\n"
+			"Author Sergey Solokhin (Neill3d) 2016-2017\n"
+			"  MoPlugs Project - https://github.com/Neill3d/MoPlugs\n"
 			"\t e-mail to s@neill3d.com"
 			"\t\t www.neill3d.com", 
 			"Ok" );
 	}
 }
 
-static void GPUshader_Particles_ResetAction(HIObject pObject, bool value) {
+void GPUshader_Particles::ResetAction(HIObject pObject, bool value) 
+{
 	GPUshader_Particles *p = FBCast<GPUshader_Particles>(pObject);
 	if (value && p)	p->DoReset();
 }
 
-static void GPUshader_Particles_ColorCurve(HIObject pObject, bool value) {
+void GPUshader_Particles::ResetAllAction(HIObject pObject, bool value) 
+{
+	GPUshader_Particles *p = FBCast<GPUshader_Particles>(pObject);
+	if (value && p)	p->DoResetAll();
+}
+
+void GPUshader_Particles::SetColorCurve(HIObject pObject, bool value) 
+{
 	GPUshader_Particles *p = FBCast<GPUshader_Particles>(pObject);
 	if (value && p)	p->DoColorCurve();
 }
 
-static void GPUshader_Particles_SizeCurve(HIObject pObject, bool value) {
+void GPUshader_Particles::SetSizeCurve(HIObject pObject, bool value)
+{
 	GPUshader_Particles *p = FBCast<GPUshader_Particles>(pObject);
 	if (value && p)	p->DoSizeCurve();
 }
@@ -137,6 +149,7 @@ void GPUshader_Particles::AddPropertiesToPropertyViewManager()
 
 	// folder Particle generation
 	AddPropertyViewForParticles("Reset", "");
+	AddPropertyViewForParticles("Reset All", "");
 	AddPropertyViewForParticles("Reset Time", "");
 	AddPropertyViewForParticles("Reset Quantity", "");
 
@@ -156,32 +169,36 @@ void GPUshader_Particles::AddPropertiesToPropertyViewManager()
 	AddPropertyViewForParticles("Generation Skip Zero Alpha", "Particle generation");
 	AddPropertyViewForParticles("Use Generation Mask", "Particle generation");
 	AddPropertyViewForParticles("Generation Mask", "Particle generation");
+	AddPropertyViewForParticles("Extrude Reset Position", "Particle generation");
 
 	//
-	AddPropertyViewForParticles("Particle generation.Start Direction", "Particle generation", true);
-	AddPropertyViewForParticles("Emit Direction", "Particle generation.Start Direction");
-	AddPropertyViewForParticles("Emit Dir Random", "Particle generation.Start Direction");
-	AddPropertyViewForParticles("Use Emitter Normals As Dir", "Particle generation.Start Direction");
+	AddPropertyViewForParticles("Particle generation.Emit Direction", "Particle generation", true);
+	AddPropertyViewForParticles("Emit Direction", "Particle generation.Emit Direction");
+	AddPropertyViewForParticles("Dir Spread Latitude", "Particle generation.Emit Direction");
+	AddPropertyViewForParticles("Dir Spread Longitude", "Particle generation.Emit Direction");
+	AddPropertyViewForParticles("Use Emitter Normals As Dir", "Particle generation.Emit Direction");
 	
-	AddPropertyViewForParticles("Particle generation.Start Velocity", "Particle generation", true);
-	AddPropertyViewForParticles("Emit Velocity", "Particle generation.Start Velocity");
-	AddPropertyViewForParticles("Emit Vel Random", "Particle generation.Start Velocity");
-	AddPropertyViewForParticles("Inherit Emitter Velocity", "Particle generation.Start Velocity");
+	AddPropertyViewForParticles("Particle generation.Emit Speed", "Particle generation", true);
+	AddPropertyViewForParticles("Emit Speed", "Particle generation.Emit Speed");
+	AddPropertyViewForParticles("Emit Speed Spread", "Particle generation.Emit Speed");
+	AddPropertyViewForParticles("Inherit Emitter Speed", "Particle generation.Emit Speed");
 
 	//
 	AddPropertyViewForParticles("Dynamic parameters", "", true );
+	AddPropertyViewForParticles("Constraint Magnitude", "Dynamic parameters" );
 	AddPropertyViewForParticles("Mass", "Dynamic parameters" );
 	AddPropertyViewForParticles("Damping", "Dynamic parameters" );
 	AddPropertyViewForParticles("Use Gravity", "Dynamic parameters" );
 	AddPropertyViewForParticles("Gravity", "Dynamic parameters" );
 	AddPropertyViewForParticles("Use Forces", "Dynamic parameters" );
-	AddPropertyViewForParticles("Force Objects", "Dynamic parameters" );
+	AddPropertyViewForParticles("Forces", "Dynamic parameters" );
 	AddPropertyViewForParticles("Use Turbulence", "Dynamic parameters" );
 	AddPropertyViewForParticles("Noise Frequency", "Dynamic parameters" );
 	AddPropertyViewForParticles("Noise Speed", "Dynamic parameters" );
 	AddPropertyViewForParticles("Noise Amplitude", "Dynamic parameters" );
 	AddPropertyViewForParticles("Use Collisions", "Dynamic parameters" );
-	AddPropertyViewForParticles("Collision Objects", "Dynamic parameters" );
+	AddPropertyViewForParticles("Collisions", "Dynamic parameters" );
+	AddPropertyViewForParticles("Self Collisions", "Dynamic parameters" );
 	AddPropertyViewForParticles("Use Floor", "Dynamic parameters" );
 	AddPropertyViewForParticles("Floor Friction", "Dynamic parameters" );
 	AddPropertyViewForParticles("Floor Level", "Dynamic parameters" );
@@ -194,6 +211,7 @@ void GPUshader_Particles::AddPropertiesToPropertyViewManager()
 	AddPropertyViewForParticles("Primitive Type", "Particle visualization.Particle Shape");
 	AddPropertyViewForParticles("Instance Object", "Particle visualization.Particle Shape");
 
+	AddPropertyViewForParticles("Point Smooth", "Particle visualization");
 	AddPropertyViewForParticles("Texture Object", "Particle visualization");
 	AddPropertyViewForParticles("Shade Mode", "Particle visualization");
 	AddPropertyViewForParticles("Affecting Lights", "Particle visualization");
@@ -225,7 +243,7 @@ bool GPUshader_Particles::FBCreate()
 {
     mRenderFrameId = 0;
 	//mLastFrameTime = 0.0;
-
+	mTotalCycles = 0;
 	mLastTimelineTime = FBTime::Infinity;
 	mLastRenderFrameId = -1;
 	//mIsFirst = true;
@@ -234,6 +252,7 @@ bool GPUshader_Particles::FBCreate()
 	firstShadeModel = false;
 
 	mLastResetState = false;
+	mLastResetAllState = false;
 
 	SetShaderCapacity( kFBShaderCapacityMaterialEffect, false );
 
@@ -241,10 +260,10 @@ bool GPUshader_Particles::FBCreate()
 	// Particle generation
 	//
 #ifdef _DEBUG
-	FBPropertyPublish( this, ReloadShader, "Reload Shader", nullptr, GPUshader_Particles_ReloadShader );
+	FBPropertyPublish( this, ReloadShader, "Reload Shader", nullptr, ReloadShaderAction );
 #endif
 
-	FBPropertyPublish( this, About, "About", nullptr, GPUshader_Particles_About );
+	FBPropertyPublish( this, About, "About", nullptr, AboutAction );
 
 	FBPropertyPublish( this, DisplayedCount, "Displayed Count", nullptr, nullptr );
 	FBPropertyPublish( this, MaximumParticles, "Maximum Particles", nullptr, nullptr );
@@ -261,7 +280,8 @@ bool GPUshader_Particles::FBCreate()
 
 	FBPropertyPublish( this, RandomSeed, "Random Seed", nullptr, nullptr );
 
-	FBPropertyPublish( this, Reset, "Reset", nullptr, GPUshader_Particles_ResetAction );
+	FBPropertyPublish( this, Reset, "Reset", nullptr, ResetAction );
+	FBPropertyPublish( this, ResetAll, "Reset All", nullptr, ResetAllAction );
 	FBPropertyPublish( this, ResetTime, "Reset Time", nullptr, nullptr );
 	FBPropertyPublish( this, ResetCount, "Reset Quantity", nullptr, nullptr );
 
@@ -271,13 +291,14 @@ bool GPUshader_Particles::FBCreate()
 	FBPropertyPublish( this, ExtrudeResetPosition, "Extrude Reset Position", nullptr, nullptr );
 	FBPropertyPublish( this, GenerationSkipZeroAlpha, "Generation Skip Zero Alpha", nullptr, nullptr );
 
-	FBPropertyPublish( this, EmitterDirection, "Emit Direction", nullptr, nullptr );
-	FBPropertyPublish( this, EmitterDirRandom, "Emit Dir Random", nullptr, nullptr );
+	FBPropertyPublish( this, EmitDirection, "Emit Direction", nullptr, nullptr );
+	FBPropertyPublish( this, EmitDirSpreadHor, "Dir Spread Latitude", nullptr, nullptr );
+	FBPropertyPublish( this, EmitDirSpreadVer, "Dir Spread Longitude", nullptr, nullptr );
 	FBPropertyPublish( this, UseEmitterNormals, "Use Emitter Normals As Dir", nullptr, nullptr );
 
-	FBPropertyPublish( this, EmitterVelocity, "Emit Velocity", nullptr, nullptr );
-	FBPropertyPublish( this, InheritEmitterVelocity, "Inherit Emitter Velocity", nullptr, nullptr );
-	FBPropertyPublish( this, EmitterVelRandom, "Emit Vel Random", nullptr, nullptr );
+	FBPropertyPublish( this, EmitSpeed, "Emit Speed", nullptr, nullptr );
+	FBPropertyPublish( this, EmitSpeedSpread, "Emit Speed Spread", nullptr, nullptr );
+	FBPropertyPublish( this, InheritEmitterSpeed, "Inherit Emitter Speed", nullptr, nullptr );
 
 	FBPropertyPublish( this, Mass, "Mass", nullptr, nullptr );
 	FBPropertyPublish( this, Damping, "Damping", nullptr, nullptr );
@@ -337,11 +358,15 @@ bool GPUshader_Particles::FBCreate()
 
 	ResetTime = FBTime(0);
 
-	EmitterDirection = FBVector3d(0.0, 1.0, 0.0);
-	EmitterDirRandom = FBVector3d(10.0, 10.0, 10.0);
-	EmitterVelocity = FBVector3d(10.0, 10.0, 10.0);
-	EmitterVelRandom = FBVector3d(1.0, 1.0, 1.0);
-	InheritEmitterVelocity = true;
+	EmitDirection = FBVector3d(0.0, 1.0, 0.0);
+	EmitDirSpreadHor = 10.0; // FBVector3d(10.0, 10.0, 10.0);
+	EmitDirSpreadHor.SetMinMax(0.0, 100.0, true, true);
+	EmitDirSpreadVer = 10.0; 
+	EmitDirSpreadVer.SetMinMax(0.0, 100.0, true, true);
+	EmitSpeed = 10.0; // FBVector3d(10.0, 10.0, 10.0);
+	EmitSpeedSpread = 10.0; // in precent // FBVector3d(1.0, 1.0, 1.0);
+	EmitSpeedSpread.SetMinMax(0.0, 100.0, true, true);
+	InheritEmitterSpeed = true;
 	UseEmitterNormals = true;
 
 	Mass = 100.0;		// result is 0.01
@@ -412,7 +437,7 @@ bool GPUshader_Particles::FBCreate()
 	FBPropertyPublish( this, Color, "Color", nullptr, nullptr );
 	FBPropertyPublish( this, ColorVariation, "Color Variation (%)", nullptr, nullptr );
 	FBPropertyPublish( this, UseColorCurve, "Use Color Curve", nullptr, nullptr );
-	FBPropertyPublish( this, ColorCurve, "Color Curve", nullptr, GPUshader_Particles_ColorCurve );
+	FBPropertyPublish( this, ColorCurve, "Color Curve", nullptr, SetColorCurve );
 	FBPropertyPublish( this, ColorCurveHolder, "ColorCurveHolder", nullptr, nullptr );
 
 	FBPropertyPublish( this, Size, "Size", nullptr, nullptr );
@@ -423,7 +448,7 @@ bool GPUshader_Particles::FBCreate()
 	FBPropertyPublish( this, PointScaleDistance, "Point Scale Distance", nullptr, nullptr );
 
 	FBPropertyPublish( this, UseSizeCurve, "Use Size Curve", nullptr, nullptr );
-	FBPropertyPublish( this, SizeCurve, "Size Curve", nullptr, GPUshader_Particles_SizeCurve );
+	FBPropertyPublish( this, SizeCurve, "Size Curve", nullptr, SetSizeCurve );
 	FBPropertyPublish( this, SizeCurveHolder, "SizeCurveHolder", nullptr, nullptr );
 
 	PointSmooth = true;
@@ -512,7 +537,7 @@ FBShaderModelInfo* GPUshader_Particles::NewShaderModelInfo(HKModelRenderInfo pMo
 	pModel->NoFrustumCullingRequire();
 	if (pModel->IsDeformable)
 	{
-		FBModelVertexData *pModelVertexData = pModel->ModelVertexData;
+		//FBModelVertexData *pModelVertexData = pModel->ModelVertexData;
 		//pModelVertexData->VertexArrayMappingRequest();
 	}
 	
@@ -545,7 +570,7 @@ void GPUshader_Particles::FreeParticles()
 	
 	for (auto iter=begin(mParticleMap); iter!=end(mParticleMap); ++iter)
 	{
-		ParticlesSystem::ParticleSystem *pParticles = iter->second;
+		ParticleSystem *pParticles = iter->second;
 		delete pParticles;
 	}
 
@@ -564,7 +589,7 @@ void GPUshader_Particles::DestroyShaderModelInfo( FBRenderOptions* pOptions, FBS
 	// release vertex array mapping request
 	if (pModel->IsDeformable)
 	{
-		FBModelVertexData *pModelVertexData = pModel->ModelVertexData;
+		//FBModelVertexData *pModelVertexData = pModel->ModelVertexData;
 		//pModelVertexData->VertexArrayMappingRelease();
 	}
 
@@ -572,7 +597,7 @@ void GPUshader_Particles::DestroyShaderModelInfo( FBRenderOptions* pOptions, FBS
 	auto iter = mParticleMap.find(pModel);
 	if (iter!=end(mParticleMap) )
 	{
-		ParticlesSystem::ParticleSystem *pParticles = iter->second;
+		ParticleSystem *pParticles = iter->second;
 		delete pParticles;
 		mParticleMap.erase(iter);
 	}
@@ -605,6 +630,20 @@ void GPUshader_Particles::DoReset()
 	for (auto iter=begin(mParticleMap); iter!=end(mParticleMap); ++iter)
 	{
 		iter->second->NeedReset();
+	}
+}
+
+void GPUshader_Particles::DoResetAll()
+{
+	FBScene *pScene = mSystem.Scene;
+
+	for (int i=0, count=pScene->Shaders.GetCount(); i<count; ++i)
+	{
+		FBShader *pShader = pScene->Shaders[i];
+		if ( FBIS(pShader, GPUshader_Particles) )
+		{
+			( (GPUshader_Particles*) pShader )->DoReset();
+		}
 	}
 }
 
@@ -679,6 +718,13 @@ bool GPUshader_Particles::ShaderNeedBeginRender()
 		DoReset();
 	}
 	mLastResetState = resetValue;
+
+	bool resetAllValue;
+	ResetAll.GetData(&resetAllValue, sizeof(bool) );
+	if (true == resetAllValue && mLastResetAllState != resetAllValue)
+	{
+		DoResetAll();
+	}
 
 	// TODO: this one is connected to specified FBShader, should be updated only once per instance
 #ifdef _DEBUG
@@ -816,7 +862,7 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 	if (particleIter == end(mParticleMap) )
 	{
 		// allocate new structure for a new model assigned
-		ParticlesSystem::ParticleSystem	*newParticleSystem = new ParticlesSystem::ParticleSystem();
+		ParticleSystem	*newParticleSystem = new ParticleSystem();
 		newParticleSystem->SetConnections(&mParticleConnections);
 		bool res = newParticleSystem->InitParticleSystem( vec3(0.0f, 0.0f, 0.0f) );
 		
@@ -928,7 +974,7 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 		pParticles->mPerModelUserData.lastFrameTime = lastFrameTime;
 	}
 
-	static int totalCycles = 0;
+	//static int totalCycles = 0;
 	
 
 	// DONE: this function executed all the time !!!
@@ -951,7 +997,7 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 		pModel->GetVector(pos);
 		pParticles->SetLastEmitterPos(pos);
 
-		totalCycles = 0;
+		mTotalCycles = 0;
 
 		pParticles->mPerModelUserData.isFirst = true;
 
@@ -1008,7 +1054,7 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 				}
 			}
 
-			pParticles->EmitParticles(deltaTime, emitType);
+			//pParticles->EmitParticles(deltaTime, emitType);
 		//}
 		
 		pParticles->mPerModelUserData.isFirst = false;
@@ -1023,9 +1069,9 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 
 		// run simulation
 		unsigned int Cycles = 0;
-		Cycles = pParticles->SimulateParticles( timeStep, deltaTime, deltaTimeLimit, SubSteps, SelfCollisions );
+		Cycles = pParticles->SimulateParticles( true, emitType, timeStep, deltaTime, deltaTimeLimit, SubSteps, SelfCollisions );
 
-		totalCycles += (int) Cycles;
+		mTotalCycles += Cycles;
 
 		// DONE: make it unique per model !!
 		//mLastFrameTime = timeNow - deltaTime;
@@ -1074,19 +1120,32 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 
 	mNeedReloadShaders = false;
 	
-	auto particleIter = mParticleMap.find(pModel);
-	if (particleIter == end(mParticleMap) )
-		return;
+	// display some particle proxy
 
-	auto pParticles = particleIter->second;
+	if ( kFBPickingModeModelsOnly != lViewingOptions->PickingMode() )
+	{
+		DebugDisplay(pModel);
+	}
+
+	// display particles
 
 	FBTime currTimelineTime = mSystem.LocalTime;
 	mLastTimelineTime = currTimelineTime;
+
+	auto particleIter = mParticleMap.find(pModel);
+	
+	if ( (particleIter == end(mParticleMap)) 
+		|| ( 0 == particleIter->second->GetTotalCycles() ) )
+	{
+		return;
+	}
+	auto pParticles = particleIter->second;
+
 	
 	//FBTime localTime = (PlayMode == kFBParticleLife) ? mSystem.SystemTime : mSystem.LocalTime;
 	//mLastFrameTime = localTime.GetSecondDouble();
 
-	ParticlesSystem::renderBlock &renderData = pParticles->GetRenderData();
+	renderBlock &renderData = pParticles->GetRenderData();
 
 	if (false == IsMoPlugsRender() )
 	{
@@ -1167,6 +1226,79 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 #endif
 }
 
+void GPUshader_Particles::DebugDisplay(FBModel *pModel)
+{
+	FBMatrix tm;
+	FBVector3d bmin, bmax;
+
+	pModel->GetMatrix(tm);
+	pModel->GetBoundingBox( bmin, bmax );
+
+	//glPushMatrix();
+	//glMultMatrixd(tm);
+
+	glBegin(GL_LINES);
+	glColor3d( 1.0, 0.0, 0.0 );
+	glVertex3d( 0.0, 0.0, 0.0 );
+	glVertex3d( 0.5 * (bmax[0]-bmin[0]), 0.0, 0.0 );
+
+	glColor3d( 0.0, 1.0, 0.0 );
+	glVertex3d( 0.0, 0.0, 0.0 );
+	glVertex3d( 0.0, 0.5*(bmax[1]-bmin[1]), 0.0 );
+
+	glColor3d( 0.0, 0.0, 1.0 );
+	glVertex3d( 0.0, 0.0, 0.0 );
+	glVertex3d( 0.0, 0.0, 0.5 * (bmax[2]-bmin[2]) );
+
+	// TODO: display emit direction
+
+	// TODO: display gravity force !
+
+	glEnd();
+
+	// TODO: display turbulence flag if used !
+
+	//glPopMatrix();
+
+	// display connections to collisions and forces
+
+	glBegin(GL_LINES);
+
+	if (true == UseForces)
+	{
+		for (int i=0, count=Forces.GetCount(); i<count; ++i)
+		{
+			FBModel *pDstModel = (FBModel*) Forces[i];
+			FBMatrix dstTM;
+			pDstModel->GetMatrix(dstTM);
+
+			FBGetLocalMatrix( dstTM, tm, dstTM );
+
+			glColor3d( 1.0, 1.0, 1.0 );
+			glVertex3d( 0.0, 0.0, 0.0 );
+			glVertex3dv( &dstTM[12] );
+		}
+	}
+
+	if (true == UseCollisions)
+	{
+		for (int i=0, count=Collisions.GetCount(); i<count; ++i)
+		{
+			FBModel *pDstModel = (FBModel*) Collisions[i];
+			FBMatrix dstTM;
+			pDstModel->GetMatrix(dstTM);
+
+			FBGetLocalMatrix( dstTM, tm, dstTM );
+
+			glColor3d( 1.0, 1.0, 1.0 );
+			glVertex3d( 0.0, 0.0, 0.0 );
+			glVertex3dv( &dstTM[12] );
+		}
+	}
+
+	glEnd();
+}
+
 void GPUshader_Particles::SetTransparencyType( FBAlphaSource pTransparency )
 {
     if (Transparency != pTransparency)
@@ -1218,7 +1350,7 @@ void GPUshader_Particles::UpdateConnectedCollisionsData()
 	mParticleConnections.SetCollisionsCount(collisionsCount);
 
 	collisionsCount = 0;
-	ParticlesSystem::TCollision	coldata;
+	TCollision	coldata;
 
 	for (int i=0; i<srcCount; ++i)
 	{
@@ -1253,7 +1385,7 @@ void GPUshader_Particles::UpdateConnectedForcesData()
 	mParticleConnections.SetForcesCount(forcesCount);
 
 	forcesCount = 0;
-	ParticlesSystem::TForce data;
+	TForce data;
 
 	for (int i=0; i<srcCount; ++i)
 	{
@@ -1302,8 +1434,8 @@ void GPUshader_Particles::UpdateConnectedData()
 	collisionsCount = 0;
 	forcesCount = 0;
 
-	ParticlesSystem::TCollision	coldata;
-	ParticlesSystem::TForce data;
+	TCollision	coldata;
+	TForce data;
 
 	for (int i=0; i<srcCount; ++i)
 	{
@@ -1342,7 +1474,7 @@ void GPUshader_Particles::UpdateConnectedData()
 	}
 }
 
-void GPUshader_Particles::UploadConnectedDataToGPU(ParticlesSystem::ParticleSystem *pParticles)
+void GPUshader_Particles::UploadConnectedDataToGPU(ParticleSystem *pParticles)
 {
 	pParticles->GetSimulationData().gNumForces = mParticleConnections.GetNumberOfForces();
 	pParticles->GetSimulationData().gNumCollisions = mParticleConnections.GetNumberOfCollisions();
@@ -1469,7 +1601,7 @@ void GPUshader_Particles::SyncForcesPropWithComponents()
 	}
 }
 
-void GPUshader_Particles::UpdateEmitterGeometryBufferOnCPU(FBModel *pModel, ParticlesSystem::ParticleSystem *pParticles)
+void GPUshader_Particles::UpdateEmitterGeometryBufferOnCPU(FBModel *pModel, ParticleSystem *pParticles)
 {
 	FBModelVertexData *pVertexData = pModel->ModelVertexData;
 
@@ -1510,7 +1642,7 @@ void GPUshader_Particles::UpdateEmitterGeometryBufferOnCPU(FBModel *pModel, Part
 	pVertexData->VertexArrayMappingRelease();
 }
 
-void GPUshader_Particles::UpdateEmitterGeometryBufferOnGPU(FBModel *pModel, ParticlesSystem::ParticleSystem *pParticles)
+void GPUshader_Particles::UpdateEmitterGeometryBufferOnGPU(FBModel *pModel, ParticleSystem *pParticles)
 {
 	FBModelVertexData *pVertexData = pModel->ModelVertexData;
 
@@ -1565,9 +1697,9 @@ void GPUshader_Particles::UpdateConnectedTerrain()
 	}
 }
 
-void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticlesSystem::ParticleSystem *pParticles, const bool enableEmit)
+void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticleSystem *pParticles, const bool enableEmit)
 {
-	FBMatrix m, normalTM;
+	FBMatrix m, rotationTM, normalTM;
 	FBVector3d min, max, pos;
 
 	FBVector3d emitterVel(0.0, 0.0, 0.0);
@@ -1577,6 +1709,7 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticlesSystem:
 	{
 		pModel->GetVector( pos );
 		pModel->GetMatrix(m);
+		pModel->GetMatrix(rotationTM, kModelRotation, true);
 		pModel->GetMatrix(normalTM, kModelInverse_Transformation);
 		FBMatrixTranspose(normalTM, normalTM);
 
@@ -1589,7 +1722,7 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticlesSystem:
 		FBVector3d lastpos;
 		pParticles->GetLastEmitterPos(lastpos);
 
-		if (InheritEmitterVelocity) emitterVel = VectorSubtract( pos, lastpos );
+		if (InheritEmitterSpeed) emitterVel = VectorSubtract( pos, lastpos );
 		pParticles->SetLastEmitterPos( pos );
 	}
 
@@ -1597,20 +1730,30 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticlesSystem:
 
 	mat4 &m4 = data.gTM;
 	mat4 &nm4 = data.gNormalTM;
+	mat4 &rotm4 = data.gRotationTM;
 	for (int i=0; i<16; ++i)
 	{
 		m4.mat_array[i] = (float) m[i];
+		rotm4.mat_array[i] = (float) rotationTM[i];
 		nm4.mat_array[i] = (float) normalTM[i];
 	}
 
-	FBVector3d direction = EmitterDirection;
-	FBVector3d dirRandom = EmitterDirRandom;
-	FBVector3d velocity = EmitterVelocity;
-	FBVector3d velRandom = EmitterVelRandom;
-	FBVector3d gravityDir = Gravity;
-
+	const FBVector3d direction = EmitDirection;
+	const double dirSpreadHor = EmitDirSpreadHor;
+	const double dirSpreadVer = EmitDirSpreadVer;
+	const double speed = EmitSpeed;
+	const double speedSpread = EmitSpeedSpread;
+	const FBVector3d gravityDir = Gravity;
+	/*
 	EvaluationExchange::SetDirection( data, vec3((float)direction[0], (float)direction[1], (float)direction[2]), vec3( (float)dirRandom[0]*0.01f, (float)dirRandom[1]*0.01f, (float)dirRandom[2]*0.01f), UseEmitterNormals );
-	EvaluationExchange::SetVelocity( data, vec3((float)velocity[0], (float)velocity[1], (float)velocity[2]), vec3((float)velRandom[0]*0.01f, (float)velRandom[1]*0.01f, (float)velRandom[2]*0.01f), vec4((float)emitterVel[0], (float)emitterVel[1], (float)emitterVel[2], (InheritEmitterVelocity) ? 1.0f : 0.0f) );
+	EvaluationExchange::SetVelocity( data, vec3((float)velocity[0], (float)velocity[1], (float)velocity[2]), 
+		vec3((float)velRandom[0]*0.01f, (float)velRandom[1]*0.01f, (float)velRandom[2]*0.01f), vec4((float)emitterVel[0], (float)emitterVel[1], (float)emitterVel[2], (InheritEmitterVelocity) ? 1.0f : 0.0f) );
+	*/
+	EvaluationExchange::SetDirection( data, vec3((float)direction[0], (float)direction[1], (float)direction[2]), 
+		(float) dirSpreadHor * 0.01f, (float) dirSpreadVer * 0.01f, UseEmitterNormals );
+	EvaluationExchange::SetSpeed( data, (float) speed, (float) speedSpread * 0.01f, 
+		vec4((float)emitterVel[0], (float)emitterVel[1], (float)emitterVel[2], (InheritEmitterSpeed) ? 1.0f : 0.0f) );
+	
 	EvaluationExchange::SetDynamicParameters( data, 0.01f * (float) Mass, 0.01f * (float) Damping );
 	EvaluationExchange::SetFlags( data, enableEmit, UseCollisions, (int) Emitter );
 	EvaluationExchange::SetTurbulence( data, UseTurbulence, 0.0001f * NoiseFrequency, 0.0001f * NoiseSpeed, 0.01f * NoiseAmplitude );

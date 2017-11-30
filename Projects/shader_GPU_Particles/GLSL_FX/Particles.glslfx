@@ -197,9 +197,10 @@ GLSLShader
 		vec2	temp;	// to align type
 	};
 	
-	const float PI = 3.1415926535897932384626433832795;
-	const float PI_2 = 1.57079632679489661923;
-	const float PI_4 = 0.785398163397448309616;
+	const float PiPi = 6.2831853;
+	const float PI = 3.14159265;
+	const float PI_2 = 1.57079632;
+	const float PI_4 = 0.785398163;
 	
 	const vec2 randN1 = vec2(0.14, -0.07);
 	const vec2 randN2 = vec2(0.77, 1.01);
@@ -247,42 +248,35 @@ namespace Evaluate
 		}
 		
 		//
-		//
-		void ConvertUnitVectorToSpherical(const vec4 v, out float r, out float theta, out float phi)
+		// out float r, out float theta, out float phi
+		void ConvertUnitVectorToSpherical(const vec4 v, out vec3 sv)
 		{
-			r = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-			theta = acos( v.z / r );
-			phi = atan( v.y / v.x );
+			sv.x = sqrt(v.x*v.x + v.y*v.y + v.z*v.z); // r
+			sv.y = atan( v.y,  v.x ); // theta
+			sv.z = atan( sqrt(v.x*v.x+v.y*v.y), v.z ); // phi
 		}
 
-		void ConvertSphericalToUnitVector(const float r, const float theta, const float phi, out vec4 v)
+		// const float r, const float theta, const float phi
+		void ConvertSphericalToUnitVector(vec3 sv, out vec4 v)
 		{
-			v.x = r * sin(theta) * cos(phi);
-			v.y = r * sin(theta) * sin(phi);
-			v.z = r * cos(theta);
+			v.x = sv.x * cos(sv.y) * sin(sv.z);
+			v.y = sv.x * sin(sv.y) * sin(sv.z);
+			v.z = sv.x * cos(sv.z);
+			v.w = 1.0;
 		}
 
 		void GetRandomDir(in vec4 inDir, in vec2 dirRnd, out vec4 dir)                                                   
 		{
-			//vec4 dirRnd = mEvaluateData.gDirRandom;
+			//float r, theta, phi;
+			vec3 sv;
 
-			float r, theta, phi;
+			ConvertUnitVectorToSpherical(inDir, sv);
 
-			ConvertUnitVectorToSpherical(inDir, r, theta, phi);
-
-			const float PiPi = 2.0 * PI;
-
-			theta += dirRnd.x * PI - PI_2;
-			phi += dirRnd.y * PiPi - PI;
-
-			if (theta > PI_2) theta -= PI;
-			else if (theta < PI_2) theta += PI;
-
-			if (phi > PI) phi -= PiPi;
-			else if (phi < PI) phi += PiPi;
-
-			ConvertSphericalToUnitVector(r, theta, phi, dir);
-		}  
+			sv.y += dirRnd.x * PI;
+			sv.z += dirRnd.y * PiPi;
+			
+			ConvertSphericalToUnitVector(sv, dir);
+		} 
 		
 		float GetRandomSpeed(float randomF)
 		{
@@ -478,8 +472,8 @@ namespace Evaluate
 			vec4 indir = surfaceData[triIndex].n;
 
 			// DONE: randomize normal vector !!
-			//GetRandomDir(indir, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), vel);
-			vel = indir;
+			GetRandomDir(indir, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), vel);
+			//vel = indir;
 		}
 		
 		void GetEmitColor(in vec4 pos, in int vertIndex, in vec3 bary, out vec4 color)
@@ -541,8 +535,8 @@ namespace Evaluate
 			vec4 newPos = vec4(0.0);
 			vec4 Dir = vec4(0.0);
 			if (USE_NORMALS_AS_DIR == 0.0)
-				Dir = gDirection;
-				//GetRandomDir(gDirection, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), Dir);
+				//Dir = gDirection;
+				GetRandomDir(gDirection, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), Dir);
 			
 			color = vec4(1.0, 1.0, 1.0, 1.0);
 			
@@ -699,7 +693,10 @@ namespace Render
 		
 		layout (location = 0) in vec4 Position;                                        
 		layout (location = 1) in vec4 Color;
-		//out float 	life;
+		layout (location = 2) in vec4 Velocity; // .w - Total Lifetime
+		layout (location = 3) in vec4 Rotation; // .w - Age
+		
+		out float 	life;
 		out vec4	pcolor;
 		out vec3	wv;
 		
@@ -724,7 +721,10 @@ namespace Render
 			
 			gl_Position = gVP * vPosition;  
 			gl_PointSize = size * pointScale;
-			//life = Position.w;
+
+			// float normLife = Age / lifetime;
+			life = clamp(Rotation.w / Velocity.w, 0.0, 1.0);
+
 			pcolor = Color;
 			
 			// clip the launchers
@@ -739,7 +739,7 @@ namespace Render
 	GLSLShader FS_Points
 	{
 		//uniform sampler2D gColorMap;                                                        
-		//in float life;
+		in float life;
 		in vec4 	pcolor;
 		in vec3		wv;
 		//out vec4 FragColor;                                                                 
@@ -749,7 +749,7 @@ namespace Render
 		layout(location=2) out vec4		outMask;
 		layout(location=3) out vec4		outPosition;
 		
-		//layout(binding=6) uniform sampler1D	ColorCurve;
+		layout(binding=6) uniform sampler1D	ColorCurve;
 
 		void main()                                                                         
 		{       
@@ -757,12 +757,12 @@ namespace Render
 
 			// color should be taken from the particles (can be part of simulation)
 			vec4 color = pcolor;
-			/*
+			
 			if (gUseColorCurve == 1)
 			{
 				color = texture(ColorCurve, life);
 			}
-*/
+
 			color.w *= gTransparencyFactor;
 			outColor = color;
 			

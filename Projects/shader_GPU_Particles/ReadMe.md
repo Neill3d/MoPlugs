@@ -63,6 +63,13 @@ Particle System
 
 LOG
 
+30.11.2017
+
++ fixed Color Curve Editor (animate color along a timeline)
++ fixed GetRandomDir
+
+ Note! GetRandomDir	still doesn't work correctly. It should randomize for the both sides along the direction, at the moment, it randomize only in clock wise.
+
 24.11.2017
  + write compute shader for particles generation. That will help to keep surfaceData always on gpu and complex models will work more stable
  + add particle generation masking (uv-model based mask)

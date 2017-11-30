@@ -73,15 +73,15 @@ void ParticleSystem::GetRandomVolumePos(const bool local, vec4 &pos)
 void ParticleSystem::ConvertUnitVectorToSpherical(const vec4 &v, float &r, float &theta, float &phi)
 {
 	r = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-	theta = acos( v.z / r );
-	phi = atan( v.y / v.x );
+	theta = atan2( v.y, v.x );
+	phi = atan2( sqrt(v.x*v.x + v.y*v.y), v.z );
 }
 
 void ParticleSystem::ConvertSphericalToUnitVector(const float r, const float theta, const float phi, vec4 &v)
 {
-	v.x = r * sin(theta) * cos(phi);
+	v.x = r * cos(theta) * sin(phi);
 	v.y = r * sin(theta) * sin(phi);
-	v.z = r * cos(theta);
+	v.z = r * cos(phi);
 }
 
 void ParticleSystem::GetRandomDir(const vec4 &dir, const float randomH, const float randomV, vec4 &outdir)
@@ -94,13 +94,7 @@ void ParticleSystem::GetRandomDir(const vec4 &dir, const float randomH, const fl
 
 	theta += randomH * M_PI;
 	phi += randomV * PiPi;
-
-	if (theta > M_PI) theta -= M_PI;
-	else if (theta < 0.0f) theta += M_PI;
-
-	if (phi > PiPi) phi -= PiPi;
-	else if (phi < 0.0f) phi += PiPi;
-
+	
 	ConvertSphericalToUnitVector(r, theta, phi, outdir);
 }
 

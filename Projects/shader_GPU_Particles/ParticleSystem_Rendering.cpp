@@ -66,10 +66,10 @@ void ParticleSystem::RenderParticles(int type, const bool pointSmooth)
 		glBindTexture(GL_TEXTURE_1D, mSizeTextureId);
 		glActiveTexture(GL_TEXTURE0);
 	}
-			
+	
 	if (mColorTextureId > 0 && mRenderData.gUseColorCurve > 0)
 	{
-		glActiveTexture(GL_TEXTURE2);
+		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_1D, mColorTextureId);
 		glActiveTexture(GL_TEXTURE0);
 	}
@@ -115,7 +115,7 @@ void ParticleSystem::RenderParticles(int type, const bool pointSmooth)
 			
 	if (mColorTextureId > 0 && mRenderData.gUseColorCurve > 0)
 	{
-		glActiveTexture(GL_TEXTURE2);
+		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_1D, 0);
 		glActiveTexture(GL_TEXTURE0);
 	}
@@ -130,15 +130,22 @@ void ParticleSystem::RenderPoints()
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mParticleBuffer[mCurrTFB]);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)0);  // position
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)32);  // color
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)16);  // velocity
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)48);  // rotation
+
 
 	glDrawTransformFeedback(GL_POINTS, mTransformFeedback[mCurrTFB]);
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+	glDisableVertexAttribArray(3);
 
 	mShader->UnBindRenderPoints();
 

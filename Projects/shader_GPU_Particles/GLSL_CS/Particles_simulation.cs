@@ -135,9 +135,10 @@ const vec2 randN1 = vec2(0.14, -0.07);
 const vec2 randN2 = vec2(0.77, 1.01);
 const vec2 randN3 = vec2(-0.38, 0.15);
 
-const float PI = 3.1415926535897932384626433832795;
-const float PI_2 = 1.57079632679489661923;
-const float PI_4 = 0.785398163397448309616;
+const float PiPi = 6.2831853;
+const float PI = 3.14159265;
+const float PI_2 = 1.57079632;
+const float PI_4 = 0.785398163;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HELPER FUNCTIONS
@@ -280,64 +281,48 @@ float snoise(vec3 v)
 
 //////////////////////////////////////////////////////////////////////
 //
-//
-void ConvertUnitVectorToSpherical(const vec4 v, out float r, out float theta, out float phi)
+// out float r, out float theta, out float phi
+
+void ConvertUnitVectorToSpherical(const vec4 v, out vec3 sv)
 {
-	r = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-	theta = acos( v.z / r );
-	phi = atan( v.y / v.x );
+	sv.x = sqrt(v.x*v.x + v.y*v.y + v.z*v.z); // r
+	sv.y = atan( v.y,  v.x ); // theta
+	sv.z = atan( sqrt(v.x*v.x+v.y*v.y), v.z ); // phi
 }
 
-void ConvertSphericalToUnitVector(const float r, const float theta, const float phi, out vec4 v)
+// const float r, const float theta, const float phi
+void ConvertSphericalToUnitVector(vec3 sv, out vec4 v)
 {
-	v.x = r * sin(theta) * cos(phi);
-	v.y = r * sin(theta) * sin(phi);
-	v.z = r * cos(theta);
+	v.x = sv.x * cos(sv.y) * sin(sv.z);
+	v.y = sv.x * sin(sv.y) * sin(sv.z);
+	v.z = sv.x * cos(sv.z);
+	v.w = 1.0;
 }
 
-void GetRandomDir(in vec4 inDir, in vec2 dirRnd, out vec4 dir)                                                   
+void GetRandomDir(in vec4 inDir, in vec2 dirRnd, out vec4 dir)                                   
 {
-	//vec4 dirRnd = mEvaluateData.gDirRandom;
+	//float r, theta, phi;
+	vec3 sv;
 
-	float r, theta, phi;
+	ConvertUnitVectorToSpherical(inDir, sv);
 
-	ConvertUnitVectorToSpherical(inDir, r, theta, phi);
+	sv.y += dirRnd.x * PI;
+	sv.z += dirRnd.y * PiPi;
+			
+	ConvertSphericalToUnitVector(sv, dir);
+} 
 
-	const float PiPi = 2.0 * PI;
+void GetRandomDir(in vec3 inDir, in vec2 dirRnd, out vec3 dir)                                        {
+	//float r, theta, phi;
+	vec3 sv;
 
-	theta += dirRnd.x * PI - PI_2;
-	phi += dirRnd.y * PiPi - PI;
+	ConvertUnitVectorToSpherical(vec4(inDir, 1.0), sv);
 
-	if (theta > PI_2) theta -= PI;
-	else if (theta < PI_2) theta += PI;
-
-	if (phi > PI) phi -= PiPi;
-	else if (phi < PI) phi += PiPi;
-
-	ConvertSphericalToUnitVector(r, theta, phi, dir);
-}  
-
-void GetRandomDir(in vec3 inDir, in vec2 dirRnd, out vec3 dir)                                                   
-{
-	//vec4 dirRnd = mEvaluateData.gDirRandom;
-
-	float r, theta, phi;
-
-	ConvertUnitVectorToSpherical(vec4(inDir, 1.0), r, theta, phi);
-
-	const float PiPi = 2.0 * PI;
-
-	theta += dirRnd.x * PI - PI_2;
-	phi += dirRnd.y * PiPi - PI;
-
-	if (theta > PI_2) theta -= PI;
-	else if (theta < PI_2) theta += PI;
-
-	if (phi > PI) phi -= PiPi;
-	else if (phi < PI) phi += PiPi;
-
+	sv.y += dirRnd.x * PI;
+	sv.z += dirRnd.y * PiPi;
+	
 	vec4 result;
-	ConvertSphericalToUnitVector(r, theta, phi, result);
+	ConvertSphericalToUnitVector(sv, result);
 	dir = result.xyz;
 }  
 

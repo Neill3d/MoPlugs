@@ -86,7 +86,7 @@ struct TCollision
 	vec4			position;			// use w as collision type
 	vec4			velocity;
 	
-	vec4			terrainScale;
+	vec4			terrainScale;		// .w - softness
 	vec4			terrainSize;		// texture dimentions
 	
 	float 			radius;
@@ -338,7 +338,7 @@ void SphereCollide(TCollision data, inout vec3 x, inout vec3 vel, inout vec3 for
 	float dist = length(delta);
 	if (dist < data.radius) {
 //      x = center + delta*(r / dist);    
-	  vel -= (delta / dist) * data.friction;
+	  vel -= (1.0 - data.terrainScale.w) * (delta / dist) * data.friction;
 	  vel += (1.0 - data.terrainScale.w) * data.velocity.xyz;
 	}
 }
@@ -352,7 +352,7 @@ void SphereConstraint(TCollision data, inout vec3 x)
 	float dist = length(delta);
 	if (dist < data.radius) {
 		vec4 transformed = inverse(data.tm) * vec4(delta*(data.radius / dist), 1.0);
-		x = transformed.xyz;
+		x = mix(x, transformed.xyz, data.terrainScale.w);
 		//x = data.position.xyz + delta*(data.radius / dist);
 	}
 }
@@ -750,7 +750,6 @@ void main()
 			ApplyConstraint(gTime * 0.01, rot.xyz, force, vel.xyz, pos.xyz);
 		}
 		
-		/*
 		if (USE_COLLISIONS)
 		{
 			for(int i=0; i<gNumCollisions; ++i)
@@ -767,7 +766,7 @@ void main()
 				}
 			}
 		}
-		*/
+		
 		if (USE_FLOOR > 0.0) 
 			FloorConstraint(pos.xyz, FLOOR_LEVEL);
 	}	

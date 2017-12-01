@@ -22,7 +22,7 @@
 #define FORCEWIND__CLASSSTR		"ForceWind"
 #define FORCEWIND__DESCSTR	    "Force Wind"
 
-/**	Custom marker template.
+/**	Force Wind for a GPU Particles.
 */
 class ForceWind : public FBModelMarker
 {

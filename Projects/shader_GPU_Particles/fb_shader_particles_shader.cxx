@@ -1204,14 +1204,14 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 
 	FBColorAndAlpha color = Color;
 	renderData.gColor = vec4( (float)color[0], (float)color[1], (float)color[2], (float)color[3] );
-	renderData.gUseColorCurve = (UseColorCurve) ? 1 : 0;
+	renderData.gUseColorCurve = (UseColorCurve) ? 1.0f : 0.0f;
 	renderData.gTransparencyFactor = (float) (0.01 * TransparencyFactor);
 
 	renderData.gBillboardSize = (float) Size;
 	renderData.gMinPointScale = (float) (0.01 * MinPointScale);
 	renderData.gMaxPointScale = (float) (0.01 * MaxPointScale);
 	renderData.gPointScaleDistance = (float) (PointScaleDistance);
-	renderData.gUseSizeCurve = (UseSizeCurve) ? 1 : 0;
+	renderData.gUseSizeCurve = (UseSizeCurve) ? 1.0f : 0.0f;
 
 	pParticles->UploadRenderDataOnGPU();
 
@@ -1647,6 +1647,7 @@ void GPUshader_Particles::UpdateEmitterGeometryBufferOnGPU(FBModel *pModel, Part
 	FBModelVertexData *pVertexData = pModel->ModelVertexData;
 
 	GLuint textureId = 0;
+	FBMatrix	textureTM;
 
 	if (pModel->Materials.GetCount() > 0 )
 	{
@@ -1661,6 +1662,7 @@ void GPUshader_Particles::UpdateEmitterGeometryBufferOnGPU(FBModel *pModel, Part
 				pTexture->OGLInit();
 				textureId = pTexture->TextureOGLId;
 			}
+			textureTM = pTexture->GetMatrix();
 		}
 	}
 
@@ -1678,7 +1680,7 @@ void GPUshader_Particles::UpdateEmitterGeometryBufferOnGPU(FBModel *pModel, Part
 		}
 	}
 
-	pParticles->EmitterSurfaceUpdateOnGPU( pVertexData, textureId, maskId );
+	pParticles->EmitterSurfaceUpdateOnGPU( pVertexData, textureId, textureTM, maskId );
 }
 
 void GPUshader_Particles::UpdateConnectedTerrain()

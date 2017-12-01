@@ -829,7 +829,7 @@ bool ParticleSystem::EmitterSurfaceUpdateOnCPU(const int vertexCount, float *pos
 }
 
 // DONE: run a computer shader
-bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLuint textureId, const GLuint maskId)
+bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLuint textureId, const double *tm, const GLuint maskId)
 {	
 	//
 	// 
@@ -915,6 +915,10 @@ bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLu
 	mEvaluateData.gPositionCount = numberOfTriangles;
 	mEvaluateData.gUseEmitterTexture = (textureId > 0);
 	mEvaluateData.gUseEmitterMask = (maskId > 0);
+
+	for (int i=0; i<16; ++i)
+		mEvaluateData.gTextureTM.mat_array[i] = (float) tm[i];
+
 	mSurfaceTextureId = textureId;
 	mSurfaceMaskId = maskId;
 

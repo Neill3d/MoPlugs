@@ -93,6 +93,7 @@ const char * FBPropertyBaseEnum<FBParticleShadeMode>::mStrings[] = {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //! GPU Particles shader.
+
 class ORSDK_DLL GPUshader_Particles : public FBShader
 {
 	//--- FiLMBOX declaration.

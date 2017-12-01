@@ -132,6 +132,7 @@ enum ECommongProperties
 
 /////////////////////////////////////////////////////////////////////////////////
 //! Particles Shader layout.
+
 class GPUshader_ParticlesLayout : public FBShaderLayout
 {
 	//--- FiLMBOX declaration.

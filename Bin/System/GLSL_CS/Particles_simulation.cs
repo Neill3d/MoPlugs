@@ -86,7 +86,7 @@ struct TCollision
 	vec4			position;			// use w as collision type
 	vec4			velocity;
 	
-	vec4			terrainScale;
+	vec4			terrainScale;		// .w - softness
 	vec4			terrainSize;		// texture dimentions
 	
 	float 			radius;
@@ -332,28 +332,35 @@ void GetRandomDir(in vec3 inDir, in vec2 dirRnd, out vec3 dir)                  
 
 void SphereCollide(TCollision data, inout vec3 x, inout vec3 vel, inout vec3 force)
 {
-	vec4 untransformed = data.tm * vec4(x, 1.0);
+	//vec4 untransformed = data.tm * vec4(x, 1.0);
 	
-	vec3 delta = untransformed.xyz; // - data.position.xyz;
+	//vec3 delta = untransformed.xyz; // - data.position.xyz;
+	vec3 delta = x - data.position.xyz;
 	float dist = length(delta);
 	if (dist < data.radius) {
-//      x = center + delta*(r / dist);    
-	  vel -= (delta / dist) * data.friction;
-	  vel += (1.0 - data.terrainScale.w) * data.velocity.xyz;
+//      x = center + delta*(r / dist); 
+		vec3 newvel = vel * (dist / data.radius) * data.friction; 
+		vel = mix(newvel, vel, data.terrainScale.w);
+		//vel *= (dist / data.radius);   
+		//force += normalize(delta);
+	  //vel -= (1.0 - data.terrainScale.w) * (delta / dist) * data.friction;
+		vel += (1.0 - data.terrainScale.w) * data.velocity.xyz;
 	}
 }
 
 // constrain particle to be outside volume of a sphere
 void SphereConstraint(TCollision data, inout vec3 x)
 {
-	vec4 untransformed = data.tm * vec4(x, 1.0);
+	//vec4 untransformed = data.tm * vec4(x, 1.0);
 	
-	vec3 delta = untransformed.xyz; // - data.position.xyz;
+	//vec3 delta = untransformed.xyz; // - data.position.xyz;
+	vec3 delta = x - data.position.xyz;
 	float dist = length(delta);
 	if (dist < data.radius) {
-		vec4 transformed = inverse(data.tm) * vec4(delta*(data.radius / dist), 1.0);
-		x = transformed.xyz;
-		//x = data.position.xyz + delta*(data.radius / dist);
+		//vec4 transformed = inverse(data.tm) * vec4(delta*(data.radius / dist), 1.0);
+		//x = mix(x, transformed.xyz, data.terrainScale.w);
+		vec3 newx = data.position.xyz + normalize(delta)*data.radius;
+		x = mix(newx, x, data.terrainScale.w);
 	}
 }
 
@@ -750,7 +757,6 @@ void main()
 			ApplyConstraint(gTime * 0.01, rot.xyz, force, vel.xyz, pos.xyz);
 		}
 		
-		/*
 		if (USE_COLLISIONS)
 		{
 			for(int i=0; i<gNumCollisions; ++i)
@@ -767,7 +773,7 @@ void main()
 				}
 			}
 		}
-		*/
+		
 		if (USE_FLOOR > 0.0) 
 			FloorConstraint(pos.xyz, FLOOR_LEVEL);
 	}	

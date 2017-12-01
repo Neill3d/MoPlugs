@@ -20,7 +20,8 @@ ConstantBuffer global evaluateBlock
 	uniform mat4					gTM;			// emitter transform
 	uniform mat4					gRotationTM;	// only rotation
 	uniform mat4					gNormalTM;
-	
+	uniform	mat4					gTextureTM;		// transform matrix for a texture when inherit colors from emitter surface
+
 	uniform vec4					gDirection;		// vec3 - direction, 4th - use normals as dir or not
 	
 	uniform float					gDirSpreadHor;	// spread direction vector in horizontal plane
@@ -75,8 +76,8 @@ ConstantBuffer global renderBlock
 	uniform		vec4			gColor;
 	
 	uniform 	float			gBillboardSize;
-	uniform		int				gUseSizeCurve;
-	uniform		int				gUseColorCurve;
+	uniform		float			gUseSizeCurve;
+	uniform		float			gUseColorCurve;
 	uniform		float			gTransparencyFactor;
 	
 	uniform		float			gMinPointScale;
@@ -409,7 +410,8 @@ namespace Evaluate
 			// color
 			if (gUseEmitterTexture > 0)
 			{
-				color = texture(gEmitTexture, uv);
+				vec4 texcoords = gTextureTM * vec4(uv.x, uv.y, 0.0, 1.0);
+				color = texture(gEmitTexture, texcoords.st);
 			}
 			else
 			{
@@ -496,7 +498,8 @@ namespace Evaluate
 			// color
 			if (gUseEmitterTexture > 0)
 			{
-				color = texture(gEmitTexture, uv);
+				vec4 texcoords = gTextureTM * vec4(uv.x, uv.y, 0.0, 1.0);
+				color = texture(gEmitTexture, texcoords.st);
 			}
 			else
 			{
@@ -692,12 +695,11 @@ namespace Render
 	{
 		
 		layout (location = 0) in vec4 Position;                                        
-		layout (location = 1) in vec4 Color;
-		layout (location = 2) in vec4 Velocity; // .w - Total Lifetime
+		layout (location = 1) in vec4 Velocity; // .w - Total Lifetime
+		layout (location = 2) in vec4 Color;
 		layout (location = 3) in vec4 Rotation; // .w - Age
 		
 		out float 	life;
-		out float 	psize;
 		out vec4	pcolor;
 		out vec3	wv;
 		
@@ -709,7 +711,7 @@ namespace Render
 		void main()                                                                         
 		{           
 			float size = Position.w; // gBillboardSize;
-			psize = size;
+		
 			// Calculate point scale based on distance from the viewer
 			// to compensate for the fact that gl_PointSize is the point
 			// size in rasterized points / pixels.
@@ -724,7 +726,7 @@ namespace Render
 			gl_PointSize = size * pointScale;
 
 			// float normLife = Age / lifetime;
-			life = Rotation.w / Velocity.w;
+			life = clamp(Rotation.w / (Velocity.w+0.001), 0.0, 1.0);
 
 			pcolor = Color;
 			
@@ -741,7 +743,6 @@ namespace Render
 	{
 		//uniform sampler2D gColorMap;                                                        
 		in float life;
-		in float psize;
 		in vec4 	pcolor;
 		in vec3		wv;
 		//out vec4 FragColor;                                                                 
@@ -755,18 +756,16 @@ namespace Render
 
 		void main()                                                                         
 		{       
-			if (life >= 0.7 || life <= 0.0) 
-				discard;
-			if (psize < 0.0)
-				discard;
+			//if (life >= 0.99 || life == 0.0) discard;
+
 			// color should be taken from the particles (can be part of simulation)
 			vec4 color = pcolor;
 			
-			if (gUseColorCurve == 1)
+			if (gUseColorCurve > 0.0)
 			{
 				color = texture(ColorCurve, life);
 			}
-
+			
 			color.w *= gTransparencyFactor;
 			outColor = color;
 			

@@ -33,8 +33,6 @@ Particle System
 
  - render self-shadowing for particles (like cloud rendering)
 
- - add texture matrix support for the emitter texture
-
  - shadows slices
  - depth sorting for correct transparency output
  - self collisions
@@ -62,6 +60,11 @@ Particle System
   + add support of transparency modes (old task - sort particles and draw after everything)
 
 LOG
+
+01.12.2017
+
+* fixed shimmering when using color curve
++ added texture matrix support for the emitter texture
 
 30.11.2017
 

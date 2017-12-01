@@ -22,7 +22,7 @@
 #define FORCEMOTOR__CLASSSTR	"ForceMotor"
 #define FORCEMOTOR__DESCSTR	    "Force Motor"
 
-/**	Custom marker template.
+/**	Force Motor for a GPU Particles.
 */
 class ForceMotor : public FBModelMarker
 {

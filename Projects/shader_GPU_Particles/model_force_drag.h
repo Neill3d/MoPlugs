@@ -22,7 +22,7 @@
 #define FORCEDRAG__CLASSSTR		"ForceDrag"
 #define FORCEDRAG__DESCSTR	    "Force Drag"
 
-/**	Custom marker template.
+/**	Force Drag for a GPU Particles.
 */
 class ForceDrag : public FBModelMarker
 {

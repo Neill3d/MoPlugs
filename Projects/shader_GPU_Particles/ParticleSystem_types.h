@@ -63,6 +63,7 @@ struct evaluateBlock
 	mat4					gTM;			// emitter transform
 	mat4					gRotationTM;	// only rotation
 	mat4					gNormalTM;
+	mat4					gTextureTM;
 
 	vec4					gDirection;		// vec3 - direction, 4th - use normals as dir or not
 
@@ -116,8 +117,8 @@ struct	renderBlock
 	vec4		gColor;
 
 	float		gBillboardSize;
-	int			gUseSizeCurve;
-	int			gUseColorCurve;
+	float		gUseSizeCurve;
+	float		gUseColorCurve;
 	float		gTransparencyFactor;
 
 	float		gMinPointScale;

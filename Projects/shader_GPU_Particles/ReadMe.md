@@ -21,6 +21,9 @@ Particle System
 
  TODO
  
+ - make sphere collision scalable (to be able to fit a character body)
+ - cleanup motor force (vortex)
+
  - GetEmitDir - function to get a spread emit direction is very slow.
 	Better to implement something like 4 vectors wind, interpolate inside pre-computed cone
 

@@ -1363,7 +1363,7 @@ void CModelsInspector::UpdateNormalMatrices( const double  *modelview )
 		}
 
 		FBMatrix modelMatrix;
-		(*modelIter)->GetMatrix(modelMatrix);
+		(*modelIter)->GetMatrix(modelMatrix, kModelTransformation_Geometry);
 
 		for (int i=0; i<16; ++i)
 			iter->transform.mat_array[i] = (float) modelMatrix[i];

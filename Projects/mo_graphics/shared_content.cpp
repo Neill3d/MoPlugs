@@ -764,7 +764,7 @@ void CGPUFBScene::UploadModelInfo(FBModel *pModel, bool uploadAndBind)
 	ModelGLSL		modeldata;
 
 	FBMatrix m;
-	pModel->GetMatrix(m);
+	pModel->GetMatrix(m, kModelTransformation_Geometry);
 
 	for (int i=0; i<16; ++i)
 	{

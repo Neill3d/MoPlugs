@@ -325,6 +325,7 @@ public:
 	static void ResetAllAction(HIObject pObject, bool value);
 	static void SetColorCurve(HIObject pObject, bool value);
 	static void SetSizeCurve(HIObject pObject, bool value);
+	static int GetDisplayedCount(HIObject pObject);
 
 	void DoReloadShader();
 	void DoReset();
@@ -350,6 +351,7 @@ protected:
 	bool		mLastResetAllState;
 
 	unsigned int		mTotalCycles;		// total simulation cycles
+	unsigned int		mDisplayedCount;
 
 	//bool					mIsFirst;
 	FBTime					mLastTimelineTime;

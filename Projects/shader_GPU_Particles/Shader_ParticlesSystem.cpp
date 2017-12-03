@@ -198,6 +198,7 @@ bool ParticleShaderFX::Initialize()
 		if (0 == programCompute)
 			throw std::exception( "failed to load particles program compute" );
 
+		locNumParticles = glGetUniformLocation(programCompute, "gNumParticles" );
 		locComputeDeltaTime = glGetUniformLocation(programCompute, "DeltaTimeSecs");
 		locComputeTime = glGetUniformLocation(programCompute, "gTime");
 
@@ -217,6 +218,7 @@ bool ParticleShaderFX::Initialize()
 		if ( 0 == programSelfCollisions )
 			throw std::exception( "failed to load particles self collisions shader" );
 	
+		locSelfCollisionsNumParticles = glGetUniformLocation(programSelfCollisions, "gNumParticles");
 		locSelfCollisionsDeltaTime = glGetUniformLocation(programSelfCollisions, "DeltaTimeSecs");
 	
 		// integrate shader
@@ -225,6 +227,7 @@ bool ParticleShaderFX::Initialize()
 		if ( 0 == programIntegrate )
 			throw std::exception( "failed to load particles integrate shader" );
 		
+		locIntegrateNumParticles = glGetUniformLocation(programIntegrate, "gNumParticles");
 		locIntegrateDeltaTime = glGetUniformLocation(programIntegrate, "DeltaTimeSecs");
 		locIntegrateNumCollisions = glGetUniformLocation(programIntegrate, "gNumCollisions");
 		
@@ -611,7 +614,8 @@ void ParticleShaderFX::DispatchSimulation(const float dt, const float gTime, con
 	{
 		glUniform1f( locComputeDeltaTime, dt );
 		glUniform1f( locComputeTime, gTime );
-		
+		glUniform1i( locNumParticles, size );
+
 		//
 		glDispatchCompute( (size / group_x) + 1, group_y, group_z );
 	}
@@ -638,7 +642,8 @@ void ParticleShaderFX::DispatchSelfCollisions(const float dt, const int size, co
 	if (programSelfCollisions > 0)
 	{
 		glUniform1f( locSelfCollisionsDeltaTime, dt );
-		
+		glUniform1i( locSelfCollisionsNumParticles, size );
+
 		//
 		glDispatchCompute( (size / group_x) + 1, group_y, group_z );
 	}
@@ -665,7 +670,8 @@ void ParticleShaderFX::DispatchIntegrate(const float dt, const int size, const i
 	if (programIntegrate > 0)
 	{
 		glUniform1f( locIntegrateDeltaTime, dt );
-		
+		glUniform1i( locIntegrateNumParticles, size );
+
 		//
 		glDispatchCompute( (size / group_x) + 1, group_y, group_z );
 	}

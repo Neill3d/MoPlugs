@@ -221,6 +221,7 @@ protected:
 	//GLuint				shaderCompute;
 	GLuint				programCompute;
 
+	GLint				locNumParticles;
 	GLint				locComputeDeltaTime;
 	GLint				locComputeTime;
 
@@ -239,6 +240,7 @@ protected:
 	GLuint				programSelfCollisions;
 
 	GLint				locSelfCollisionsDeltaTime;
+	GLint				locSelfCollisionsNumParticles;
 
 	//
 	// euler integration compute shader
@@ -246,6 +248,7 @@ protected:
 
 	GLint				locIntegrateDeltaTime;
 	GLint				locIntegrateNumCollisions;
+	GLint				locIntegrateNumParticles;
 
 	// terrain uniforms
 

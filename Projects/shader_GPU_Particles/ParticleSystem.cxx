@@ -34,6 +34,8 @@ using namespace GPUParticles;
 #define		USE_COLLISIONS		mEvaluateData.gFlags.y
 #define		EMITTER_TYPE		mEvaluateData.gFlags.z
 
+#define		COMPUTE_SHADER_GROUP_SIZE	1024
+
 #define RANDOM_TEXTURE_SIZE		1024
 
 #define INVALID_UNIFORM_LOCATION	-1
@@ -698,21 +700,21 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 			}
 
 			mShader->BindSimulation(false);
-			mShader->DispatchSimulation( (float)timeStep, (float)globalTime, mInstanceCount, 64, 1, 1);
+			mShader->DispatchSimulation( (float)timeStep, (float)globalTime, mInstanceCount, COMPUTE_SHADER_GROUP_SIZE, 1, 1);
 			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
 			//mShader->UnBindSimulation();
 
 			if (selfCollisions)
 			{
 				mShader->BindSelfCollisions();
-				mShader->DispatchSelfCollisions( (float) timeStep, mInstanceCount, 64, 1, 1 );
+				mShader->DispatchSelfCollisions( (float) timeStep, mInstanceCount, COMPUTE_SHADER_GROUP_SIZE, 1, 1 );
 				//mShader->UnBindSelfCollisions();
 
 				glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
 			}
 
 			mShader->BindIntegrate();
-			mShader->DispatchIntegrate( (float) timeStep, mInstanceCount, 64, 1, 1 );
+			mShader->DispatchIntegrate( (float) timeStep, mInstanceCount, COMPUTE_SHADER_GROUP_SIZE, 1, 1 );
 			//mShader->UnBindIntegrate();
 
 			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
@@ -750,7 +752,7 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 			}
 			mShader->BindSimulation(true);
 
-			mShader->DispatchSimulation( (float)timeStep, (float)globalTime, mInstanceCount, 64, 1, 1);
+			mShader->DispatchSimulation( (float)timeStep, (float)globalTime, mInstanceCount, COMPUTE_SHADER_GROUP_SIZE, 1, 1);
 			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
 		
 			mShader->UnBindSimulation();

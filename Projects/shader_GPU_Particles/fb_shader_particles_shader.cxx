@@ -106,6 +106,21 @@ void GPUshader_Particles::SetSizeCurve(HIObject pObject, bool value)
 	if (value && p)	p->DoSizeCurve();
 }
 
+int GPUshader_Particles::GetDisplayedCount(HIObject pObject)
+{
+	GPUshader_Particles *p = FBCast<GPUshader_Particles>(pObject);
+	if (nullptr != p)
+	{
+		int count = 0;
+		for (auto iter=begin(p->mParticleMap); iter!=end(p->mParticleMap); ++iter)
+		{
+			ParticleSystem *pParticles = iter->second;
+			count += pParticles->GetDisplayedCount();
+		}
+		return count;
+	}
+	return 0;
+}
 
 /************************************************
  *	Specific Constructor. Construct custom shader from an FBMaterial object.
@@ -244,6 +259,7 @@ bool GPUshader_Particles::FBCreate()
     mRenderFrameId = 0;
 	//mLastFrameTime = 0.0;
 	mTotalCycles = 0;
+	mDisplayedCount = 0;
 	mLastTimelineTime = FBTime::Infinity;
 	mLastRenderFrameId = -1;
 	//mIsFirst = true;
@@ -265,7 +281,7 @@ bool GPUshader_Particles::FBCreate()
 
 	FBPropertyPublish( this, About, "About", nullptr, AboutAction );
 
-	FBPropertyPublish( this, DisplayedCount, "Displayed Count", nullptr, nullptr );
+	FBPropertyPublish( this, DisplayedCount, "Displayed Count", GetDisplayedCount, nullptr );
 	FBPropertyPublish( this, MaximumParticles, "Maximum Particles", nullptr, nullptr );
 	
 	FBPropertyPublish( this, UseRate, "Use Rate", nullptr, nullptr );
@@ -781,7 +797,7 @@ void GPUshader_Particles::ShaderBeginRender( FBRenderOptions* pRenderOptions, FB
 
 	firstBeginRender = false;
 	shaderBegin = true;
-
+	
 	//bool pregeneratedEmit = UsePreGeneratedParticles;
 
 	//
@@ -1070,7 +1086,7 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 		// run simulation
 		unsigned int Cycles = 0;
 		Cycles = pParticles->SimulateParticles( true, emitType, timeStep, deltaTime, deltaTimeLimit, SubSteps, SelfCollisions );
-
+		//mDisplayedCount += pParticles->GetDisplayedCount();
 		mTotalCycles += Cycles;
 
 		// DONE: make it unique per model !!

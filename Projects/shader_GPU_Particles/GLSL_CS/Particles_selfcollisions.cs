@@ -15,8 +15,9 @@
 
 #version 430
 
-layout (local_size_x = 64, local_size_y = 1) in;
+layout (local_size_x = 1024, local_size_y = 1) in;
 
+uniform int		gNumParticles;
 uniform float	DeltaTimeSecs;
 
 #define		ACCELERATION_LIMIT		5000.0
@@ -62,8 +63,8 @@ void main()
 	uint flattened_id = get_invocation();
 	
 	// ?! skip unused part of the array
-	//if (flattened_id >= gNumParticles)
-	//	return;
+	if (flattened_id >= gNumParticles)
+		return;
 	
 	// Read position and velocity
 	vec4 pos = particleBuffer.particles[flattened_id].Pos;

@@ -199,6 +199,10 @@ public:
 		return mTotalCycles;
 	}
 
+	const unsigned int	GetDisplayedCount() const {
+		return mInstanceCount;
+	}
+
 	// textures for size and color lookup ( 0 - to disable )
 	void	SetRenderSizeAndColorCurves( GLuint sizeTextureId, GLuint colorTextureId );
     void RenderParticles(int type, const bool pointSmooth);

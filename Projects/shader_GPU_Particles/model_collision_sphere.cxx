@@ -154,15 +154,19 @@ bool CollisionSphere::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStor
 
 void CollisionSphere::FillCollisionData( TCollision	&data )
 {
-	FBVector3d T, vel;
+	FBVector3d T, vel, Scl;
 	GetVector(T);
+	GetVector(Scl, kModelScaling, false);
 	vel = VectorSubtract( T, LastTranslation );
 	LastTranslation = T;
 
 	int iEnabled = (Enabled) ? PARTICLE_COLLISION_SPHERE_TYPE : PARTICLE_COLLISION_DISABLED;
+	double maxscale = Scl[0];
+	if (Scl[1] > maxscale) maxscale = Scl[1];
+	if (Scl[2] > maxscale) maxscale = Scl[2];
 
 	CollisionExchange::SetPosition( data, iEnabled, vec3( (float)T[0], (float)T[1], (float)T[2] ) );
-	CollisionExchange::SetVelocity(data, vec4( (float)vel[0], (float)vel[1], (float)vel[2], 1.0f ) );
+	CollisionExchange::SetVelocity(data, vec4( (float)vel[0], (float)vel[1], (float)vel[2], maxscale ) );
 	CollisionExchange::SetRadius(data, Size );
 	CollisionExchange::SetFriction(data, Friction);
 
@@ -171,8 +175,9 @@ void CollisionSphere::FillCollisionData( TCollision	&data )
 	data.terrainScale.w = 0.01f * (float) dsoftness;
 
 	//
-	FBMatrix invTM;
+	FBMatrix tm, invTM;
+	GetMatrix(tm);
 	GetMatrix(invTM, kModelInverse_Transformation);
 
-	CollisionExchange::SetInvMatrix(data, invTM);
+	CollisionExchange::SetMatrix(data, tm, invTM);
 }

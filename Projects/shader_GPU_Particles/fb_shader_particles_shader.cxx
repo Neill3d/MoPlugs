@@ -1782,7 +1782,7 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticleSystem *
 	double dConstraintMagn;
 	ConstraintMagnitude.GetData( &dConstraintMagn, sizeof(double) );
 
-	data.gDynamic.z = 0.01f * dConstraintMagn;
+	data.gDynamic.z = 0.01f * (float) dConstraintMagn;
 
 	data.gShellLifetime = (float) LifeTime;
 	data.gShellLifetimeVariation = (float) LifeTimeVariation * 0.01f;

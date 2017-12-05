@@ -43,16 +43,18 @@ struct TParticle
 struct TCollision
 {
 	vec4			position;			// use w as collision type
-	vec4			velocity;
+	vec4			velocity;			// .w - maxscale dimention
 	
-	//vec4			terrainOffset;	// terrain offset stores in position
-	vec4			terrainScale;
+	vec4			terrainScale;		// .w - softness
 	vec4			terrainSize;		// texture dimentions
 	
 	float 			radius;
 	float			friction;
 	
 	uvec2			terrainAddress;
+	
+	mat4			tm;
+	mat4			invtm;
 };
 
 layout (std430, binding = 0) buffer ParticleBuffer

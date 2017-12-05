@@ -104,6 +104,7 @@ ParticleShaderFX::ParticleShaderFX()
 	//shaderCompute = 0;
 	programCompute = 0;
 
+	locEmitterTM = 0;
 	locComputeDynamic = 0;
 	locComputeFloor = 0;
 	locComputeGravity = 0;
@@ -202,6 +203,7 @@ bool ParticleShaderFX::Initialize()
 		locComputeDeltaTime = glGetUniformLocation(programCompute, "DeltaTimeSecs");
 		locComputeTime = glGetUniformLocation(programCompute, "gTime");
 
+		locEmitterTM = glGetUniformLocation(programCompute, "gTM");
 		locComputeDynamic = glGetUniformLocation(programCompute, "gDynamic");
 		locComputeTurbulence = glGetUniformLocation(programCompute, "gTurbulence");
 		locComputeGravity = glGetUniformLocation(programCompute, "gGravity");
@@ -508,6 +510,7 @@ void ParticleShaderFX::UploadEvaluateDataBlock(const evaluateBlock &_evaluateBlo
 	{
 		glUseProgram( programCompute );
 
+		glUniformMatrix4fv( locEmitterTM, 1, GL_FALSE, _evaluateBlock.gTM.mat_array );
 		glUniform4f( locComputeDynamic, _evaluateBlock.gDynamic.x, _evaluateBlock.gDynamic.y, _evaluateBlock.gDynamic.z, _evaluateBlock.gDynamic.w );
 		glUniform4f( locComputeTurbulence, _evaluateBlock.gTurbulence.x, _evaluateBlock.gTurbulence.y, _evaluateBlock.gTurbulence.z, _evaluateBlock.gTurbulence.w );
 		glUniform4f( locComputeGravity, _evaluateBlock.gGravity.x, _evaluateBlock.gGravity.y, _evaluateBlock.gGravity.z, _evaluateBlock.gGravity.w );

@@ -21,6 +21,8 @@ uniform	int		gNumParticles;
 uniform float	DeltaTimeSecs;
 uniform float	gTime;
 
+uniform mat4	gTM;	// emitter transform
+
 uniform vec4	gDynamic;
 uniform vec4	gTurbulence;
 uniform vec4	gGravity;			// in w - use gravity force
@@ -84,7 +86,7 @@ struct TParticle
 struct TCollision
 {
 	vec4			position;			// use w as collision type
-	vec4			velocity;
+	vec4			velocity;			// .w - maxscale dimention
 	
 	vec4			terrainScale;		// .w - softness
 	vec4			terrainSize;		// texture dimentions
@@ -95,6 +97,7 @@ struct TCollision
 	uvec2			terrainAddress;
 	
 	mat4			tm;
+	mat4			invtm;
 };
 
 struct TForce
@@ -330,38 +333,38 @@ void GetRandomDir(in vec3 inDir, in vec2 dirRnd, out vec3 dir)                  
 // CONSTRAINT AND COLLIDE
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SphereCollide(TCollision data, inout vec3 x, inout vec3 vel, inout vec3 force)
+void SphereCollide(TCollision data, in float size, in vec3 x, inout vec3 vel, inout float inuse)
 {
-	//vec4 untransformed = data.tm * vec4(x, 1.0);
-	
-	//vec3 delta = untransformed.xyz; // - data.position.xyz;
 	vec3 delta = x - data.position.xyz;
 	float dist = length(delta);
-	if (dist < data.radius) {
-//      x = center + delta*(r / dist); 
-		vec3 newvel = vel * (dist / data.radius) * data.friction; 
-		vel = mix(newvel, vel, data.terrainScale.w);
-		//vel *= (dist / data.radius);   
-		//force += normalize(delta);
-	  //vel -= (1.0 - data.terrainScale.w) * (delta / dist) * data.friction;
-		vel += (1.0 - data.terrainScale.w) * data.velocity.xyz;
+	float radius = data.radius * data.velocity.w; // + size;
+
+	if (dist < radius) {
+		vec4 untransformed = data.invtm * vec4(x, 1.0);
+		dist = length(untransformed.xyz);
+		radius = data.radius; // + size / data.velocity.w;
+
+		if (dist < radius)
+		{
+			vec3 newvel = vel * clamp(dist / radius, 0.0, 1.0) * data.friction;
+			vel = mix(newvel, vel, data.terrainScale.w);
+			vel += (1.0 - data.terrainScale.w) * data.velocity.xyz;
+
+			float inuse = 1.0;
+		}
 	}
 }
 
 // constrain particle to be outside volume of a sphere
-void SphereConstraint(TCollision data, inout vec3 x)
+void SphereConstraint(TCollision data, in float size, inout vec3 x)
 {
-	//vec4 untransformed = data.tm * vec4(x, 1.0);
-	
-	//vec3 delta = untransformed.xyz; // - data.position.xyz;
-	vec3 delta = x - data.position.xyz;
-	float dist = length(delta);
-	if (dist < data.radius) {
-		//vec4 transformed = inverse(data.tm) * vec4(delta*(data.radius / dist), 1.0);
-		//x = mix(x, transformed.xyz, data.terrainScale.w);
-		vec3 newx = data.position.xyz + normalize(delta)*data.radius;
-		x = mix(newx, x, data.terrainScale.w);
-	}
+	vec4 untransformed = data.invtm * vec4(x, 1.0);
+	float radius = data.radius; // + size / data.velocity.w;
+
+	vec3 newx = data.position.xyz + radius * normalize(untransformed.xyz);
+	untransformed = data.tm * vec4(newx, 1.0);
+
+	x = mix(untransformed.xyz, x, data.terrainScale.w);
 }
 
 // constrain particle to heightfield stored in texture
@@ -625,13 +628,14 @@ void ApplyVortex(TForce data, in float time, in vec3 particlePos, inout vec3 for
 
 void ApplyConstraint(in float time, in vec3 particleHold, inout vec3 force, inout vec3 vel, inout vec3 pos)
 {
-	vec3 direction = pos - particleHold;
+	vec4 dst = gTM * vec4(particleHold, 1.0);
+	vec3 direction = pos - dst.xyz;
 	float distance = length(direction);
 	
 	if (distance != 0.0)
 	{
 		
-		pos = mix(pos, particleHold, clamp(CONSTRAINT_MAGN * time, 0.0, 1.0)) ;
+		pos = mix(pos, dst.xyz, clamp(CONSTRAINT_MAGN * time, 0.0, 1.0)) ;
 		
 		direction /= distance;
 		vel *= 1.0 - CONSTRAINT_MAGN; // * max(1.0, (1.0 / (distance*distance))); // * data.magnitude;
@@ -675,6 +679,14 @@ void main()
 		return;
 	}
 	
+	// animate size
+	if (gUseSizeAttenuation > 0)
+	{
+		float normLife = Age / lifetime;
+		pos.w = texture( SizeSampler, normLife ).r;
+		//pos.w = normLife * 10.0;
+	}
+
 	float randomF = gTime + float(flattened_id);
 	
 	// predicted position next timestep
@@ -704,17 +716,20 @@ void main()
 	//
 	// Process all collisions
 	//
+	vec4 collisions_inuse = vec4(0.0);
+	vec4 collisions_type = vec4(0.0);
+
 	if (USE_COLLISIONS)
 	{
 		for(int i=0; i<gNumCollisions; ++i)
 		{
-			float type = collisionBuffer.collisions[i].position.w;
+			collisions_type[i] = collisionBuffer.collisions[i].position.w;
 			
-			if (type == COLLISION_SPHERE) 
+			if ( COLLISION_SPHERE == collisions_type[i] ) 
 			{
-				SphereCollide(collisionBuffer.collisions[i], pos_next, vel.xyz, force);
+				SphereCollide(collisionBuffer.collisions[i], pos.w, pos_next, vel.xyz, collisions_inuse[i]);
 			}
-			else if (type == COLLISION_TERRIAN)
+			else if ( COLLISION_TERRIAN == collisions_type[i] )
 			{
 				TerrainCollide(collisionBuffer.collisions[i], pos_next, randomF, vel.xyz);
 			}
@@ -761,13 +776,14 @@ void main()
 		{
 			for(int i=0; i<gNumCollisions; ++i)
 			{
-				float type = collisionBuffer.collisions[i].position.w;
+				if ( collisions_inuse[i] < 1.0 )
+					continue;
 				
-				if (type == COLLISION_SPHERE) 
+				if ( COLLISION_SPHERE == collisions_type[i]) 
 				{
-					SphereConstraint(collisionBuffer.collisions[i], pos.xyz);
+					SphereConstraint(collisionBuffer.collisions[i], pos.w, pos.xyz);
 				}
-				else if (type == COLLISION_TERRIAN)
+				else if ( COLLISION_TERRIAN == collisions_type[i] )
 				{
 					TerrainConstraint(collisionBuffer.collisions[i], pos.xyz);
 				}
@@ -778,13 +794,7 @@ void main()
 			FloorConstraint(pos.xyz, FLOOR_LEVEL);
 	}	
 	
-	// animate size
-	if (gUseSizeAttenuation > 0)
-	{
-		float normLife = Age / lifetime;
-		pos.w = texture( SizeSampler, normLife ).r;
-		//pos.w = normLife * 10.0;
-	}
+	
 	
 	// write back
 	particleBuffer.particles[flattened_id].Pos = pos; // pos.w - particle size

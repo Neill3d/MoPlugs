@@ -192,6 +192,7 @@ struct TCollision
 	GLuint64		terrainAddress;
 
 	mat4			tm;
+	mat4			invtm;
 };
 
 struct	TForce
@@ -234,7 +235,7 @@ struct CollisionExchange
 	static void SetVelocity(TCollision &data, const vec4 &value);
 	static void SetRadius(TCollision &data, const double value);
 	static void SetFriction(TCollision &data, const double value);
-	static void SetInvMatrix(TCollision &data, const double *value);
+	static void SetMatrix(TCollision &data, const double *value, const double *invvalue);
 
 	static void SetTerrainScale(TCollision &data, const vec4 &value);
 	static void SetTerrainSize(TCollision &data, const vec4 &value);

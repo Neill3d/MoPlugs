@@ -106,10 +106,13 @@ void CollisionExchange::SetFriction(TCollision &data, const double value)
 	data.friction = (float) value;
 }
 
-void CollisionExchange::SetInvMatrix(TCollision &data, const double *value)
+void CollisionExchange::SetMatrix(TCollision &data, const double *value, const double *invvalue)
 {
 	for (int i=0; i<16; ++i)
+	{
 		data.tm.mat_array[i] = (float) value[i];
+		data.invtm.mat_array[i] = (float) invvalue[i];
+	}
 }
 
 void CollisionExchange::SetTerrainScale(TCollision &data, const vec4 &value)

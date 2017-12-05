@@ -225,6 +225,7 @@ protected:
 	GLint				locComputeDeltaTime;
 	GLint				locComputeTime;
 
+	GLint				locEmitterTM;
 	GLint				locComputeDynamic;
 	GLint				locComputeTurbulence;
 	GLint				locComputeGravity;

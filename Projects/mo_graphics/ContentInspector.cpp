@@ -211,6 +211,19 @@ void CShadersInspector::ConstructFromFBShader( FBShader *pShader, FBEvaluateInfo
 			shader.toonShadowPosition = (float) toonSh;
 		}
 	}
+	else
+	{
+		FBProperty *pProp = pShader->PropertyList.Find( "Transparency Factor" );
+
+		if (nullptr != pProp)
+		{
+			double transF;
+			pProp->GetData( &transF, sizeof(double), pEvalInfo );
+			shader.transparency = (float) transF;
+		}
+
+		
+	}
 }
 
 CShadersInspector::CShadersInspector()

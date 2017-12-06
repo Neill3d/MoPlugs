@@ -465,13 +465,14 @@
       <IgnoreSpecificDefaultLibraries>libcpmt.lib;LIBCMT.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
-    </PostBuildEvent>
-    <PreBuildEvent>
       <Command>xcopy "$(ProjectDir)\GLSL\*.*" "..\..\bin\System\GLSL" /Y /I
 xcopy "$(ProjectDir)\GLSL_CS\*.*" "..\..\bin\System\GLSL_CS" /Y /I
 xcopy "$(ProjectDir)\GLSL_FX\*.*" "..\..\bin\System\GLSL_FX" /Y /I</Command>
+      <Message>copy glsl shaders</Message>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">

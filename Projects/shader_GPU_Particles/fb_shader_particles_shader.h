@@ -175,6 +175,8 @@ public:
 //
 public:
 
+	FBPropertyInt								InternalClassId;
+
 #ifdef _DEBUG
 	FBPropertyAction							ReloadShader;
 #endif

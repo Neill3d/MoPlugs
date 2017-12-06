@@ -272,6 +272,12 @@ bool GPUshader_Particles::FBCreate()
 
 	SetShaderCapacity( kFBShaderCapacityMaterialEffect, false );
 
+
+	FBPropertyPublish( this, InternalClassId, "Internal ClassId", nullptr, nullptr );
+	InternalClassId = GPUshader_Particles::TypeInfo;
+	InternalClassId.ModifyPropertyFlag( kFBPropertyFlagHideProperty, true );
+	InternalClassId.ModifyPropertyFlag( kFBPropertyFlagReadOnly, true );
+
 	//
 	// Particle generation
 	//
@@ -718,8 +724,13 @@ void GPUshader_Particles::DetachDisplayContext( FBRenderOptions* pOptions, FBSha
 		iter->second = false;
 		*/
 
+	mColorCurve.Free();
+	mSizeCurve.Free();
+	mNeedUpdatePropertyTexture = true;
+
 	CHECK_GL_ERROR();
 	//mNeedReloadShaders = true;
+	DoReset();
 }
 
 bool GPUshader_Particles::ShaderNeedBeginRender()
@@ -1163,6 +1174,8 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 
 	renderBlock &renderData = pParticles->GetRenderData();
 
+	//int currIndex = mSystem.Renderer->CurrentPaneCallbackIndex;
+	//if ( 0 == currIndex )
 	if (false == IsMoPlugsRender() )
 	{
 		// Get current camera

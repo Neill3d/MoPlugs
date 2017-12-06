@@ -28,6 +28,8 @@ public:
 		mIsEarlyZ = false;
 		mNeedOverrideShading = false;
 		mRenderToNormalAndMaskOutput = false;
+
+		mInternalClassId = 0;
 	}
 
 	virtual const char *shaderName() const override
@@ -92,4 +94,6 @@ protected:
 
 	bool				mRenderToNormalAndMaskOutput;
 
+	// pre-cache particles classId on first run
+	int					mInternalClassId;
 };

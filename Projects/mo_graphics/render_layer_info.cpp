@@ -41,7 +41,7 @@ void CRenderLayerInfo::ChangeShaderCounters(FBShader *pShader, int counter)
 		if (true == pGPUCache->OverrideShading && eShadingTypeMatte == pGPUCache->ShadingType)
 			matteShadersCounter += counter;
 	}
-	else if (FBIS(pShader, ProjTexShader) || FBIS(pShader, ORIBLShader) )
+	else if (nullptr != pShader) // FBIS(pShader, ProjTexShader) || FBIS(pShader, ORIBLShader) )
 	{
 		FBProperty *pProperty=nullptr;
 
@@ -88,7 +88,7 @@ void CRenderLayerInfo::EventData(FBConnectionAction action, FBShader *pShader, F
 					matteShadersCounter += actionIndex;
 			}
 		}
-		else if (FBIS(pShader, ProjTexShader) || FBIS(pShader, ORIBLShader) )
+		else if (nullptr != pShader) // FBIS(pShader, ProjTexShader) || FBIS(pShader, ORIBLShader) )
 		{
 			//ProjTexShader *pProjShader = (ProjTexShader*) pShader;
 
@@ -126,7 +126,7 @@ void CRenderLayerArray::IncLayerShaders(FBShader *pShader)
 {
 	ERenderLayer layerId = eRenderLayerMain;
 
-	if ( FBIS(pShader, ProjTexShader) || FBIS(pShader, ORIBLShader) )
+	if ( nullptr != pShader ) // FBIS(pShader, ProjTexShader) || FBIS(pShader, ORIBLShader) )
 	{
 		FBProperty *pProperty = pShader->PropertyList.Find(RENDER_LAYER_LABEL);
 
@@ -141,7 +141,7 @@ void CRenderLayerArray::DecLayerShaders(FBShader *pShader)
 {
 	ERenderLayer layerId = eRenderLayerMain;
 
-	if ( FBIS(pShader, ProjTexShader) || FBIS(pShader, ORIBLShader) )
+	if ( nullptr != pShader ) // FBIS(pShader, ProjTexShader) || FBIS(pShader, ORIBLShader) )
 	{
 		FBProperty *pProperty = pShader->PropertyList.Find(RENDER_LAYER_LABEL);
 
@@ -173,24 +173,26 @@ void CRenderLayerArray::EventDataNotify(HISender pSender, HKEvent pEvent)
 	{
 		const bool appendLayerData = (action == kFBCandidated);
 
-		if ( FBIS(pShader, ProjTexShader) || FBIS(pShader, ORIBLShader) )
+		// operate with any shader that has transparency
+		//if ( FBIS(pShader, ProjTexShader) || FBIS(pShader, ORIBLShader) )
 		{
 			FBProperty *pProperty = pShader->PropertyList.Find(RENDER_LAYER_LABEL);
 			//ProjTexShader *pProjShader = (ProjTexShader*) pShader;
 			//const ERenderLayer layerId = pProjShader->RenderLayer;
-
+			
+			ERenderLayer layerId = eRenderLayerMain;
 			if (nullptr != pProperty)
 			{
 				const ERenderLayer layerId = (ERenderLayer) pProperty->AsInt();
+			}
 
-				if (lPlug == pProperty)
-				{	
-					layersInfo[layerId].ChangeShaderCounters(pShader, (appendLayerData) ? 1 : -1);
-				}
-				else
-				{
-					layersInfo[layerId].EventData(action, pShader, (FBProperty*)lPlug);
-				}
+			if (lPlug == pProperty)
+			{	
+				layersInfo[layerId].ChangeShaderCounters(pShader, (appendLayerData) ? 1 : -1);
+			}
+			else
+			{
+				layersInfo[layerId].EventData(action, pShader, (FBProperty*)lPlug);
 			}
 		}
 		
@@ -203,7 +205,9 @@ const ERenderLayer CRenderLayerArray::GetShaderRenderLayerId(FBShader *pShader)
 {
 	ERenderLayer layerId = eRenderLayerMain;
 
-	if ( FBIS(pShader, ProjTexShader) || FBIS(pShader, ORIBLShader) )
+	// operate with any shader that has needed property (layer label)
+	//if ( FBIS(pShader, ProjTexShader) || FBIS(pShader, ORIBLShader) )
+	if ( nullptr != pShader )
 	{
 		FBProperty *pProperty = pShader->PropertyList.Find(RENDER_LAYER_LABEL);
 		if (nullptr != pProperty)

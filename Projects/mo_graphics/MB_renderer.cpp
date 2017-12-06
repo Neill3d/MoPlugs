@@ -889,6 +889,7 @@ void MoRendererCallback::Detach()
 		gLastContext = 0;
 
 		gCallbackAttached = false;
+		SetMoPlugsRender(false);
     }
 }
 

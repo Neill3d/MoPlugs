@@ -21,7 +21,7 @@ Particle System
 
  TODO
  
- - make sphere collision scalable (to be able to fit a character body)
+ + make sphere collision scalable (to be able to fit a character body)
  - cleanup motor force (vortex)
 
  - GetEmitDir - function to get a spread emit direction is very slow.

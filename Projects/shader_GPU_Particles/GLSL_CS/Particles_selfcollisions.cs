@@ -20,7 +20,7 @@ layout (local_size_x = 1024, local_size_y = 1) in;
 uniform int		gNumParticles;
 uniform float	DeltaTimeSecs;
 
-#define		ACCELERATION_LIMIT		5000.0
+#define		ACCELERATION_LIMIT		5.0
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TYPES AND DATA BUFFERS
@@ -69,7 +69,8 @@ void main()
 	// Read position and velocity
 	vec4 pos = particleBuffer.particles[flattened_id].Pos;
 	vec4 vel = particleBuffer.particles[flattened_id].Vel;
-	
+	vec4 rotVel = particleBuffer.particles[flattened_id].RotVel;
+
 	float lifetime = vel.w;
 	
 	if (lifetime <= 0.0)
@@ -82,6 +83,7 @@ void main()
 	//
 	// linear calculation
 	float mass = 1.0;
+	float radius1 = 0.5;
 
 	for (int i=0; i<N; ++i)
 	{
@@ -94,11 +96,12 @@ void main()
 			continue;
 		
 		vec4 other = particleBuffer.particles[i].Pos;
-		
+		float radius2 = 0.5;
+			
 		vec3 n = pos.xyz - other.xyz;
 		float udiff = length(n);
 		
-		if (udiff > pos.w+other.w)
+		if (udiff >= (radius1 + radius2))
 		{
 			continue;
 		}
@@ -110,7 +113,8 @@ void main()
 		float optimizedP = (2.0 * (a1 - a2)) / (mass + mass); 
 
 		// calculate v1', the new movement vector of circle1
-		vel.xyz = vel.xyz - optimizedP * mass * n;
+		//vel.xyz = vel.xyz - optimizedP * mass * n;
+		acceleration = acceleration - optimizedP * mass * n;
 
 		// calcualte v2'
 		//othervel.xyz = othervel.xyz - optimizedP * mass * n;
@@ -152,10 +156,12 @@ void main()
         "       barrier();\n"
         "   }\n"
 	*/
-	/*
+	
 	float accLen = length(acceleration);
 	if (accLen > ACCELERATION_LIMIT)
 		acceleration = ACCELERATION_LIMIT * normalize(acceleration);
-	*/
+	
+
 	particleBuffer.particles[flattened_id].Vel = vel; // vec4(vel.xyz + acceleration * DeltaTimeSecs, vel.w);	// in w we store lifetime
+	particleBuffer.particles[flattened_id].RotVel = vec4(acceleration.xyz, rotVel.w);
 }

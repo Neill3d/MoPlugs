@@ -422,6 +422,7 @@ bool CollisionTerrain::RenderToHeightMap()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	
+	CHECK_GL_ERROR();
 
 	glDisable(GL_CULL_FACE);
 
@@ -453,8 +454,9 @@ bool CollisionTerrain::RenderToHeightMap()
 	fLocalM.identity();
 	mShader->UpdateTerrainModelTM(fLocalM);
 
+	CHECK_GL_ERROR();
 	
-	for (int i=0; i<Objects.GetCount(); ++i)
+	for (int i=0, count=Objects.GetCount(); i<count; ++i)
 	{
 		if ( FBIS(Objects[i], FBModel) )
 		{

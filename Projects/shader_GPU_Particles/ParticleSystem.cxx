@@ -667,24 +667,16 @@ void ParticleSystem::EmitParticles(const double deltaTime, const ETechEmitType	t
 const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, const ETechEmitType type, const double timeStep, 
 	double &DeltaTime, const double limit, const int SubSteps, const bool selfCollisions)
 {
-	if (mShader->IsInitialized() == false)
+	if (false == mShader->IsInitialized() )
+	{
 		mShader->Initialize();
-	
+
+		if (false == mShader->IsInitialized() )
+			return 0;
+	}
+
 	unsigned int cycles = 0;
 
-	/*
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mParticleBuffer[mCurrTFB]);  
-	
-	mConnections->BindForces(1);
-	mConnections->BindCollisions(2);
-
-	// TODO: bind terrain 2d texture if bindless is not supported
-	const GLuint terrainId = mConnections->GetTextureTerrain();
-	if (terrainId > 0 && mShader->IsBindlessTexturesSupported() == false)
-	{
-		glBindTexture(GL_TEXTURE_2D, terrainId);
-	}
-	*/
 	double ltime = DeltaTime;
 	double globalTime = mTime - DeltaTime;
 

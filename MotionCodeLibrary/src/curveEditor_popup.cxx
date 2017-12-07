@@ -206,8 +206,11 @@ void ColorView::ViewExpose()
 		glBindTexture(GL_TEXTURE_1D, lTexId);
 	}
 
-	PrepareOrthoView(mWidth, mHeight);
-	DrawQuad2d();
+	//glViewport(0, 0, mWidth, mHeight);
+	//PrepareOrthoView(mWidth, mHeight);
+	//DrawQuad2d();
+
+	drawOrthoQuad2d(mWidth, mHeight);
 
 	if (lTexId)
 	{

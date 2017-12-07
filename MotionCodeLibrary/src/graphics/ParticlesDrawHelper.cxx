@@ -250,6 +250,11 @@ ColorPropertyTexture::ColorPropertyTexture(const int textureWidth, FBPropertyAni
 //! a destructor
 ColorPropertyTexture::~ColorPropertyTexture()
 {
+	Free();
+}
+
+void ColorPropertyTexture::Free()
+{
 	if (mTexId)
 	{
 		glDeleteTextures(1, &mTexId);
@@ -304,7 +309,8 @@ bool ColorPropertyTexture::Generate(FBPropertyAnimatableColorAndAlpha	*prop)
 		glTexImage1D( GL_TEXTURE_1D, 0, GL_RGBA, mTextureWidth, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels );
 		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_BASE_LEVEL, 0);
 		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAX_LEVEL, 0);
-		
+		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+
 		glBindTexture(GL_TEXTURE_1D, 0);
 	}
 	else
@@ -340,6 +346,11 @@ DoublePropertyTexture::DoublePropertyTexture(const int textureWidth, FBPropertyA
 
 //! a destructor
 DoublePropertyTexture::~DoublePropertyTexture()
+{
+	Free();
+}
+
+void DoublePropertyTexture::Free()
 {
 	if (mTexId)
 	{

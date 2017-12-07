@@ -71,6 +71,9 @@ bool CUberShaderCallback::OnTypeBegin(const CRenderOptions &options, bool useMRT
 	//mUberShader->SetRimParameters( 0.0, 0.0, false, vec3(0.0f, 0.0f, 0.0f) );
 	//mUberShader->SetDepthDisplacement( 0.0f );
 	
+	mShaderFX->SetTextureOffset( vec4( 0.0, 0.0, 0.0, 0.0) );
+	mShaderFX->SetTextureScaling( vec4( 1.0, 1.0, 1.0, 1.0) );
+
 	//
 	/*
 	if (options.IsCubeMapRender() && options.GetCubeMapData() )

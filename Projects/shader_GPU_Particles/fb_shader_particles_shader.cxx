@@ -122,6 +122,11 @@ int GPUshader_Particles::GetDisplayedCount(HIObject pObject)
 	return 0;
 }
 
+int GPUshader_Particles::GetInternalClassId(HIObject pObject)
+{
+	return GPUshader_Particles::TypeInfo;
+}
+
 /************************************************
  *	Specific Constructor. Construct custom shader from an FBMaterial object.
  ************************************************/
@@ -273,10 +278,11 @@ bool GPUshader_Particles::FBCreate()
 	SetShaderCapacity( kFBShaderCapacityMaterialEffect, false );
 
 
-	FBPropertyPublish( this, InternalClassId, "Internal ClassId", nullptr, nullptr );
+	FBPropertyPublish( this, InternalClassId, "Internal ClassId", GetInternalClassId, nullptr );
 	InternalClassId = GPUshader_Particles::TypeInfo;
 	InternalClassId.ModifyPropertyFlag( kFBPropertyFlagHideProperty, true );
 	InternalClassId.ModifyPropertyFlag( kFBPropertyFlagReadOnly, true );
+	InternalClassId.ModifyPropertyFlag( kFBPropertyFlagNotSavable, true );
 
 	//
 	// Particle generation

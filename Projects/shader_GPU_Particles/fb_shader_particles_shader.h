@@ -328,6 +328,7 @@ public:
 	static void SetColorCurve(HIObject pObject, bool value);
 	static void SetSizeCurve(HIObject pObject, bool value);
 	static int GetDisplayedCount(HIObject pObject);
+	static int GetInternalClassId(HIObject pObject);
 
 	void DoReloadShader();
 	void DoReset();

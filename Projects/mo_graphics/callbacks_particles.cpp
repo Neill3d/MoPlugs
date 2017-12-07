@@ -12,7 +12,7 @@
 
 #include "callbacks_particles.h"
 
-// TODO: replace classname with internal class id
+// DONE: replace classname with internal class id
 
 const bool CGPUParticlesCallback::IsForShader(FBShader *pShader)
 {
@@ -21,7 +21,7 @@ const bool CGPUParticlesCallback::IsForShader(FBShader *pShader)
 	{
 		lSuccess = (nullptr!=pShader && pShader->Is( mInternalClassId ) );	
 	}
-	else if ( 0 == strcmp(pShader->ClassName(), "GPUshader_Particles") )
+	else if ( nullptr!=pShader && (0 == strcmp(pShader->ClassName(), "GPUshader_Particles")) )
 	{
 		FBProperty *pProp = pShader->PropertyList.Find("Internal ClassId");
 		if (nullptr != pProp)
@@ -32,7 +32,6 @@ const bool CGPUParticlesCallback::IsForShader(FBShader *pShader)
 	}
 
 	return lSuccess;
-	//return ( 0 == strcmp(pShader->ClassName(), "GPUshader_Particles") );
 }
 
 const bool CGPUParticlesCallback::IsForShaderAndPass(FBShader *pShader, const EShaderPass pass)
@@ -42,7 +41,7 @@ const bool CGPUParticlesCallback::IsForShaderAndPass(FBShader *pShader, const ES
 	{
 		lSuccess = (nullptr!=pShader && pShader->Is( mInternalClassId ) );	
 	}
-	else if ( 0 == strcmp(pShader->ClassName(), "GPUshader_Particles") )
+	else if ( nullptr!=pShader && (0 == strcmp(pShader->ClassName(), "GPUshader_Particles")) )
 	{
 		FBProperty *pProp = pShader->PropertyList.Find("Internal ClassId");
 		if (nullptr != pProp)
@@ -51,13 +50,8 @@ const bool CGPUParticlesCallback::IsForShaderAndPass(FBShader *pShader, const ES
 			lSuccess = (pShader->Is( mInternalClassId ) );
 		}
 	}
-
+	
 	return lSuccess;
-	/*
-	if (nullptr == pShader)
-		return false;
-	return ( 0 == strcmp(pShader->ClassName(), "GPUshader_Particles") );
-	*/
 }
 
 

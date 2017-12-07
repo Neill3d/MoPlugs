@@ -154,6 +154,21 @@ public:
 		lastpos[2] = (double) mLastEmitterPos.z;
 	}
 
+	void SetLastEmitterTM( const mat4 &tm )
+	{
+		mLastEmitterTransform = tm;
+	}
+	void SetLastEmitterTM( const double *tm )
+	{
+		for (int i=0; i<16; ++i)
+			mLastEmitterTransform.mat_array[i] = (float) tm[i];
+	}
+	void GetLastEmitterTransform( double *tm )
+	{
+		for (int i=0; i<16; ++i)
+			tm[i] = (double) mLastEmitterTransform.mat_array[i];
+	}
+
 public:
 
 	struct PerModelUserData
@@ -241,6 +256,7 @@ protected:
 	float						mPointColorVariation;
 
 	vec3						mLastEmitterPos;
+	mat4						mLastEmitterTransform;
 
 	// forces and collisions
 	ParticleSystemConnections	*mConnections;

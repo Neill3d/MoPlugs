@@ -76,6 +76,10 @@ struct evaluateBlock
 	//vec4					gVelocity;		// start particle velocity
 	//vec4					gVelRandom;		// randomize start velocity
 	vec4					gEmitterVelocity; // use this velocity to inherit emitter speed
+	//vec4					gEmitterPivot;
+	//vec4					gAngularVelocity;
+	//mat4					gEmitterDeltaTM;	// computed diff between two frames
+	
 	vec4					gDynamic;		// 1st - mass, 2nd - damping
 	vec4					gGravity;		// vec3 - gravity direction XYZ, 4-th component - use or not to use gravity
 	vec4					gFlags;			// 1st - useForces, 2nd - useCollisions, 3rd - emitter type(0.0-vertices, 1.0-volume)
@@ -217,7 +221,8 @@ struct EvaluationExchange
 {
 	//
 	static void SetDirection(evaluateBlock &data, const vec3 &dir, const float spreadH, const float spreadV, bool useNormals);
-	static void SetSpeed(evaluateBlock &data, const float speed, const float spread, const vec4 &emittervel);
+	static void SetSpeed(evaluateBlock &data, const float speed, const float spread, 
+		const vec4 &emittervel, vec4 &pivot, vec4 &angular, const double *TMdelta);
 	//static void SetDirection(evaluateBlock &data, const vec3 &dir, const vec3 &random, bool useNormals);
 	//static void SetVelocity(evaluateBlock &data, const vec3 &vel, const vec3 &random, const vec4 &emittervel);
 	static void SetDynamicParameters(evaluateBlock &data, float mass, float damping);

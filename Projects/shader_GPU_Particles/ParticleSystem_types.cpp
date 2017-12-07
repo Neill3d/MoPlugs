@@ -35,11 +35,17 @@ void EvaluationExchange::SetDirection(evaluateBlock &data, const vec3 &dir,
 	data.gDirSpreadHor = spreadH;
 	data.gDirSpreadVer = spreadV;
 }
-void EvaluationExchange::SetSpeed(evaluateBlock &data, const float speed, const float spread, const vec4 &emittervel)
+void EvaluationExchange::SetSpeed(evaluateBlock &data, const float speed, const float spread, 
+	const vec4 &emittervel, vec4 &emitterPivot, vec4 &angularVelocity, const double *TMdelta)
 {
 	data.gEmitSpeed = speed;
 	data.gSpeedSpread = spread;
 	data.gEmitterVelocity = emittervel;
+	//data.gEmitterPivot = emitterPivot;
+	//data.gAngularVelocity = angularVelocity;
+	
+	//for (int i=0; i<16; ++i)
+	//	data.gEmitterDeltaTM.mat_array[i] = (float) TMdelta[i];
 }
 
 void EvaluationExchange::SetDynamicParameters(evaluateBlock &data, float mass, float damping)

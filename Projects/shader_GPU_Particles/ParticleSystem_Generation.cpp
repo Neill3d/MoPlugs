@@ -45,6 +45,7 @@ void ParticleSystem::GetRandomVolumePos(const bool local, vec4 &pos)
 	vec3 lMin = mEvaluateData.gMin;
 			
 	// if inherit emitter velocity, put particle on some random position during the way
+	/*
 	if (mEvaluateData.gEmitterVelocity.w > 0.0)
 	{
 		double randomValue = dist(e2);
@@ -53,7 +54,7 @@ void ParticleSystem::GetRandomVolumePos(const bool local, vec4 &pos)
 		lMax -= delta;
 		lMin -= delta;
 	}
-	
+	*/
 	vec3 rnd = vec3( (float)dist(e2), (float)dist(e2), (float)dist(e2)); 
 			
 	pos.x = (lMax.x - lMin.x) * rnd.x + lMin.x;
@@ -437,10 +438,10 @@ void ParticleSystem::GenerateParticle(const int emitType, const bool local, cons
 	}
 
 	//
-	particle.Pos = particle.Pos - mEvaluateData.gEmitterVelocity.w * mEvaluateData.gEmitterVelocity;
+	particle.Pos = particle.Pos; // - mEvaluateData.gEmitterVelocity.w * mEvaluateData.gEmitterVelocity;
 	particle.Pos.w = GenerateParticleSize(mPointSize, mPointSizeVariation); // negative size value for launcher !
 	particle.Vel = GetRandomSpeed() * normalize(particle.Vel);
-	particle.Vel = particle.Vel + mEvaluateData.gEmitterVelocity.w * mEvaluateData.gEmitterVelocity;
+	particle.Vel = particle.Vel; // + mEvaluateData.gEmitterVelocity.w * mEvaluateData.gEmitterVelocity;
 	//particle.Vel.w = -dist(e2) - 0.001f;	// negative lifetime value for launcher !!
 	particle.Rot = vec4(0.0f, 0.0f, 0.0f, 0.0f); // AgeMillis = 1.0f; // Particles[i].Vel.w - 1000.0f;		// one launch per second for this launcher
 	particle.RotVel = vec4(0.0f, 0.0f, 0.0f, 0.0f); // Index = 1.0f;

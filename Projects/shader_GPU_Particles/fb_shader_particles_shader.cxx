@@ -1739,7 +1739,9 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticleSystem *
 	FBMatrix m, rotationTM, normalTM;
 	FBVector3d min, max, pos;
 
-	FBVector3d emitterVel(0.0, 0.0, 0.0);
+	FBMatrix emitterDelta;
+	emitterDelta.Identity();
+	FBVector4d emitterVel(0.0, 0.0, 0.0, 1.0);
 
 	// TODO: use rotation around pivot point to compute velocity
 	if (pModel)
@@ -1756,11 +1758,21 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticleSystem *
 		//VectorTransform( min, m, min );
 		//VectorTransform( max, m, max );
 
+		pParticles->GetLastEmitterTransform(emitterDelta);
+		if (InheritEmitterSpeed)
+		{
+			FBGetLocalMatrix( emitterDelta, emitterDelta, m );
+			FBVectorMatrixMult( emitterVel, emitterDelta, FBVector4d(0.0, 0.0, 1.0, 1.0) );
+			FBSub( emitterVel, emitterVel, FBVector4d(0.0, 0.0, 1.0, 1.0) );
+		}
+		pParticles->SetLastEmitterTM( m );
+		/*
 		FBVector3d lastpos;
 		pParticles->GetLastEmitterPos(lastpos);
 
 		if (InheritEmitterSpeed) emitterVel = VectorSubtract( pos, lastpos );
 		pParticles->SetLastEmitterPos( pos );
+		*/
 	}
 
 	evaluateBlock	&data = pParticles->GetSimulationData();
@@ -1789,7 +1801,8 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticleSystem *
 	EvaluationExchange::SetDirection( data, vec3((float)direction[0], (float)direction[1], (float)direction[2]), 
 		(float) dirSpreadHor * 0.01f, (float) dirSpreadVer * 0.01f, UseEmitterNormals );
 	EvaluationExchange::SetSpeed( data, (float) speed, (float) speedSpread * 0.01f, 
-		vec4((float)emitterVel[0], (float)emitterVel[1], (float)emitterVel[2], (InheritEmitterSpeed) ? 1.0f : 0.0f) );
+		vec4((float)emitterVel[0], (float)emitterVel[1], (float)emitterVel[2], (InheritEmitterSpeed) ? 1.0f : 0.0f),
+		vec4(), vec4(), emitterDelta );
 	
 	EvaluationExchange::SetDynamicParameters( data, 0.01f * (float) Mass, 0.01f * (float) Damping );
 	EvaluationExchange::SetFlags( data, enableEmit, UseCollisions, (int) Emitter );

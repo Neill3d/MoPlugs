@@ -688,6 +688,8 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 	double ltime = DeltaTime;
 	double globalTime = mTime - DeltaTime;
 
+	//
+	
 	if (selfCollisions)
 	{
 		while(ltime > timeStep)
@@ -698,6 +700,21 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 			{
 				EmitParticles( timeStep, type );
 			}
+
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mParticleBuffer[mCurrTFB]);  
+	
+			mConnections->BindForces(1);
+			mConnections->BindCollisions(2);
+
+			// TODO: bind terrain 2d texture if bindless is not supported
+			const GLuint terrainId = mConnections->GetTextureTerrain();
+			if (terrainId > 0 && mShader->IsBindlessTexturesSupported() == false)
+			{
+				glBindTexture(GL_TEXTURE_2D, terrainId);
+			}
+			
+			//
+			//
 
 			mShader->BindSimulation(false);
 			mShader->DispatchSimulation( (float)timeStep, (float)globalTime, mInstanceCount, COMPUTE_SHADER_GROUP_SIZE, 1, 1);
@@ -738,7 +755,6 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 				EmitParticles( timeStep, type );
 			}
 		
-			//
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mParticleBuffer[mCurrTFB]);  
 	
 			mConnections->BindForces(1);
@@ -750,6 +766,9 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 			{
 				glBindTexture(GL_TEXTURE_2D, terrainId);
 			}
+			
+			//
+			//
 			mShader->BindSimulation(true);
 
 			mShader->DispatchSimulation( (float)timeStep, (float)globalTime, mInstanceCount, COMPUTE_SHADER_GROUP_SIZE, 1, 1);
@@ -888,7 +907,7 @@ bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLu
 	const GLvoid* uvOffset = pData->GetUVSetVBOOffset();
 
 	
-	//TODO: not correct for GPU skinning, we should use ptr offset
+	//DONE: not correct for GPU skinning, we should use ptr offset
 	/*
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, posId );
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, norId );

@@ -81,28 +81,46 @@ void main()
 	
 	//
 	// linear calculation
-	/*
+	float mass = 1.0;
+
 	for (int i=0; i<N; ++i)
 	{
+		if ( i == flattened_id )
+			continue;
+
 		vec4 othervel = particleBuffer.particles[i].Vel;
 		
 		if (othervel.w <= 0.0)
 			continue;
 		
 		vec4 other = particleBuffer.particles[i].Pos;
-		vec3 diff = pos.xyz - other.xyz;
-		float udiff = length(diff);
+		
+		vec3 n = pos.xyz - other.xyz;
+		float udiff = length(n);
 		
 		if (udiff > pos.w+other.w)
 		{
 			continue;
 		}
-		
-		float invdist = 1.0 / (length(diff)+0.001);
-		acceleration -= diff * 0.1 * invdist * invdist * invdist;
+		n = normalize(n);
+
+		float a1 = dot(vel.xyz, n);
+		float a2 = dot(othervel.xyz, n);
+
+		float optimizedP = (2.0 * (a1 - a2)) / (mass + mass); 
+
+		// calculate v1', the new movement vector of circle1
+		vel.xyz = vel.xyz - optimizedP * mass * n;
+
+		// calcualte v2'
+		//othervel.xyz = othervel.xyz - optimizedP * mass * n;
+		//particleBuffer.particles[i].Vel = othervel;
+
+		//float invdist = 1.0 / (length(diff)+0.001);
+		//acceleration -= diff * 0.1 * invdist * invdist * invdist;
 	}
-	*/
 	
+	/*
 	for(int tile = 0;tile<N;tile+=int(gl_WorkGroupSize.x)) 
 	{
 		tmp[gl_LocalInvocationIndex] = particleBuffer.particles[tile + int(gl_LocalInvocationIndex)].Pos;
@@ -118,6 +136,7 @@ void main()
 		groupMemoryBarrier();
         barrier();
 	}
+	*/
 	/*
 	for(int tile = 0;tile<N;tile+=int(gl_WorkGroupSize.x)) {\n"
         "       tmp[gl_LocalInvocationIndex] = positions[tile + int(gl_LocalInvocationIndex)];\n"
@@ -133,10 +152,10 @@ void main()
         "       barrier();\n"
         "   }\n"
 	*/
-	
+	/*
 	float accLen = length(acceleration);
 	if (accLen > ACCELERATION_LIMIT)
 		acceleration = ACCELERATION_LIMIT * normalize(acceleration);
-	
-	particleBuffer.particles[flattened_id].Vel = vec4(vel.xyz + acceleration * DeltaTimeSecs, vel.w);	// in w we store lifetime
+	*/
+	particleBuffer.particles[flattened_id].Vel = vel; // vec4(vel.xyz + acceleration * DeltaTimeSecs, vel.w);	// in w we store lifetime
 }

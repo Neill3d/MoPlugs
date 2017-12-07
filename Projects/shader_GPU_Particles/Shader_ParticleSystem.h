@@ -250,6 +250,7 @@ protected:
 	GLint				locIntegrateDeltaTime;
 	GLint				locIntegrateNumCollisions;
 	GLint				locIntegrateNumParticles;
+	GLint				locIntegrateFloor;
 
 	// terrain uniforms
 

@@ -21,10 +21,16 @@ uniform int		gNumParticles;
 uniform float	DeltaTimeSecs;
 uniform	int		gNumCollisions;
 
+uniform vec4	gFloor;				// in x - floor friction, in y - level, in w - use floor level
+
 #define		USE_COLLISIONS		gNumCollisions > 0
 
 #define		COLLISION_SPHERE		1.0
 #define		COLLISION_TERRIAN		4.0
+
+#define		USE_FLOOR			gFloor.w
+#define		FLOOR_FRICTION		gFloor.y
+#define		FLOOR_LEVEL			gFloor.z
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TYPES AND DATA BUFFERS
@@ -166,9 +172,9 @@ void main()
 			}
 		}
 	}
-	/*
+	
 	if (USE_FLOOR > 0.0) 
 		FloorConstraint(pos.xyz, FLOOR_LEVEL);
-	*/
+	
 	particleBuffer.particles[flattened_id].Pos = pos;	// in w we store lifetime
 }

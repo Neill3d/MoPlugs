@@ -232,7 +232,8 @@ bool ParticleShaderFX::Initialize()
 		locIntegrateNumParticles = glGetUniformLocation(programIntegrate, "gNumParticles");
 		locIntegrateDeltaTime = glGetUniformLocation(programIntegrate, "DeltaTimeSecs");
 		locIntegrateNumCollisions = glGetUniformLocation(programIntegrate, "gNumCollisions");
-		
+		locIntegrateFloor = glGetUniformLocation(programIntegrate, "gFloor");
+
 		// surface data prep
 		lSuccess = LoadSurfaceComputeShaders(g_computeSurfacePath, g_computeSurfacePathLen);
 
@@ -529,6 +530,7 @@ void ParticleShaderFX::UploadEvaluateDataBlock(const evaluateBlock &_evaluateBlo
 		glUseProgram( programIntegrate );
 
 		glUniform1i( locIntegrateNumCollisions, _evaluateBlock.gNumCollisions );
+		glUniform4f( locIntegrateFloor, _evaluateBlock.gFloor.x, _evaluateBlock.gFloor.y, _evaluateBlock.gFloor.z, _evaluateBlock.gFloor.w );
 
 		glUseProgram(0);
 	}

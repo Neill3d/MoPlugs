@@ -33,6 +33,11 @@ ConstantBuffer global evaluateBlock
 	//uniform vec4					gVelocity;		// start particle velocity
 	//uniform vec4					gVelRandom;		// randomize start velocity
 	uniform vec4					gEmitterVelocity; // use this velocity to inherit emitter speed
+	//uniform vec4					gEmitterPivot;
+	//uniform vec4					gAngularVelocity;	// rotation around pivot of the emitter
+
+	//uniform mat4					gEmitterDeltaTM;
+
 	uniform vec4					gDynamic;		// 1st - mass, 2nd - damping
 	uniform vec4					gGravity;		// vec3 - gravity direction XYZ, 4-th component - use or not to use gravity
 	uniform vec4					gFlags;			// 1st - useForces, 2nd - useCollisions, 3rd - emitter type(0.0-vertices, 1.0-volume)
@@ -298,6 +303,7 @@ namespace Evaluate
 			// new lifetime
 			vel = gRotationTM * vec4(vel.xyz, 1.0);
 			vel.xyz = vel.xyz + gEmitterVelocity.w * gEmitterVelocity.xyz; 
+			//vel = gEmitterDeltaTM * vel;	// inherit emitter movement
 			vel.w = gShellLifetime + (rand(vec2(randomF,0.487)) * 2.0 - 1.0) * gShellLifetime * gShellLifetimeVariation;
 			rotVel.w = 1.0; // Index1 = 1.0; // rand(vec2(randomF, 1.0));
 		}
@@ -557,12 +563,15 @@ namespace Evaluate
 				GetRandomColor(gEmitColor, randomF, gColorVariation, color);
 			
 			float newSize = GetRandomSize(randomF);
+			//newPos = inverse(gEmitterDeltaTM) * vec4(newPos.xyz, 1.0);
 			newPos = gTM * vec4(newPos.xyz, 1.0);
 			pos = vec4(newPos.xyz - gEmitterVelocity.w * gEmitterVelocity.xyz, newSize);
-			
-			Dir.xyz = normalize(Dir.xyz) * GetRandomSpeed(randomF);
-			Dir = gRotationTM * vec4(Dir.xyz, 1.0);
-			vel.xyz = Dir.xyz + gEmitterVelocity.w * gEmitterVelocity.xyz;                                      
+			//pos = vec4(newPos.xyz, newSize);
+
+			Dir = gRotationTM * vec4( normalize(Dir.xyz), 1.0 );
+			Dir.xyz = GetRandomSpeed(randomF) * Dir.xyz;
+			//vel = gEmitterDeltaTM * vec4(Dir.xyz, 1.0);
+			vel.xyz = Dir.xyz + gEmitterVelocity.w * gEmitterVelocity.xyz;
 			rot = vec4(0.0); // Age1 = 0.0;                  
 			
 			vel.w = gShellLifetime + (rand(vec2(randomF,0.487)) * 2.0 - 1.0) * gShellLifetime * gShellLifetimeVariation;

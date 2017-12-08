@@ -126,6 +126,15 @@ public:
 	void	BindRenderPoints();
 	void	UnBindRenderPoints();
 
+	void	BindRenderBillboards();
+	void	UnBindRenderBillboards();
+
+	void	BindRenderStretchedBillboards();
+	void	UnBindRenderStretchedBillboards();
+
+	void	BindRenderInstances();
+	void	UnBindRenderInstances();
+
 	void	BindTerrainDepth();
 	void	UnBindTerrainDepth();
 	void	BindTerrainPreview();
@@ -184,6 +193,9 @@ protected:
 	nvFX::IPass*        fx_passSimulate;
 	*/
 	nvFX::ITechnique*   fx_TechRenderPoints;
+	nvFX::ITechnique*   fx_TechRenderBillboards;
+	nvFX::ITechnique*   fx_TechRenderStretchedBillboards;
+	nvFX::ITechnique*   fx_TechRenderInstances;
 	nvFX::IPass*        fx_passRender;
 	
 	nvFX::ITechnique	*fx_TechTerrainPrep;

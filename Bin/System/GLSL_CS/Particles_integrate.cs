@@ -21,10 +21,16 @@ uniform int		gNumParticles;
 uniform float	DeltaTimeSecs;
 uniform	int		gNumCollisions;
 
+uniform vec4	gFloor;				// in x - floor friction, in y - level, in w - use floor level
+
 #define		USE_COLLISIONS		gNumCollisions > 0
 
 #define		COLLISION_SPHERE		1.0
 #define		COLLISION_TERRIAN		4.0
+
+#define		USE_FLOOR			gFloor.w
+#define		FLOOR_FRICTION		gFloor.y
+#define		FLOOR_LEVEL			gFloor.z
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TYPES AND DATA BUFFERS
@@ -92,8 +98,20 @@ void SphereConstraint(TCollision data, inout vec3 x)
 {
 	vec3 delta = x - data.position.xyz;
 	float dist = length(delta);
-	if (dist < data.radius) {
-		x = data.position.xyz + delta*(data.radius / dist);
+	float radius = data.radius * data.velocity.w; // + size;
+
+	if (dist < radius) {
+		vec4 untransformed = data.invtm * vec4(x, 1.0);
+		dist = length(untransformed.xyz);
+		radius = data.radius; // + size / data.velocity.w;
+
+		if (dist < radius)
+		{
+			vec3 newx = radius * normalize(untransformed.xyz);
+			untransformed = data.tm * vec4(newx, 1.0);
+
+			x = mix(untransformed.xyz, x, data.terrainScale.w);
+		}
 	}
 }
 
@@ -102,7 +120,6 @@ void TerrainConstraint(TCollision data, inout vec3 pos)
 {
 	vec3 scale = data.terrainScale.xyz;
 	vec3 offset = data.position.xyz;
-	
 	
 	if (pos.x < offset.x || pos.x > offset.x+scale.x || pos.z < offset.z || pos.z > offset.z+scale.z
 		|| pos.y < offset.y || pos.y > data.terrainSize.z )
@@ -142,12 +159,14 @@ void main()
 	// Read position and velocity
 	vec4 pos = particleBuffer.particles[flattened_id].Pos;
 	vec4 vel = particleBuffer.particles[flattened_id].Vel;
-	
+	vec4 rotVel = particleBuffer.particles[flattened_id].RotVel;
+
 	float lifetime = vel.w;
 	
 	if (lifetime <= 0.0)
 		return;
 	
+	vel.xyz = vel.xyz + rotVel.xyz;
 	pos.xyz = pos.xyz + vel.xyz * DeltaTimeSecs;
 	
 	if (USE_COLLISIONS)
@@ -166,9 +185,10 @@ void main()
 			}
 		}
 	}
-	/*
+	
 	if (USE_FLOOR > 0.0) 
 		FloorConstraint(pos.xyz, FLOOR_LEVEL);
-	*/
+	
+	particleBuffer.particles[flattened_id].Vel = vel;
 	particleBuffer.particles[flattened_id].Pos = pos;	// in w we store lifetime
 }

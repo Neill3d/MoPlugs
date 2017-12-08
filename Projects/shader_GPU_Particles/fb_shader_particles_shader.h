@@ -274,6 +274,7 @@ public:
 
 	// Common graphic parameters
 	FBPropertyBool								PointSmooth;
+	FBPropertyBool								PointFalloff;
 	FBPropertyBaseEnum<FBParticlePrimitive>		PrimitiveType;		//!< type of a particle shape (point, billboard, geometry instance, etc.)
 	FBPropertyListObject						InstanceObject;		//!< draw this object as an instance
 	// ?! grab texture from the diffuse channel of an instance object

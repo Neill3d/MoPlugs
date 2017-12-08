@@ -89,6 +89,7 @@ const char *gShadingPropNames [ePropShadingCount] = {
 	"Inherit Emitter Colors",
 
 	"Point Smooth",
+	"Point Falloff",
 	"Primitive Type",
 
 	"Instance Object",

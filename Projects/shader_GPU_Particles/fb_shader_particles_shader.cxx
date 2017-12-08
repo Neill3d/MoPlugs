@@ -232,6 +232,7 @@ void GPUshader_Particles::AddPropertiesToPropertyViewManager()
 	AddPropertyViewForParticles("Instance Object", "Particle visualization.Particle Shape");
 
 	AddPropertyViewForParticles("Point Smooth", "Particle visualization");
+	AddPropertyViewForParticles("Point Falloff", "Particle visualization");
 	AddPropertyViewForParticles("Texture Object", "Particle visualization");
 	AddPropertyViewForParticles("Shade Mode", "Particle visualization");
 	AddPropertyViewForParticles("Affecting Lights", "Particle visualization");
@@ -442,6 +443,7 @@ bool GPUshader_Particles::FBCreate()
 	// render properties
 	//
 	FBPropertyPublish( this, PointSmooth, "Point Smooth", nullptr, nullptr );
+	FBPropertyPublish( this, PointFalloff, "Point Falloff", nullptr, nullptr );
 	FBPropertyPublish( this, PrimitiveType, "Primitive Type", nullptr, nullptr );
 	FBPropertyPublish( this, InstanceObject, "Instance Object", nullptr, nullptr );
 	FBPropertyPublish( this, TextureObject, "Texture Object", nullptr, nullptr );
@@ -480,6 +482,7 @@ bool GPUshader_Particles::FBCreate()
 	FBPropertyPublish( this, SizeCurveHolder, "SizeCurveHolder", nullptr, nullptr );
 
 	PointSmooth = true;
+	PointFalloff = false;
 	PrimitiveType = kFBParticlePoints;
 	InstanceObject.SetFilter(FBModel::GetInternalClassId() );
 	InstanceObject.SetSingleConnect(true);
@@ -1193,10 +1196,13 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 		}
 
 		FBVector3d pos;
-		FBMatrix vp, mv;
+		FBMatrix vp, mv, invMV;
 		lCamera->GetCameraMatrix( vp, kFBProjection );
 		lCamera->GetCameraMatrix( mv, kFBModelView );
 		lCamera->GetVector(pos);
+
+		FBMatrixInverse(invMV, mv);
+		FBMatrixTranspose(invMV, invMV);
 
 		//
 		//
@@ -1205,11 +1211,15 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 		{
 			renderData.gVP.mat_array[i] = (float) vp[i];
 			renderData.gMV.mat_array[i] = (float) mv[i];
+			renderData.gInvTransposeMV.mat_array[i] = (float) invMV[i];
 		}
 		for (int i=0; i<3; ++i)
 		{
 			renderData.gCameraPos.vec_array[i] = (float) pos[i];
 		}
+
+		renderData.gScreenSize.z = (float) lCamera->CameraViewportWidth;
+		renderData.gScreenSize.w = (float) lCamera->CameraViewportHeight;
 	}
 	else
 	{
@@ -1218,7 +1228,9 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 
 		renderData.gVP = cache.p4;
 		renderData.gMV = cache.mv4;
+		renderData.gInvTransposeMV = cache.mvInv4;
 		renderData.gCameraPos = cache.pos;
+		renderData.gScreenSize = vec4(0.0f, 0.0f, (float)cache.width, (float)cache.height);
 	}
 
 	
@@ -1235,6 +1247,9 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 			texture->OGLInit(pRenderOptions);
 			texId = texture->TextureOGLId;
 		}
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texId);
 	}
 
 	FBColorAndAlpha color = Color;
@@ -1242,18 +1257,19 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 	renderData.gUseColorCurve = (UseColorCurve) ? 1.0f : 0.0f;
 	renderData.gTransparencyFactor = (float) (0.01 * TransparencyFactor);
 
-	renderData.gBillboardSize = (float) Size;
+	renderData.gPointFalloff = (true == PointFalloff) ? 1.0f : 0.0f;
 	renderData.gMinPointScale = (float) (0.01 * MinPointScale);
 	renderData.gMaxPointScale = (float) (0.01 * MaxPointScale);
 	renderData.gPointScaleDistance = (float) (PointScaleDistance);
 	renderData.gUseSizeCurve = (UseSizeCurve) ? 1.0f : 0.0f;
+	renderData.gUseColorMap = (texId > 0) ? 1.0f : 0.0f;
 
 	pParticles->UploadRenderDataOnGPU();
 
 	pParticles->SetRenderSizeAndColorCurves(mSizeCurve.GetTextureId(), mColorCurve.GetTextureId() );
 	
 	glPushClientAttrib(GL_ALL_ATTRIB_BITS);
-	pParticles->RenderParticles(PrimitiveType, PointSmooth);
+	pParticles->RenderParticles(PrimitiveType, PointSmooth, PointFalloff);
 	glPopClientAttrib();
 	CHECK_GL_ERROR();
 #ifdef _DEBUG
@@ -1542,15 +1558,21 @@ bool GPUshader_Particles::UpdateInstanceData()
 	if (pVertexData == nullptr)
 		return false;
 
-	mParticleConnections.SetInstanceData(
-		pVertexData->GetVertexCount(), 
+	TInstanceVertexStream stream = { pVertexData->GetVertexCount(), 
 		pVertexData->GetVertexArrayVBOId(kFBGeometryArrayID_Point), 
 		pVertexData->GetVertexArrayVBOId(kFBGeometryArrayID_Normal), 
 		pVertexData->GetUVSetVBOId(),
 		pVertexData->GetIndexArrayVBOId(),
-		pVertexData->GetSubPatchCount() );
+		pVertexData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Point),
+		pVertexData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Normal),
+		pVertexData->GetUVSetVBOOffset(),
+		0
+	};
 
-	for (int i=0, count=pVertexData->GetSubPatchCount(); i<count; ++i)
+	const int patchCount = pVertexData->GetSubPatchCount();
+	mParticleConnections.SetInstanceVertexStream(stream, patchCount );
+
+	for (int i=0; i<patchCount; ++i)
 	{
 		mParticleConnections.SetInstancePatchData( i, pVertexData->GetSubPatchIndexOffset(i), pVertexData->GetSubPatchIndexSize(i) );
 	}

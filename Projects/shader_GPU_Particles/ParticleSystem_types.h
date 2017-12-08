@@ -116,11 +116,14 @@ struct	renderBlock
 
 	mat4		gMV;
 	mat4		gVP;
+	mat4		gInvTransposeMV;
 
 	vec4		gCameraPos;
+	vec4		gScreenSize;
+	
 	vec4		gColor;
 
-	float		gBillboardSize;
+	float		gPointFalloff;
 	float		gUseSizeCurve;
 	float		gUseColorCurve;
 	float		gTransparencyFactor;
@@ -128,7 +131,7 @@ struct	renderBlock
 	float		gMinPointScale;
 	float		gMaxPointScale;
 	float		gPointScaleDistance;
-	float		gRenderTemp2;
+	float		gUseColorMap;
 };
 
 //
@@ -161,7 +164,7 @@ struct TTriangle
 };
 
 // instance model
-struct TInstanceVertex
+struct TInstanceVertexStream
 {
 	unsigned int	vertexCount;
 
@@ -170,6 +173,11 @@ struct TInstanceVertex
 	GLuint			uvId;
 
 	GLuint			indexId;
+
+	void			*positionOffset;
+	void			*normalOffset;
+	void			*uvOffset;
+	void			*indexOffset;
 };
 
 struct TMeshPatch

@@ -75,12 +75,14 @@ ConstantBuffer global renderBlock
 {
 	uniform		mat4			gMV;
 	uniform		mat4			gVP;
-	
+	uniform		mat4			gInvTransposeMV;
+
 	uniform		vec4			gCameraPos;
-	
+	uniform		vec4			gScreenSize;
+
 	uniform		vec4			gColor;
 	
-	uniform 	float			gBillboardSize;
+	uniform 	float			gPointFalloff;
 	uniform		float			gUseSizeCurve;
 	uniform		float			gUseColorCurve;
 	uniform		float			gTransparencyFactor;
@@ -88,7 +90,7 @@ ConstantBuffer global renderBlock
 	uniform		float			gMinPointScale;
 	uniform		float			gMaxPointScale;
 	uniform		float			gPointScaleDistance;
-	uniform		float			gRenderTemp2;
+	uniform		float			gUseColorMap;
 }
 
 //////////////////////////////////////////////////////////// terrainBlock
@@ -717,22 +719,21 @@ namespace Render
 			float gl_PointSize;
         };
 
+		layout(binding=6) uniform sampler1D	ColorCurve;
+
 		void main()                                                                         
 		{           
-			float size = Position.w; // gBillboardSize;
+			float spriteSize = Position.w; // gBillboardSize;
 		
 			// Calculate point scale based on distance from the viewer
 			// to compensate for the fact that gl_PointSize is the point
 			// size in rasterized points / pixels.
-			float cameraDist = distance(Position.xyz, gCameraPos.xyz);
-			float pointScale = 1.0 - (cameraDist / gPointScaleDistance);
-			pointScale = max(pointScale, gMinPointScale);
-			pointScale = min(pointScale, gMaxPointScale);
 			
-			vec4 vPosition = gMV * vec4(Position.xyz, 1.0);
-			
-			gl_Position = gVP * vPosition;  
-			gl_PointSize = size * pointScale;
+			vec4 eyePos = gMV * vec4(Position.xyz, 1.0);
+			vec4 projVoxel = gVP * vec4(spriteSize,spriteSize,eyePos.z,eyePos.w);
+			vec2 projSize = gScreenSize.zw * projVoxel.xy / projVoxel.w;
+			gl_PointSize = 0.25 * (projSize.x+projSize.y);
+			gl_Position = gVP * eyePos;
 
 			// float normLife = Age / lifetime;
 			life = clamp(Rotation.w / (Velocity.w+0.001), 0.0, 1.0);
@@ -740,44 +741,54 @@ namespace Render
 			pcolor = Color;
 			
 			// clip the launchers
-			if (size < 0.0)
+			if (spriteSize <= 0.0)
+			{
 				gl_Position.w = 0.0;
-			
-			wv = vPosition.xyz;
+			}
+			else
+			if (gUseColorCurve > 0.0)
+			{
+				pcolor = pcolor * texture(ColorCurve, life);
+			}
+			pcolor.w *= gTransparencyFactor;
+
+			wv = eyePos.xyz;
 		} 
 	}
 	
 	
 	GLSLShader FS_Points
-	{
-		//uniform sampler2D gColorMap;                                                        
+	{                                                 
 		in float life;
 		in vec4 	pcolor;
 		in vec3		wv;
-		//out vec4 FragColor;                                                                 
+		in vec2 gl_PointCoord ;                                                                
 
 		layout(location=0) out vec4 	outColor;
 		layout(location=1) out vec4		outNormal;	// output a view space normal
 		layout(location=2) out vec4		outMask;
 		layout(location=3) out vec4		outPosition;
 		
-		layout(binding=6) uniform sampler1D	ColorCurve;
+		layout(binding=0) uniform sampler2D		ColorSampler;
 
 		void main()                                                                         
 		{       
 			//if (life >= 0.99 || life == 0.0) discard;
-
-			// color should be taken from the particles (can be part of simulation)
-			vec4 color = pcolor;
-			
-			if (gUseColorCurve > 0.0)
+		
+			outColor = pcolor;
+					
+			if (gUseColorMap > 0.0)
 			{
-				color = color * texture(ColorCurve, life);
+				outColor = pcolor * texture(ColorSampler, gl_PointCoord);
 			}
-			
-			color.w *= gTransparencyFactor;
-			outColor = color;
-			
+
+			if (gPointFalloff > 0.0)
+			{
+				vec2 v = vec2(0.5) - gl_PointCoord.st;
+				float f = clamp(1.0 - 2.0 * sqrt( v.x * v.x + v.y * v.y ), 0.0, 1.0);
+				outColor.a = outColor.a * f;
+			}
+
 			outNormal = vec4(normalize(wv), 1.0); // vec4(0.0, 1.0, 0.0, 0.0); // vec4( normalize(inNw), albedo.w );
 			//outNormal = normalize(inNw);
 			
@@ -785,6 +796,313 @@ namespace Render
 			outMask = vec4(0.0); // theShader->mask;
 		}
 	}
+
+	/////////////////////////////////////////////////////////////////
+	// Billboard
+	/*	
+	GLSLShader VS_Billboard
+	{
+		layout (location = 0) in vec4 Position;
+		out float life0;
+
+		out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+
+		void main()                                                                         
+		{                                                                                   
+			gl_Position = gMV * vec4(Position.xyz, 1.0);   
+			life0 = Position.w;
+		} 
+	}
+	
+	GLSLShader GS_Billboard
+	{
+		layout(points) in;                                                                  
+		layout(triangle_strip) out;                                                         
+		layout(max_vertices = 4) out;                                                       
+		in float life0[];
+
+		out vec2 TexCoord;  
+		out float life1;                                                                
+
+		float Epsilon = 0.001;
+
+		void main()                                                                         
+		{
+			float size = gBillboardSize;
+			if (UseSizeCurve == 1)
+			{
+				size = texture( SizeCurve, life0[0] ).r;
+			}
+			
+			vec4 Pos = gl_in[0].gl_Position;
+			
+			//
+			vec2 va = Pos.xy + vec2(-0.5, -0.5) * size;
+			gl_Position = gVP * vec4(va, Pos.zw);                                             
+			TexCoord = vec2(0.0, 0.0);
+			life1 = life0[0];
+			EmitVertex();                                                                   
+
+			vec2 vb = Pos.xy + vec2(-0.5, 0.5) * size;
+			gl_Position = gVP * vec4(vb, Pos.zw);                                             
+			TexCoord = vec2(0.0, 1.0);    
+			life1 = life0[0];	
+			EmitVertex();                                                                   
+
+			vec2 vd = Pos.xy + vec2(0.5, -0.5) * size;
+			gl_Position = gVP * vec4(vd, Pos.zw);                                             
+			TexCoord = vec2(1.0, 0.0);                                                      
+			life1 = life0[0];
+			EmitVertex();                                                                   
+
+			vec2 vc = Pos.xy + vec2(0.5, 0.5) * size;
+			gl_Position = gVP * vec4(vc, Pos.zw);                                             
+			TexCoord = vec2(1.0, 1.0);                                                      
+			life1 = life0[0];
+			EmitVertex();                                                                   
+
+			EndPrimitive();                                                                 
+		} 
+	}
+	
+	GLSLShader FS_Billboard
+	{
+
+		#version 330                                                                        
+
+		uniform int gUseColorMap;
+		uniform sampler2D gColorMap;                                                        
+		uniform float gAlpha;
+
+		uniform	vec4	gColor;
+
+		uniform int			UseColorCurve;
+		uniform sampler1D	ColorCurve;
+
+		in vec2 TexCoord;                                                                   
+		out vec4 FragColor;                                                                 
+
+		in float life1;
+
+		void main()                                                                         
+		{   
+			if (life1 >= 0.99) discard;
+		  
+			vec4 color = gColor;
+			
+			if (UseColorCurve == 1)
+			{
+				color = texture(ColorCurve, life1);
+			}
+			
+			if (gUseColorMap == 1)
+			{
+				color = color * texture2D(gColorMap, TexCoord);
+				color.a *= gAlpha;
+			}
+			
+			FragColor = color;
+		}
+	}
+
+	
+	GLSLShader VS_StretchedBillboard
+	{
+		
+		layout (location = 0) in vec4 OldPosition;                                             
+		layout (location = 1) in vec4 Position;
+		out float life0;
+		out vec3 oldPosition0;
+
+		out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+
+		void main()                                                                         
+		{                                                                                   
+			gl_Position = vec4(Position.xyz, 1.0);   
+			life0 = Position.w;
+			oldPosition0 = OldPosition.xyz;
+		} 	
+	}
+
+	GLSLShader GS_StretchedBillboard
+	{
+
+		layout(points) in;                                                                  
+		layout(triangle_strip) out;                                                         
+		layout(max_vertices = 4) out;                                                       
+		in float life0[];
+		in vec3 oldPosition0[];
+
+		out vec2 TexCoord;  
+		out float life1;                                                                
+
+		float Epsilon = 0.001;
+
+		void main()                                                                         
+		{
+			mat3 Modelview = mat3(gMV);
+			
+			float size = gBillboardSize;
+			if (UseSizeCurve == 1)
+			{
+				size = texture( SizeCurve, life0[0] ).r;
+			}
+			
+			vec3 p = gl_in[0].gl_Position.xyz;
+			float w = size * 0.5;
+			float h = w * 2.0;
+			vec3 u = Modelview * (p - oldPosition0[0]);
+			
+			// Determine 't', which represents Z-aligned magnitude.
+			// By default, t = 0.0.
+			// If velocity aligns with Z, increase t towards 1.0.
+			// If total speed is negligible, increase t towards 1.0.
+			float t = 0.0;
+			float nz = abs(normalize(u).z);
+			if (nz > 1.0 - Epsilon)
+				t = (nz - (1.0 - Epsilon)) / Epsilon;
+			else if (dot(u,u) < Epsilon)
+				t = (Epsilon - dot(u,u)) / Epsilon;
+				
+			// Compute screen-space velocity:
+			u.z = 0.0;
+			u = normalize(u);
+		 
+			// Lerp the orientation vector if screen-space velocity is negligible:
+			u = normalize(mix(u, vec3(1,0,0), t));
+			h = mix(h, w, t);
+
+			// Compute the change-of-basis matrix for the billboard:
+			vec3 v = vec3(-u.y, u.x, 0);
+			vec3 a = u * Modelview;
+			vec3 b = v * Modelview;
+			vec3 c = cross(a, b);
+			mat3 basis = mat3(a, b, c);
+
+			// Compute the four offset vectors:
+			vec3 N = basis * vec3(0,w,0);
+			vec3 S = basis * vec3(0,-w,0);
+			vec3 E = basis * vec3(-h,0,0);
+			vec3 W = basis * vec3(h,0,0);
+			
+			vec3 va = p+S+W;
+			vec3 vb = p+N+W;
+			vec3 vd = p+S+E;
+			vec3 vc = p+N+E;
+			
+			//
+			gl_Position = gVP * gMV * vec4(va, 1.0);                                             
+			TexCoord = vec2(0.0, 0.0);
+			life1 = life0[0];
+			EmitVertex();                                                                   
+
+			gl_Position = gVP * gMV * vec4(vb, 1.0);                                             
+			TexCoord = vec2(0.0, 1.0);    
+			life1 = life0[0];	
+			EmitVertex();                                                                   
+
+			gl_Position = gVP * gMV * vec4(vd, 1.0);                                             
+			TexCoord = vec2(1.0, 0.0);                                                      
+			life1 = life0[0];
+			EmitVertex();                                                                   
+
+			gl_Position = gVP * gMV * vec4(vc, 1.0);                                             
+			TexCoord = vec2(1.0, 1.0);                                                      
+			life1 = life0[0];
+			EmitVertex();                                                                   
+
+			EndPrimitive();                                                                 
+		} 
+	}
+	*/
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// INSTANCES
+		
+	GLSLShader VS_Instancing
+	{
+
+		layout (location = 0) in vec4 Position;                                             
+		layout (location = 1) in vec4 Normal;
+		// particle attributes
+		layout (location = 4) in vec3 ParticlePosition;
+		layout (location = 5) in vec4 Velocity; // .w - Total Lifetime
+		layout (location = 6) in vec4 Color;
+		layout (location = 7) in vec4 Rotation; // .w - Age
+
+		out vec3 lNormal;
+		out float life;
+		out vec4 pcolor;
+		out vec3	wv;
+
+		out gl_PerVertex {
+            vec4 gl_Position;		// 16 bytes
+        };
+
+		layout(binding=6) uniform sampler1D	ColorCurve;
+
+		void main()                                                                         
+		{   
+			float size = Position.w; // gBillboardSize;
+			// float normLife = Age / lifetime;
+			life = clamp(Rotation.w / (Velocity.w+0.001), 0.0, 1.0);
+
+			vec4 pos = Position * size + vec4(ParticlePosition, 1.0);
+			vec4 vPosition = gMV * vec4(pos.xyz, 1.0);
+			gl_Position = gVP * vPosition;
+			wv = vPosition.xyz;
+
+			vec4 n = gInvTransposeMV * vec4(Normal.xyz, 1.0);
+			lNormal = n.xyz;
+
+			//
+			pcolor = Color;
+			
+			// clip the launchers
+			if (size <= 0.0)
+			{
+				gl_Position.w = 0.0;
+			}
+			else
+			if (gUseColorCurve > 0.0)
+			{
+				pcolor = pcolor * texture(ColorCurve, life);
+			}
+			pcolor.w *= gTransparencyFactor;
+		} 
+	}
+
+	GLSLShader FS_Instancing
+	{
+		
+		in vec3 lNormal;
+		in float life;
+		in vec4 pcolor;
+		in vec3	wv;
+		                                                             
+		layout(location=0) out vec4 	outColor;
+		layout(location=1) out vec4		outNormal;	// output a view space normal
+		layout(location=2) out vec4		outMask;
+		layout(location=3) out vec4		outPosition;
+		
+		void main()                                                                         
+		{
+			
+			vec3 n = normalize(lNormal);
+			float diffuse = clamp(dot( normalize(lNormal), normalize(gCameraPos.xyz) ), 0.0, 1.0);
+			
+			//
+			outColor = vec4(diffuse * pcolor.xyz, pcolor.w);
+						
+			outNormal = vec4(n, 1.0); // vec4(0.0, 1.0, 0.0, 0.0); 
+			outPosition = vec4(wv, 1.0); // fMesh->lightmap);
+			outMask = vec4(0.0); // theShader->mask;
+		}
+	}
+
 }
 
 // DONE: convert glsl 330 into glsl 420 syntax
@@ -951,6 +1269,7 @@ Technique emitPreGenerated
 	}
 }
 
+///////////////////////////////////////////
 Technique renderPoints
 {
 	Pass p0
@@ -959,7 +1278,37 @@ Technique renderPoints
 		FragmentProgram = Render::FS_Points;
 	}
 }
+/*
+Technique renderBillboards
+{
+	Pass p0
+	{
+		VertexProgram = Render::VS_Billboard;
+		GeometryProgram = Render::GS_Billboard;
+		FragmentProgram = Render::FS_Billboard;
+	}
+}
 
+Technique renderStretchedBillboards
+{
+	Pass p0
+	{
+		VertexProgram = Render::VS_StretchedBillboard;
+		GeometryProgram = Render::GS_StretchedBillboard;
+		FragmentProgram = Render::FS_Billboard;
+	}
+}
+*/
+Technique renderInstances
+{
+	Pass p0
+	{
+		VertexProgram = Render::VS_Instancing;
+		FragmentProgram = Render::FS_Instancing;
+	}
+}
+
+////////////////////////////////////////////
 Technique terrainPrepare
 {
 	Pass p0

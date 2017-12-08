@@ -12,6 +12,7 @@
 
 
 #include "ParticleSystem.h"
+#include <vector>
 
 using namespace GPUParticles;
 
@@ -53,20 +54,21 @@ void ParticleSystem::SetRenderSizeAndColorCurves( GLuint sizeTextureId, GLuint c
 	mColorTextureId = colorTextureId;
 }
 
-void ParticleSystem::RenderParticles(int type, const bool pointSmooth)
+void ParticleSystem::RenderParticles(int type, const bool pointSmooth, const bool pointFalloff)
 {
 	//GLuint lSizeTexId = mSizeCurve.GetTextureId();
 	//GLuint lColorTexId = mColorCurve.GetTextureId();
 
 	glDisable(GL_RASTERIZER_DISCARD);
-	
+	/*
+	// TODO: depricated, size is computed inside the simulation cycle
 	if (mSizeTextureId > 0 && mRenderData.gUseSizeCurve > 0.0f)
 	{
 		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_1D, mSizeTextureId);
 		glActiveTexture(GL_TEXTURE0);
 	}
-	
+	*/
 	if (mColorTextureId > 0 && mRenderData.gUseColorCurve > 0.0f)
 	{
 		glActiveTexture(GL_TEXTURE6);
@@ -74,45 +76,44 @@ void ParticleSystem::RenderParticles(int type, const bool pointSmooth)
 		glActiveTexture(GL_TEXTURE0);
 	}
 
-	if (pointSmooth)
-	{
-		glEnable(GL_POINT_SMOOTH);
-	}
-
+	
 	//
-	//
-	RenderPoints();
-
-	if (pointSmooth)
-	{
-		glDisable(GL_POINT_SMOOTH);
-	}
-
-	/*
 	switch(type)
 	{
 	case 0: // points
-		RenderPoints();
-		break;
+		{
+			if (pointFalloff || mRenderData.gUseColorMap > 0.0f)
+				glEnable(GL_POINT_SPRITE);
+			else if (pointSmooth)
+				glEnable(GL_POINT_SMOOTH);
+	
+			RenderPoints();
+
+			if (pointFalloff || mRenderData.gUseColorMap > 0.0f)
+				glDisable(GL_POINT_SPRITE);
+			else if (pointSmooth)
+				glDisable(GL_POINT_SMOOTH);
+	
+		} break;
 	case 1: // billboard
-		RenderBillboards();
+		//RenderBillboards();
 		break;
 	case 2: // stretched billboard
-		RenderStretchedBillboards();
+		//RenderStretchedBillboards();
 		break;
 	case 3:
 		RenderInstances();
 		break;
 	}
-	*/
-
+	
+	/*
 	if (mSizeTextureId > 0 && mRenderData.gUseSizeCurve > 0.0f)
 	{
 		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_1D, 0);
 		glActiveTexture(GL_TEXTURE0);
 	}
-			
+			*/
 	if (mColorTextureId > 0 && mRenderData.gUseColorCurve > 0.0f)
 	{
 		glActiveTexture(GL_TEXTURE6);
@@ -121,10 +122,13 @@ void ParticleSystem::RenderParticles(int type, const bool pointSmooth)
 	}
 }
 
+
 void ParticleSystem::RenderPoints()
 {
+	
 	//glPointSize(mPointSize);
-	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+	//glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+	glEnable(GL_PROGRAM_POINT_SIZE);
 
 	mShader->BindRenderPoints();
 
@@ -149,7 +153,9 @@ void ParticleSystem::RenderPoints()
 
 	mShader->UnBindRenderPoints();
 
-	glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+	//glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+	glDisable(GL_PROGRAM_POINT_SIZE);
+	
 }
 /*
 void ParticleSystem::RenderBillboards()
@@ -313,63 +319,54 @@ void ParticleSystem::RenderStretchedBillboards()
 	checkGlError("end rendering stretched billboard");
 }
 
+
+*/
+
 void ParticleSystem::RenderInstances()
 {
-	if (mInstanceMesh.size() > 0)
+	if ( nullptr!=mConnections && mConnections->GetNumberOfInstanceSubPatches() > 0 )
 	{
-		
+		const TInstanceVertexStream &stream = mConnections->GetInstanceVertexStream();
+		std::vector<TMeshPatch> &mesh = mConnections->GetInstanceMeshVector();
 		//pModelVertexData->EnableOGLVertexData();
-	
-		GLuint posId = mInstanceVertex.positionId;
-		GLuint norId = mInstanceVertex.normalId;
 		
-		glBindBuffer(GL_ARRAY_BUFFER, posId);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(float)*4, (const GLvoid*) 0); // position
-		glBindBuffer(GL_ARRAY_BUFFER, norId);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float)*4, (const GLvoid*) 0); // normals
 
-		mInstancingProgram.bind();
-		mInstancingProgram.SetVP(VP);
-		mInstancingProgram.SetMV(MV);
-		mInstancingProgram.SetCameraPosition(vec3(100.0, 50.0, 0.0));
-			
-		mInstancingProgram.SetUseSizeCurve(mUseSizeCurve);
-		if (lSizeTexId && mUseSizeCurve)
-		{
-			mInstancingProgram.SetSizeCurve(5);
+		glEnableVertexAttribArray(4);
+		glEnableVertexAttribArray(5);
+		glEnableVertexAttribArray(6);
+		glEnableVertexAttribArray(7);
 
-			glActiveTexture(GL_TEXTURE5);
-			glBindTexture(GL_TEXTURE_1D, lSizeTexId);
-			glActiveTexture(GL_TEXTURE0);
-		}
-			
-		mInstancingProgram.SetUseColorCurve(mUseColorCurve);
-		if (lColorTexId && mUseColorCurve)
-		{
-			mInstancingProgram.SetColorCurve(2);
+		glBindBuffer(GL_ARRAY_BUFFER, stream.positionId);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(float)*4, (const GLvoid*) stream.positionOffset); // position
+		
+		glBindBuffer(GL_ARRAY_BUFFER, stream.normalId);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float)*4, (const GLvoid*) stream.normalOffset); // normals
 
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_1D, lColorTexId);
-			glActiveTexture(GL_TEXTURE0);
-		}
+		mShader->BindRenderInstances();
+
 
 		glBindBuffer(GL_ARRAY_BUFFER, mParticleBuffer[mCurrTFB]);
-		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)16);  // position
+		
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)0);         // position, normalized lifetime
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)16);        // velocity, lifetime
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)32);        // color
+		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)48);        // age milliseconds
+
 		glVertexAttribDivisor(4, 1);
+		glVertexAttribDivisor(5, 1);
+		glVertexAttribDivisor(6, 1);
+		glVertexAttribDivisor(7, 1);
 
 		int baseVertex = 0;
 		int indicesCount = 0;
 
-		GLuint elementId = mInstanceVertex.indexId;
-
-		if (elementId)
+		if (stream.indexId > 0)
 		{
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementId);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, stream.indexId);
 
-			for (auto iter=begin(mInstanceMesh); iter!=end(mInstanceMesh); ++iter)
+			for (auto iter=begin(mesh); iter!=end(mesh); ++iter)
 			{
 				baseVertex = iter->offset;
 				indicesCount = iter->size;
@@ -385,26 +382,16 @@ void ParticleSystem::RenderInstances()
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(4);
-		mInstancingProgram.unbind();
-
-		if (lSizeTexId && mUseSizeCurve)
-		{
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_1D, 0);
-			glActiveTexture(GL_TEXTURE0);
-		}
-			
-		if (lColorTexId && mUseColorCurve)
-		{
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_1D, 0);
-			glActiveTexture(GL_TEXTURE0);
-		}
+		glDisableVertexAttribArray(5);
+		glDisableVertexAttribArray(6);
+		glDisableVertexAttribArray(7);
+		
+		mShader->UnBindRenderInstances();
 
 		//pModelVertexData->DisableOGLVertexData();
 	}
 }
-*/
+
 void ParticleSystem::SwapBuffers()
 {
 	//

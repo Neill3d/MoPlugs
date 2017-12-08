@@ -91,6 +91,7 @@ enum EShadingProperties
 	ePropertyInheritEmitterColor,
 
 	ePropShadingPointSmooth,
+	ePropShadingPointFalloff,
 	ePropShadingPrimitiveType,
 	ePropShadingInstanceObject,
 	ePropShadingTextureObject,

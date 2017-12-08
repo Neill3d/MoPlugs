@@ -815,4 +815,12 @@ void main()
 	particleBuffer.particles[flattened_id].Pos = pos; // pos.w - particle size
 	particleBuffer.particles[flattened_id].Vel = vel;	// in w we store lifetime
 	particleBuffer.particles[flattened_id].Rot = vec4(rot.xyz, Age);
+
+	/*
+	// noise3 based color
+	
+	vec4 color = particleBuffer.particles[flattened_id].Color;
+	float a = clamp(1.0 - snoise( 0.03 * pos.xyz + 0.01 * vel.xyz ), 0.0, 1.0);
+	particleBuffer.particles[flattened_id].Color = vec4(a, a, a, color.w);
+	*/
 }

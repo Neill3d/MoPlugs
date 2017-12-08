@@ -128,14 +128,9 @@ void ParticleSystemConnections::UploadForcesToGPU()
 }
 
 
-void ParticleSystemConnections::SetInstanceData( unsigned int vertexCount, GLuint posId, GLuint norId, GLuint uvId, GLuint indexId, unsigned int patchCount )
+void ParticleSystemConnections::SetInstanceVertexStream( const TInstanceVertexStream &stream, unsigned int patchCount )
 {
-	mInstanceVertex.vertexCount = vertexCount;
-	mInstanceVertex.positionId = posId;
-	mInstanceVertex.normalId = norId;
-	mInstanceVertex.uvId = uvId;
-	mInstanceVertex.indexId = indexId;
-
+	mInstanceVertex = stream;
 	mInstanceMesh.resize(patchCount);
 }
 

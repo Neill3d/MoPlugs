@@ -50,7 +50,7 @@ public:
 	void	SetForceData(const int index, const TForce &data);
 	void	UploadForcesToGPU();
 
-	void	SetInstanceData( unsigned int vertexCount, GLuint posId, GLuint norId, GLuint uvId, GLuint indexId, unsigned int patchCount );
+	void	SetInstanceVertexStream( const TInstanceVertexStream &stream, unsigned int patchCount  );
 	void	SetInstancePatchData( const int index, unsigned int offset, unsigned int size );
 
 	const int GetNumberOfCollisions() {
@@ -79,9 +79,22 @@ public:
 		return mTextureTerrain;
 	}
 
+	const int GetNumberOfInstanceSubPatches() const
+	{
+		return (int) mInstanceMesh.size();
+	}
+
+	const TInstanceVertexStream &GetInstanceVertexStream() const
+	{
+		return mInstanceVertex;
+	}
+	std::vector<TMeshPatch> &GetInstanceMeshVector() {
+		return mInstanceMesh;
+	}
+
 protected:
 
-	TInstanceVertex				mInstanceVertex;
+	TInstanceVertexStream		mInstanceVertex;
 	std::vector<TMeshPatch>		mInstanceMesh;
 
 	std::vector<TCollision>		mCollisionData;
@@ -220,7 +233,7 @@ public:
 
 	// textures for size and color lookup ( 0 - to disable )
 	void	SetRenderSizeAndColorCurves( GLuint sizeTextureId, GLuint colorTextureId );
-    void RenderParticles(int type, const bool pointSmooth);
+    void RenderParticles(int type, const bool pointSmooth, const bool pointFalloff);
 
 	void SetConnections(ParticleSystemConnections	*pConnections)
 	{

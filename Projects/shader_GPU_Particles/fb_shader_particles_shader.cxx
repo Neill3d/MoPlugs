@@ -1233,14 +1233,17 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 		renderData.gScreenSize = vec4(0.0f, 0.0f, (float)cache.width, (float)cache.height);
 	}
 
-	
-		
+	//	
 	GLuint texId = 0;
+	FBMatrix texMat;
+	texMat.Identity();
 	FBTexture *texture = nullptr;
+	
 	if (TextureObject.GetCount() )
 	{
 		texture = (FBTexture*) TextureObject.GetAt(0);
 		texId = texture->TextureOGLId;
+		texMat = texture->GetMatrix();
 
 		if (0 == texId)
 		{
@@ -1264,12 +1267,34 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 	renderData.gUseSizeCurve = (UseSizeCurve) ? 1.0f : 0.0f;
 	renderData.gUseColorMap = (texId > 0) ? 1.0f : 0.0f;
 
+	if (texId > 0)
+		for (int i=0; i<16; ++i)
+			renderData.gTexMatrix.mat_array[i] = (float) texMat[i];
+
 	pParticles->UploadRenderDataOnGPU();
 
 	pParticles->SetRenderSizeAndColorCurves(mSizeCurve.GetTextureId(), mColorCurve.GetTextureId() );
 	
 	glPushClientAttrib(GL_ALL_ATTRIB_BITS);
-	pParticles->RenderParticles(PrimitiveType, PointSmooth, PointFalloff);
+
+	// if instances, check that model is ready to be drawn
+	bool ready = true;
+
+	if (kFBParticleInstance == PrimitiveType && InstanceObject.GetCount() > 0)
+	{
+		ready = false;
+		FBModel *pModel = (FBModel*) InstanceObject.GetAt(0);
+		if (nullptr != pModel)
+		{
+			FBModelVertexData *pData = pModel->ModelVertexData;
+			if (nullptr != pData)
+				ready = pData->IsDrawable();
+		}
+	}
+
+	if (true == ready)
+		pParticles->RenderParticles(PrimitiveType, PointSmooth, PointFalloff);
+
 	glPopClientAttrib();
 	CHECK_GL_ERROR();
 #ifdef _DEBUG
@@ -1574,7 +1599,23 @@ bool GPUshader_Particles::UpdateInstanceData()
 
 	for (int i=0; i<patchCount; ++i)
 	{
-		mParticleConnections.SetInstancePatchData( i, pVertexData->GetSubPatchIndexOffset(i), pVertexData->GetSubPatchIndexSize(i) );
+		GLuint texId = 0;
+		FBMaterial *pMaterial = pVertexData->GetSubPatchMaterial(i);
+		if (nullptr != pMaterial)
+		{
+			FBTexture *pTexture = pMaterial->GetTexture();
+			if (nullptr != pTexture)
+			{
+				texId = pTexture->TextureOGLId;
+				if ( 0 == texId )
+				{
+					pTexture->OGLInit();
+					texId = pTexture->TextureOGLId;
+				}
+			}
+		}
+		mParticleConnections.SetInstancePatchData( i, 
+			pVertexData->GetSubPatchIndexOffset(i), pVertexData->GetSubPatchIndexSize(i), texId );
 	}
 
 	return true;

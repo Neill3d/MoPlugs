@@ -89,6 +89,9 @@ ParticleShaderFX::ParticleShaderFX()
 	fx_passSimulate = nullptr;
 */
 	fx_TechRenderPoints = nullptr;
+	fx_TechRenderBillboards = nullptr;
+	fx_TechRenderStretchedBillboards = nullptr;
+	fx_TechRenderInstances = nullptr;
 	fx_passRender = nullptr;
 
 	fx_gTime = nullptr;
@@ -192,7 +195,7 @@ bool ParticleShaderFX::Initialize()
 
 		if (false == lSuccess)
 			throw std::exception( "failed to load particles effect" );
-	
+
 		//
 		programCompute = loadComputeShader(fx_computeLocation);
 	
@@ -410,6 +413,19 @@ bool ParticleShaderFX::loadEffect(const char *effectFileName)
 	fx_TechRenderPoints = fx_Effect->findTechnique("renderPoints");
 	if(fx_TechRenderPoints && (!fx_TechRenderPoints->validate()))
         return false;
+	
+	fx_TechRenderBillboards = fx_Effect->findTechnique("renderBillboards");
+	if(fx_TechRenderBillboards && (!fx_TechRenderBillboards->validate()))
+        return false;
+
+	fx_TechRenderStretchedBillboards = fx_Effect->findTechnique("renderStretchedBillboards");
+	if(fx_TechRenderStretchedBillboards && (!fx_TechRenderStretchedBillboards->validate()))
+        return false;
+
+	fx_TechRenderInstances = fx_Effect->findTechnique("renderInstances");
+	if(fx_TechRenderInstances && (!fx_TechRenderInstances->validate()))
+        return false;
+	
 	fx_passRender = fx_TechRenderPoints->getPass(0);
 
 	// terrain shaders
@@ -698,6 +714,48 @@ void ParticleShaderFX::BindRenderPoints()
 }
 
 void ParticleShaderFX::UnBindRenderPoints()
+{
+	if (fx_passRender)
+		fx_passRender->unbindProgram();
+}
+
+void ParticleShaderFX::BindRenderBillboards()
+{
+	fx_passRender = (fx_TechRenderBillboards) ? fx_TechRenderBillboards->getPass(0) : nullptr;
+
+	if (fx_passRender)
+		fx_passRender->execute();
+}
+
+void ParticleShaderFX::UnBindRenderBillboards()
+{
+	if (fx_passRender)
+		fx_passRender->unbindProgram();
+}
+
+void ParticleShaderFX::BindRenderStretchedBillboards()
+{
+	fx_passRender = (fx_TechRenderStretchedBillboards) ? fx_TechRenderStretchedBillboards->getPass(0) : nullptr;
+
+	if (fx_passRender)
+		fx_passRender->execute();
+}
+
+void ParticleShaderFX::UnBindRenderStretchedBillboards()
+{
+	if (fx_passRender)
+		fx_passRender->unbindProgram();
+}
+
+void ParticleShaderFX::BindRenderInstances()
+{
+	fx_passRender = (fx_TechRenderInstances) ? fx_TechRenderInstances->getPass(0) : nullptr;
+
+	if (fx_passRender)
+		fx_passRender->execute();
+}
+
+void ParticleShaderFX::UnBindRenderInstances()
 {
 	if (fx_passRender)
 		fx_passRender->unbindProgram();

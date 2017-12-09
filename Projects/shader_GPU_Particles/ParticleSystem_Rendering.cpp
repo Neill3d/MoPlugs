@@ -332,6 +332,7 @@ void ParticleSystem::RenderInstances()
 		
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
+		glEnableVertexAttribArray(2);
 
 		glEnableVertexAttribArray(4);
 		glEnableVertexAttribArray(5);
@@ -339,14 +340,17 @@ void ParticleSystem::RenderInstances()
 		glEnableVertexAttribArray(7);
 
 		glBindBuffer(GL_ARRAY_BUFFER, stream.positionId);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(float)*4, (const GLvoid*) stream.positionOffset); // position
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) stream.positionOffset); // position
 		
 		glBindBuffer(GL_ARRAY_BUFFER, stream.normalId);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float)*4, (const GLvoid*) stream.normalOffset); // normals
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) stream.normalOffset); // normals
+
+		glBindBuffer(GL_ARRAY_BUFFER, stream.uvId);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) stream.uvOffset); // normals
 
 		mShader->BindRenderInstances();
 
-
+		glActiveTexture(GL_TEXTURE0);
 		glBindBuffer(GL_ARRAY_BUFFER, mParticleBuffer[mCurrTFB]);
 		
 		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)0);         // position, normalized lifetime
@@ -359,8 +363,9 @@ void ParticleSystem::RenderInstances()
 		glVertexAttribDivisor(6, 1);
 		glVertexAttribDivisor(7, 1);
 
-		int baseVertex = 0;
-		int indicesCount = 0;
+		GLuint texId = 0;
+		unsigned int baseVertex = 0;
+		unsigned int indicesCount = 0;
 
 		if (stream.indexId > 0)
 		{
@@ -368,8 +373,14 @@ void ParticleSystem::RenderInstances()
 
 			for (auto iter=begin(mesh); iter!=end(mesh); ++iter)
 			{
+				texId = iter->textureId;
 				baseVertex = iter->offset;
 				indicesCount = iter->size;
+
+				if (texId > 0)
+				{
+					glBindTexture(GL_TEXTURE_2D, texId);
+				}
 
 				glDrawElementsInstanced(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, (void*) (sizeof(unsigned int) * baseVertex), mInstanceCount);
 			}
@@ -381,6 +392,7 @@ void ParticleSystem::RenderInstances()
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
 		glDisableVertexAttribArray(4);
 		glDisableVertexAttribArray(5);
 		glDisableVertexAttribArray(6);
@@ -388,6 +400,7 @@ void ParticleSystem::RenderInstances()
 		
 		mShader->UnBindRenderInstances();
 
+		glBindTexture(GL_TEXTURE_2D, 0);
 		//pModelVertexData->DisableOGLVertexData();
 	}
 }

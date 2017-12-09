@@ -117,6 +117,7 @@ struct	renderBlock
 	mat4		gMV;
 	mat4		gVP;
 	mat4		gInvTransposeMV;
+	mat4		gTexMatrix;
 
 	vec4		gCameraPos;
 	vec4		gScreenSize;
@@ -182,6 +183,7 @@ struct TInstanceVertexStream
 
 struct TMeshPatch
 {
+	unsigned int	textureId;
 	unsigned int	offset;
 	unsigned int	size;
 };

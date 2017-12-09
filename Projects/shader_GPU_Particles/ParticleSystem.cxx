@@ -134,10 +134,10 @@ void ParticleSystemConnections::SetInstanceVertexStream( const TInstanceVertexSt
 	mInstanceMesh.resize(patchCount);
 }
 
-void ParticleSystemConnections::SetInstancePatchData( const int index, unsigned int offset, unsigned int size )
+void ParticleSystemConnections::SetInstancePatchData( const int index, unsigned int offset, unsigned int size, unsigned int texId )
 {
-	mInstanceMesh[index].offset = offset;
-	mInstanceMesh[index].size = size;
+	TMeshPatch patch = { texId, offset, size };
+	mInstanceMesh[index] = patch;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////// PARTICLE SYSTEM

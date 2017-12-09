@@ -51,7 +51,7 @@ public:
 	void	UploadForcesToGPU();
 
 	void	SetInstanceVertexStream( const TInstanceVertexStream &stream, unsigned int patchCount  );
-	void	SetInstancePatchData( const int index, unsigned int offset, unsigned int size );
+	void	SetInstancePatchData( const int index, unsigned int offset, unsigned int size, unsigned int texId );
 
 	const int GetNumberOfCollisions() {
 		return (int) mCollisionData.size();

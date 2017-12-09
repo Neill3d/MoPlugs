@@ -440,6 +440,7 @@ namespace Evaluate
 	{
 		//layout(location=6) flat in TTriangle	*inMesh[];
 		uniform 	TTriangle 	*gEmitMesh;
+		uniform 	TTriangle 	*gEmitPrevMesh;
 		layout(binding=0) 		uniform		sampler2D	gEmitTexture;	// particles will inherit texture texel under the surface point
 		layout(binding=1)		uniform		sampler2D	gEmitMask;	// mask out particles emitting (model UV-based mask)
 		
@@ -479,12 +480,16 @@ namespace Evaluate
 		{
 			int triIndex = vertIndex / 3;
 			TTriangle	*surfaceData = gEmitMesh;
-			
+			TTriangle	*prevData = gEmitPrevMesh;
+
 			vec4 indir = surfaceData[triIndex].n;
+
+			vec4 d = surfaceData[triIndex].p[0] - prevData[triIndex].p[0];
 
 			// DONE: randomize normal vector !!
 			GetRandomDir(indir, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), vel);
 			//vel = indir;
+			vel = 100.0 * d;
 		}
 		
 		void GetEmitColor(in vec4 pos, in int vertIndex, in vec3 bary, out vec4 color)
@@ -653,7 +658,7 @@ namespace Evaluate
 			
 			float lifetime = Velocity0[0].w;
 			
-			if (gFlags.x > 0.0 && lifetime < 0.0 && Age >= -lifetime) {
+			if ( gFlags.x > 0.0 && lifetime < 0.0 && Age >= -lifetime) {
 				
 				vec4 newPosition = Position0[0];
 				vec4 newVelocity = Velocity0[0];
@@ -668,14 +673,18 @@ namespace Evaluate
 				
 				if (0.0 == gSkipZeroAlpha || newColor.a > 0.5)
 				{
-					Position1 = newPosition;
-					Velocity1 = newVelocity; 	
-					Rot1 = newRotation;
-					RotVel1 = newRotVel;
-					Color1 = newColor;
+					float l = length(newVelocity.xyz);
+					if (l > 10.0)
+					{
+						Position1 = newPosition;
+						Velocity1 = newVelocity; 	
+						Rot1 = newRotation;
+						RotVel1 = newRotVel;
+						Color1 = newColor;
 				
-					EmitVertex();                                                           
-					EndPrimitive();                                                         
+						EmitVertex();                                                           
+						EndPrimitive();                                                         
+					}
 					// reset launcher age to next time (one launch per second)
 					Age = -1.0f * lifetime - 1.0;  
 				}

@@ -1255,6 +1255,7 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 		glBindTexture(GL_TEXTURE_2D, texId);
 	}
 
+
 	FBColorAndAlpha color = Color;
 	renderData.gColor = vec4( (float)color[0], (float)color[1], (float)color[2], (float)color[3] );
 	renderData.gUseColorCurve = (UseColorCurve) ? 1.0f : 0.0f;

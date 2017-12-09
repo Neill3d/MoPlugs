@@ -413,3 +413,12 @@ void ParticleSystem::SwapBuffers()
 	mCurrVB = mCurrTFB;
     mCurrTFB = (mCurrTFB + 1) & 0x1;
 }
+
+void ParticleSystem::SwapSurfaceBuffers()
+{
+	//
+	// swap buffers
+	//
+	mSurfaceBack = mSurfaceFront;
+    mSurfaceFront = (mSurfaceFront + 1) & 0x1;
+}

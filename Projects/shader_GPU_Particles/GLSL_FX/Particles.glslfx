@@ -76,6 +76,7 @@ ConstantBuffer global renderBlock
 	uniform		mat4			gMV;
 	uniform		mat4			gVP;
 	uniform		mat4			gInvTransposeMV;
+	uniform		mat4			gTexMatrix;
 
 	uniform		vec4			gCameraPos;
 	uniform		vec4			gScreenSize;
@@ -439,6 +440,7 @@ namespace Evaluate
 	{
 		//layout(location=6) flat in TTriangle	*inMesh[];
 		uniform 	TTriangle 	*gEmitMesh;
+		uniform 	TTriangle 	*gEmitPrevMesh;
 		layout(binding=0) 		uniform		sampler2D	gEmitTexture;	// particles will inherit texture texel under the surface point
 		layout(binding=1)		uniform		sampler2D	gEmitMask;	// mask out particles emitting (model UV-based mask)
 		
@@ -478,12 +480,16 @@ namespace Evaluate
 		{
 			int triIndex = vertIndex / 3;
 			TTriangle	*surfaceData = gEmitMesh;
-			
+			TTriangle	*prevData = gEmitPrevMesh;
+
 			vec4 indir = surfaceData[triIndex].n;
+
+			vec4 d = surfaceData[triIndex].p[0] - prevData[triIndex].p[0];
 
 			// DONE: randomize normal vector !!
 			GetRandomDir(indir, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), vel);
 			//vel = indir;
+			vel = 100.0 * d;
 		}
 		
 		void GetEmitColor(in vec4 pos, in int vertIndex, in vec3 bary, out vec4 color)
@@ -652,7 +658,7 @@ namespace Evaluate
 			
 			float lifetime = Velocity0[0].w;
 			
-			if (gFlags.x > 0.0 && lifetime < 0.0 && Age >= -lifetime) {
+			if ( gFlags.x > 0.0 && lifetime < 0.0 && Age >= -lifetime) {
 				
 				vec4 newPosition = Position0[0];
 				vec4 newVelocity = Velocity0[0];
@@ -667,14 +673,18 @@ namespace Evaluate
 				
 				if (0.0 == gSkipZeroAlpha || newColor.a > 0.5)
 				{
-					Position1 = newPosition;
-					Velocity1 = newVelocity; 	
-					Rot1 = newRotation;
-					RotVel1 = newRotVel;
-					Color1 = newColor;
+					float l = length(newVelocity.xyz);
+					if (l > 5.0)
+					{
+						Position1 = newPosition;
+						Velocity1 = newVelocity; 	
+						Rot1 = newRotation;
+						RotVel1 = newRotVel;
+						Color1 = newColor;
 				
-					EmitVertex();                                                           
-					EndPrimitive();                                                         
+						EmitVertex();                                                           
+						EndPrimitive();                                                         
+					}
 					// reset launcher age to next time (one launch per second)
 					Age = -1.0f * lifetime - 1.0;  
 				}
@@ -779,7 +789,8 @@ namespace Render
 					
 			if (gUseColorMap > 0.0)
 			{
-				outColor = pcolor * texture(ColorSampler, gl_PointCoord);
+				vec4 puv = gTexMatrix * vec4(gl_PointCoord.s, gl_PointCoord.t, 0.0, 1.0);
+				outColor = pcolor * texture(ColorSampler, puv.st);
 			}
 
 			if (gPointFalloff > 0.0)
@@ -1025,10 +1036,12 @@ namespace Render
 	GLSLShader VS_Instancing
 	{
 
-		layout (location = 0) in vec4 Position;                                             
+		layout (location = 0) in vec4 Position;
 		layout (location = 1) in vec4 Normal;
+		layout (location = 2) in vec2 TexCoord;
+
 		// particle attributes
-		layout (location = 4) in vec3 ParticlePosition;
+		layout (location = 4) in vec4 ParticlePosition;
 		layout (location = 5) in vec4 Velocity; // .w - Total Lifetime
 		layout (location = 6) in vec4 Color;
 		layout (location = 7) in vec4 Rotation; // .w - Age
@@ -1037,6 +1050,7 @@ namespace Render
 		out float life;
 		out vec4 pcolor;
 		out vec3	wv;
+		out vec2 puv;
 
 		out gl_PerVertex {
             vec4 gl_Position;		// 16 bytes
@@ -1046,11 +1060,11 @@ namespace Render
 
 		void main()                                                                         
 		{   
-			float size = Position.w; // gBillboardSize;
+			float size = ParticlePosition.w; // gBillboardSize;
 			// float normLife = Age / lifetime;
 			life = clamp(Rotation.w / (Velocity.w+0.001), 0.0, 1.0);
 
-			vec4 pos = Position * size + vec4(ParticlePosition, 1.0);
+			vec4 pos = size * Position + ParticlePosition;
 			vec4 vPosition = gMV * vec4(pos.xyz, 1.0);
 			gl_Position = gVP * vPosition;
 			wv = vPosition.xyz;
@@ -1060,7 +1074,8 @@ namespace Render
 
 			//
 			pcolor = Color;
-			
+			puv = (gTexMatrix * vec4(TexCoord.s, TexCoord.t, 0.0, 1.0)).st;
+
 			// clip the launchers
 			if (size <= 0.0)
 			{
@@ -1082,20 +1097,29 @@ namespace Render
 		in float life;
 		in vec4 pcolor;
 		in vec3	wv;
-		                                                             
+		in vec2 puv;                                                   
+
 		layout(location=0) out vec4 	outColor;
 		layout(location=1) out vec4		outNormal;	// output a view space normal
 		layout(location=2) out vec4		outMask;
 		layout(location=3) out vec4		outPosition;
 		
+		layout(binding=0) uniform sampler2D		ColorSampler;
+
 		void main()                                                                         
 		{
 			
 			vec3 n = normalize(lNormal);
 			float diffuse = clamp(dot( normalize(lNormal), normalize(gCameraPos.xyz) ), 0.0, 1.0);
 			
+			vec4 color = pcolor;
+			
+			if (gUseColorMap > 0.0)
+			{
+				color = color * texture(ColorSampler, puv);
+			}
 			//
-			outColor = vec4(diffuse * pcolor.xyz, pcolor.w);
+			outColor = vec4(diffuse * color.xyz, color.w);
 						
 			outNormal = vec4(n, 1.0); // vec4(0.0, 1.0, 0.0, 0.0); 
 			outPosition = vec4(wv, 1.0); // fMesh->lightmap);

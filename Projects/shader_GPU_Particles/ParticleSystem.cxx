@@ -152,6 +152,10 @@ ParticleSystem::ParticleSystem(unsigned int maxparticles)
 
 	mCurrVB = 0;
 	mCurrTFB = 1;
+
+	mSurfaceBack = 0;
+	mSurfaceFront = 1;
+
 	mIsFirst = true;
 	mTime = 0;
 
@@ -214,7 +218,8 @@ void ParticleSystem::ClearParticleSystem()
 		mParticleBuffer[0] = mParticleBuffer[1] = 0;
     }
 
-	mBufferSurface.Free();
+	mBufferSurface[0].Free();
+	mBufferSurface[1].Free();
 
 	FreeNoiseTexture();
 }
@@ -249,7 +254,8 @@ void ParticleSystem::ChangeDisplayContext()
 	ReloadShaders();
 	NeedReset();
 
-	mBufferSurface.Free();
+	mBufferSurface[0].Free();
+	mBufferSurface[1].Free();
 }
 
 void ParticleSystem::NeedReset()
@@ -437,13 +443,13 @@ bool ParticleSystem::ResetParticles(unsigned int maxparticles, const int randomS
 
 	//
 	// read surface data from gpu
-
-	if ( 0 == mBufferSurface.GetBufferId() )
+	CGPUBufferNV &buf = mBufferSurface[mSurfaceFront];
+	if ( 0 == buf.GetBufferId() )
 		return false;
 
 	// copy data back to surface data on cpu
-	glBindBuffer(GL_UNIFORM_BUFFER, mBufferSurface.GetBufferId() );
-	glGetBufferSubData(GL_UNIFORM_BUFFER, 0, mBufferSurface.GetSize() * mBufferSurface.GetCount(), mSurfaceData.data() );
+	glBindBuffer(GL_UNIFORM_BUFFER, buf.GetBufferId() );
+	glGetBufferSubData(GL_UNIFORM_BUFFER, 0, buf.GetSize() * buf.GetCount(), mSurfaceData.data() );
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	bool newAssignment = (mMaxParticles != maxparticles);
@@ -575,8 +581,11 @@ void ParticleSystem::EmitParticles(const double deltaTime, const ETechEmitType	t
 	if (type != eTechEmitPreGenerated)
 	{
 		// layout(location=128) 	uniform 	TTriangle 	*gEmitMesh;
-		mBufferSurface.BindAsUniform(mShader->GetEmitGeometryProgramId(type), mShader->GetEmitMeshLocation(type), 0);
-	
+		mBufferSurface[mSurfaceFront].BindAsUniform(mShader->GetEmitGeometryProgramId(type), 
+			mShader->GetEmitMeshLocation(type), 0);
+		mBufferSurface[mSurfaceBack].BindAsUniform(mShader->GetEmitGeometryProgramId(type), 
+			mShader->GetEmitPrevMeshLocation(type), 0);
+
 		if (mSurfaceMaskId > 0)
 		{
 			glActiveTexture( GL_TEXTURE1 );
@@ -642,8 +651,9 @@ void ParticleSystem::EmitParticles(const double deltaTime, const ETechEmitType	t
 	
 	if (type != eTechEmitPreGenerated)
 	{
-		mBufferSurface.UnBind();
-	
+		mBufferSurface[mSurfaceFront].UnBind();
+		mBufferSurface[mSurfaceBack].UnBind();
+
 		if (mSurfaceMaskId > 0)
 		{
 			glActiveTexture(GL_TEXTURE1);
@@ -874,7 +884,9 @@ bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLu
 	if ( numberOfTriangles != (int)mSurfaceData.size() )
 	{
 		mSurfaceData.resize(numberOfTriangles);
-		mBufferSurface.UpdateData( sizeof(TTriangle), (int)mSurfaceData.size(), mSurfaceData.data() );
+		
+		mBufferSurface[0].UpdateData( sizeof(TTriangle), (int)mSurfaceData.size(), mSurfaceData.data() );
+		mBufferSurface[1].UpdateData( sizeof(TTriangle), (int)mSurfaceData.size(), mSurfaceData.data() );
 	}
 
 	//
@@ -884,7 +896,7 @@ bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLu
 	const GLuint norId = pData->GetVertexArrayVBOId( kFBGeometryArrayID_Normal, true );
 	const GLuint uvId = pData->GetUVSetVBOId();
 	const GLuint indId = pData->GetIndexArrayVBOId();
-	const GLuint surfaceId = mBufferSurface.GetBufferId();
+	const GLuint surfaceId = mBufferSurface[mSurfaceBack].GetBufferId();
 
 	if ( 0 == posId || 0 == norId || 0 == uvId || 0 == indId || 0 == surfaceId )
 		return false;
@@ -930,6 +942,8 @@ bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLu
 	mSurfaceTextureId = textureId;
 	mSurfaceMaskId = maskId;
 
+	SwapSurfaceBuffers();
+
 	return true;
 
 }
@@ -937,5 +951,7 @@ bool ParticleSystem::EmitterSurfaceUpdateOnGPU(void *pModelVertexData, const GLu
 // that's only for the case when data is updating on CPU
 void ParticleSystem::UploadSurfaceDataToGPU()
 {
-	mBufferSurface.UpdateData( sizeof(TTriangle), (int)mSurfaceData.size(), mSurfaceData.data() );
+	mBufferSurface[mSurfaceFront].UpdateData( sizeof(TTriangle), (int)mSurfaceData.size(), mSurfaceData.data() );
+	// TODO: do we support per-vertex velocity when computing on CPU ?!
+	//mBufferSurface[mSurfaceBack].UpdateData( sizeof(TTriangle), (int)mSurfaceData.size(), mSurfaceData.data() );
 }

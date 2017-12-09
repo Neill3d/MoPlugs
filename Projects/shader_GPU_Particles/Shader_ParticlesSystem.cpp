@@ -391,11 +391,13 @@ bool ParticleShaderFX::loadEffect(const char *effectFileName)
 		{
 			emitGeometryProgram[i] = nvGetProgramId(pTech->getPass(0), 0, 1);	// geometry shader
 			locEmitMesh[i] = glGetUniformLocation( emitGeometryProgram[i], "gEmitMesh" );
+			locEmitPrevMesh[i] = glGetUniformLocation( emitGeometryProgram[i], "gEmitPrevMesh" );
 		}
 		else
 		{
 			emitGeometryProgram[i] = 0;
 			locEmitMesh[i] = 0;
+			locEmitPrevMesh[i] = 0;
 		}
 	}
 
@@ -567,6 +569,7 @@ void ParticleShaderFX::UploadRenderDataBlock(const renderBlock	&_renderBlock)
 
 	CHECK_GL_ERROR();
 }
+
 
 void ParticleShaderFX::UploadTerrainDataBlock(const terrainBlock &data)
 {

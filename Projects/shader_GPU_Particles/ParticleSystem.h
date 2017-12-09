@@ -348,7 +348,9 @@ protected:
 	//BufferTexture				mPositionTexture;	// hold vertices positions in a buffer texture
 	//BufferTexture				mNormalTexture;		// hold vertices normals in a buffer texture
 
-	CGPUBufferNV				mBufferSurface;
+	unsigned int				mSurfaceBack;
+	unsigned int				mSurfaceFront;
+	CGPUBufferNV				mBufferSurface[2];
 
 	GLuint						mTexture;
 
@@ -364,7 +366,7 @@ protected:
 	void RenderInstances();
 
 	void SwapBuffers();	// operation to switch update and render double-buffers
-
+	void SwapSurfaceBuffers();
 };
 
 };

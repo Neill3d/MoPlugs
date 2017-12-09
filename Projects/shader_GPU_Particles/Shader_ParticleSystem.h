@@ -159,6 +159,10 @@ public:
 	{
 		return locEmitMesh[type];
 	}
+	const GLint	GetEmitPrevMeshLocation(const ETechEmitType	type) const
+	{
+		return locEmitPrevMesh[type];
+	}
 	/*
 	const GLuint	GetEmitMeshTextureLocation() const
 	{
@@ -227,6 +231,7 @@ protected:
 	*/
 	GLuint				emitGeometryProgram[eTechEmitCount];
 	GLint				locEmitMesh[eTechEmitCount];
+	GLint				locEmitPrevMesh[eTechEmitCount];
 
 	//
 	//

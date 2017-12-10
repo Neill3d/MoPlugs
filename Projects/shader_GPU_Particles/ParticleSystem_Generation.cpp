@@ -440,8 +440,10 @@ void ParticleSystem::GenerateParticle(const int emitType, const bool local, cons
 	//
 	particle.Pos = particle.Pos; // - mEvaluateData.gEmitterVelocity.w * mEvaluateData.gEmitterVelocity;
 	particle.Pos.w = GenerateParticleSize(mPointSize, mPointSizeVariation); // negative size value for launcher !
+	//particle.Vel.w = 1.0f;
+	//particle.Vel = mEvaluateData.gRotationTM * particle.Vel;
 	particle.Vel = GetRandomSpeed() * normalize(particle.Vel);
-	particle.Vel = particle.Vel; // + mEvaluateData.gEmitterVelocity.w * mEvaluateData.gEmitterVelocity;
+	//particle.Vel = particle.Vel; // + mEvaluateData.gEmitterVelocity.w * mEvaluateData.gEmitterVelocity;
 	//particle.Vel.w = -dist(e2) - 0.001f;	// negative lifetime value for launcher !!
 	particle.Rot = vec4(0.0f, 0.0f, 0.0f, 0.0f); // AgeMillis = 1.0f; // Particles[i].Vel.w - 1000.0f;		// one launch per second for this launcher
 	particle.RotVel = vec4(0.0f, 0.0f, 0.0f, 0.0f); // Index = 1.0f;

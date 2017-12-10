@@ -120,7 +120,7 @@ enum EShadingProperties
 
 };
 
-enum ECommongProperties
+enum ECommonProperties
 {
 	ePropCommonMaxParticles,
 	ePropCommonIterations,

@@ -191,6 +191,7 @@ bool ParticleShaderFX::Initialize()
 	try
 	{
 
+
 		lSuccess = loadEffect( fx_location );
 
 		if (false == lSuccess)

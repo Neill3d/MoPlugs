@@ -687,6 +687,7 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 
 	//
 	
+
 	if (selfCollisions)
 	{
 		while(ltime > timeStep)
@@ -715,23 +716,26 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 
 			mShader->BindSimulation(false);
 			mShader->DispatchSimulation( (float)timeStep, (float)globalTime, mInstanceCount, COMPUTE_SHADER_GROUP_SIZE, 1, 1);
+			//glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+			mShader->UnBindSimulation();
+			glFinish();
+
+			//
+			mShader->BindSelfCollisions();
+			mShader->DispatchSelfCollisions( (float) timeStep, mInstanceCount, 32, 1, 1 );
+			mShader->UnBindSelfCollisions();
+
+			// GL_ALL_BARRIER_BITS
 			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
-			//mShader->UnBindSimulation();
+			//glFinish();
 
-			if (selfCollisions)
-			{
-				mShader->BindSelfCollisions();
-				mShader->DispatchSelfCollisions( (float) timeStep, mInstanceCount, COMPUTE_SHADER_GROUP_SIZE, 1, 1 );
-				//mShader->UnBindSelfCollisions();
-
-				glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
-			}
-
+			//
 			mShader->BindIntegrate();
 			mShader->DispatchIntegrate( (float) timeStep, mInstanceCount, COMPUTE_SHADER_GROUP_SIZE, 1, 1 );
 			//mShader->UnBindIntegrate();
 
 			glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+			//glFinish();
 
 			ltime -= timeStep;
 			cycles += 1;

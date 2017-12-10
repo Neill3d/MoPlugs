@@ -15,7 +15,7 @@
 
 #version 430
 
-layout (local_size_x = 1024, local_size_y = 1) in;
+layout (local_size_x = 32, local_size_y = 1) in;
 
 uniform int		gNumParticles;
 uniform float	DeltaTimeSecs;
@@ -55,7 +55,9 @@ uint get_invocation()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MAIN
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-shared vec4 tmp[gl_WorkGroupSize.x];
+//shared vec4 tmp[gl_WorkGroupSize.x];
+//shared vec4 tmpVel[gl_WorkGroupSize.x];
+//shared float tmpIndex[gl_WorkGroupSize.x];
 
 void main()
 {
@@ -66,72 +68,103 @@ void main()
 	if (flattened_id >= gNumParticles)
 		return;
 	
+	vec3 acceleration = vec3(0.0);
+
 	// Read position and velocity
 	vec4 pos = particleBuffer.particles[flattened_id].Pos;
 	vec4 vel = particleBuffer.particles[flattened_id].Vel;
-	vec4 rotVel = particleBuffer.particles[flattened_id].RotVel;
-
-	float lifetime = vel.w;
 	
-	if (lifetime <= 0.0)
-		return;
-	
-	int N = int(gl_NumWorkGroups.x*gl_WorkGroupSize.x);
-	
-	vec3 acceleration = vec3(0.0, 0.0, 0.0);
-	
-	//
-	// linear calculation
 	float mass = 1.0;
-	float radius1 = 0.5;
+	float radius1 = pos.w;
 
-	for (int i=0; i<N; ++i)
+	if (vel.w > 0.0)
 	{
-		if ( i == flattened_id )
-			continue;
-
-		vec4 othervel = particleBuffer.particles[i].Vel;
-		
-		if (othervel.w <= 0.0)
-			continue;
-		
-		vec4 other = particleBuffer.particles[i].Pos;
-		float radius2 = 0.5;
-			
-		vec3 n = pos.xyz - other.xyz;
-		float udiff = length(n);
-		
-		if (udiff >= (radius1 + radius2))
-		{
-			continue;
-		}
-		n = normalize(n);
-
-		float a1 = dot(vel.xyz, n);
-		float a2 = dot(othervel.xyz, n);
-
-		float optimizedP = (2.0 * (a1 - a2)) / (mass + mass); 
-
-		// calculate v1', the new movement vector of circle1
-		//vel.xyz = vel.xyz - optimizedP * mass * n;
-		acceleration = acceleration - optimizedP * mass * n;
-
-		// calcualte v2'
-		//othervel.xyz = othervel.xyz - optimizedP * mass * n;
-		//particleBuffer.particles[i].Vel = othervel;
-
-		//float invdist = 1.0 / (length(diff)+0.001);
-		//acceleration -= diff * 0.1 * invdist * invdist * invdist;
-	}
+		//int N = int(gl_NumWorkGroups.x*gl_WorkGroupSize.x);
 	
+		//
+		// linear calculation
+		
+		for (int i=0; i<gNumParticles; ++i)
+		{
+			vec4 other = particleBuffer.particles[i].Pos;
+			vec4 othervel = particleBuffer.particles[i].Vel;
+
+			vec3 n = pos.xyz - other.xyz;
+			float udiff = length(n);
+			float radsum = radius1 + other.w;
+
+			if ( othervel.w <= 0.0 && udiff >= radsum )
+			{
+				n = normalize(n);
+
+				float a1 = dot(vel.xyz, n);
+				float a2 = dot(othervel.xyz, n);
+
+				float optimizedP = (2.0 * (a1 - a2)) / (mass + mass); 
+
+				// calculate v1', the new movement vector of circle1
+				//vel.xyz = vel.xyz - optimizedP * mass * n;
+				acceleration = acceleration - optimizedP * mass * n;
+			}
+		}
+	}
+
+	/*
+	int groupSize = int(gl_WorkGroupSize.x);
+	
+	for(int tile = 0; tile<N; tile+=groupSize) 
+	{
+		tmpIndex[gl_LocalInvocationIndex] = tile + int(gl_LocalInvocationIndex);
+		if (tmpIndex[gl_LocalInvocationIndex] < gNumParticles)
+		{
+			tmp[gl_LocalInvocationIndex] = particleBuffer.particles[tile + int(gl_LocalInvocationIndex)].Pos;
+			tmpVel[gl_LocalInvocationIndex] = particleBuffer.particles[tile + int(gl_LocalInvocationIndex)].Vel;
+		}
+		groupMemoryBarrier();
+		barrier();
+		for(int i=0; i<gl_WorkGroupSize.x; ++i) 
+		{
+			if (tmpIndex[i] >= gNumParticles)
+				continue;
+			
+			vec4 othervel = tmpVel[i];
+			
+			if (othervel.w <= 0.0)
+				continue;
+			
+			float radius2 = tmp[i].w;
+			
+			vec3 n = pos.xyz - tmp[i].xyz;
+			float udiff = length(n);
+			
+			if (udiff >= (radius1 + radius2))
+			{
+				continue;
+			}
+			n = normalize(n);
+
+			float a1 = dot(vel.xyz, n);
+			float a2 = dot(othervel.xyz, n);
+
+			float optimizedP = (2.0 * (a1 - a2)) / (mass + mass); 
+
+			// calculate v1', the new movement vector of circle1
+			//vel.xyz = vel.xyz - optimizedP * mass * n;
+			acceleration -= optimizedP * mass * n;
+		}
+		groupMemoryBarrier();
+        barrier();
+	}
+	*/
 	/*
 	for(int tile = 0;tile<N;tile+=int(gl_WorkGroupSize.x)) 
 	{
 		tmp[gl_LocalInvocationIndex] = particleBuffer.particles[tile + int(gl_LocalInvocationIndex)].Pos;
 		groupMemoryBarrier();
 		barrier();
-		for(int i = 0;i<gl_WorkGroupSize.x;++i) 
+		for(int i=0; i<gl_WorkGroupSize.x; ++i) 
 		{
+			if ()
 			vec3 other = tmp[i].xyz;
 			vec3 diff = pos.xyz - other;
 			float invdist = 1.0/(length(diff)+0.001);
@@ -162,6 +195,6 @@ void main()
 		acceleration = ACCELERATION_LIMIT * normalize(acceleration);
 	
 
-	particleBuffer.particles[flattened_id].Vel = vel; // vec4(vel.xyz + acceleration * DeltaTimeSecs, vel.w);	// in w we store lifetime
-	particleBuffer.particles[flattened_id].RotVel = vec4(acceleration.xyz, rotVel.w);
+	particleBuffer.particles[flattened_id].Vel = vec4(vel.xyz + acceleration * DeltaTimeSecs, vel.w);	// in w we store lifetime
+	//particleBuffer.particles[flattened_id].RotVel = vec4(acceleration.xyz, rotVel.w);
 }

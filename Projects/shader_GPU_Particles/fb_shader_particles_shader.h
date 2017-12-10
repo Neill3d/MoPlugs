@@ -193,10 +193,13 @@ public:
 
 	FBPropertyDouble							ExtrudeResetPosition;
 	FBPropertyBool								GenerationSkipZeroAlpha;
+	FBPropertyDouble							GenerateSkipAlphaLimit;
 
 	FBPropertyBool								UseRate;
 	FBPropertyInt								ParticleRate;		// particles / second
 	FBPropertyBool								UsePreGeneratedParticles;	// pre-cache launchers or generate dynamically in a glsl shader
+	FBPropertyBool								GenerateOnMotion;	// emit particle only when geometry has velocity on a vertex
+	FBPropertyDouble							GenerateOnMotionFactor;
 
 	// mask out particles when generating from a surface
 	FBPropertyBool								UseGenerationMask;

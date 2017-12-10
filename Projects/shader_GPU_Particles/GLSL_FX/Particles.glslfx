@@ -64,9 +64,14 @@ ConstantBuffer global evaluateBlock
 	uniform	float					gSize;
 	uniform	float					gInheritEmitterColor;
 	uniform	float					gUseEmitterMask;
-	uniform float					gSkipZeroAlpha;
+	uniform float					gSkipAlphaLimit;		// skip generating trasparency particles
 	
 	uniform	vec4					gEmitColor;
+
+	uniform float					gGenerateOnMotionLimit;
+	uniform float					gEvalTemp1;
+	uniform float					gEvalTemp2;
+	uniform float					gEvalTemp3;
 }
 
 /////////////////////////////////////////////////////////// render block
@@ -222,11 +227,14 @@ GLSLShader
 	
 	// choose a shader between volume, vertex and surface generation
 	void GetEmitPos(in vec2 randN, out vec4 pos, out int vertIndex, out vec3 bary);
+	// return emitter vertex speed (for generate on motion feature)
 	void GetEmitDir(in int vertIndex, in float randomF, out vec4 vel);
+	void GetEmitterVelocity(in int vertIndex, out vec4 vel);
 	void GetEmitColor(in vec4 pos, in int vertIndex, in vec3 bary, out vec4 color);
 	
 	// choose between launcher pre-defined or dynamic generation
-	void GenerateNewParticle(in float randomF, inout vec4 pos, inout vec4 vel, inout vec4 rot, inout vec4 rotVel, inout vec4 color);
+	// return emitter vertex speed ( for generate on motion feature )
+	float GenerateNewParticle(in float randomF, inout vec4 pos, inout vec4 vel, inout vec4 rot, inout vec4 rotVel, inout vec4 color);
 }
 
 //#include "Particles_generation.glslfxh"
@@ -297,7 +305,7 @@ namespace Evaluate
 	// use pre-defined launcher data
 	GLSLShader PreGenerated
 	{
-		void GenerateNewParticle(in float randomF, inout vec4 pos, inout vec4 vel, inout vec4 rot, inout vec4 rotVel, inout vec4 color)
+		float GenerateNewParticle(in float randomF, inout vec4 pos, inout vec4 vel, inout vec4 rot, inout vec4 rotVel, inout vec4 color)
 		{
 			vec4 newpos = gTM * vec4(pos.xyz, 1.0);
 			pos.xyz = newpos.xyz;
@@ -309,6 +317,8 @@ namespace Evaluate
 			//vel = gEmitterDeltaTM * vel;	// inherit emitter movement
 			vel.w = gShellLifetime + (rand(vec2(randomF,0.487)) * 2.0 - 1.0) * gShellLifetime * gShellLifetimeVariation;
 			rotVel.w = 1.0; // Index1 = 1.0; // rand(vec2(randomF, 1.0));
+
+			return 0.0;
 		}
 	}
 	
@@ -347,6 +357,11 @@ namespace Evaluate
 			GetRandomDir(gDirection, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), vel);
 		}
 		
+		void GetEmitterVelocity(in int vertIndex, out vec4 vel)
+		{
+			vel = vec4(gEmitterVelocity.w * gEmitterVelocity.xyz, 1.0);
+		}
+
 		void GetEmitColor(in vec4 pos, in int vertIndex, in vec3 bary, out vec4 color)
 		{
 			vec4 lMax = gMax;
@@ -364,6 +379,7 @@ namespace Evaluate
 	GLSLShader EmitFromVertices
 	{
 		uniform 	TTriangle 	*gEmitMesh;
+		uniform 	TTriangle 	*gEmitPrevMesh;
 		layout(binding=0) 		uniform		sampler2D	gEmitTexture;	// particles will inherit texture texel under the surface point
 		layout(binding=1)		uniform		sampler2D	gEmitMask;	// mask out particles emitting (model UV-based mask)
 		
@@ -396,8 +412,14 @@ namespace Evaluate
 
 			// DONE: randomize normal vector !!
 			GetRandomDir(indir, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), vel);
-			
 		}   
+
+		void GetEmitterVelocity(in int vertIndex, out vec4 vel)
+		{
+			int triIndex = vertIndex / 3;
+			// accumulate velocity from a geometry movement
+			vel = gEmitMesh[triIndex].p[0] - gEmitPrevMesh[triIndex].p[0];
+		}
 
 		void GetEmitColor(in vec4 pos, in int vertIndex, in vec3 bary, out vec4 color)
 		{
@@ -484,14 +506,17 @@ namespace Evaluate
 
 			vec4 indir = surfaceData[triIndex].n;
 
-			vec4 d = surfaceData[triIndex].p[0] - prevData[triIndex].p[0];
-
 			// DONE: randomize normal vector !!
 			GetRandomDir(indir, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), vel);
-			//vel = indir;
-			vel = 100.0 * d;
 		}
 		
+		void GetEmitterVelocity(in int vertIndex, out vec4 vel)
+		{
+			int triIndex = vertIndex / 3;
+			// accumulate velocity from a geometry movement
+			vel = gEmitMesh[triIndex].p[0] - gEmitPrevMesh[triIndex].p[0];
+		}
+
 		void GetEmitColor(in vec4 pos, in int vertIndex, in vec3 bary, out vec4 color)
 		{
 			int triIndex = vertIndex / 3;
@@ -547,10 +572,12 @@ namespace Evaluate
 			return gSize + (f - gSize * gSizeVariation);
 		}
 		
-		void GenerateNewParticle(in float randomF, inout vec4 pos, inout vec4 vel, inout vec4 rot, inout vec4 rotVel, inout vec4 color)
+		// return emitter vertex speed
+		float GenerateNewParticle(in float randomF, inout vec4 pos, inout vec4 vel, inout vec4 rot, inout vec4 rotVel, inout vec4 color)
 		{
 			vec4 newPos = vec4(0.0);
 			vec4 Dir = vec4(0.0);
+			vec4 emitterVel = vec4(0.0); 
 			if (USE_NORMALS_AS_DIR == 0.0)
 				//Dir = gDirection;
 				GetRandomDir(gDirection, vec2(gDirSpreadHor * rand(vec2(randomF, 2.03)), gDirSpreadVer * rand(vec2(randomF, 0.789))), Dir);
@@ -561,7 +588,8 @@ namespace Evaluate
 			vec3 baryCoords;
 			
 			GetEmitPos(vec2(randomF, 0.487), newPos, vertIndex, baryCoords);
-			
+			GetEmitterVelocity(vertIndex, emitterVel);
+
 			if (USE_NORMALS_AS_DIR > 0.0)
 				GetEmitDir(vertIndex, randomF, Dir);
 			
@@ -573,17 +601,19 @@ namespace Evaluate
 			float newSize = GetRandomSize(randomF);
 			//newPos = inverse(gEmitterDeltaTM) * vec4(newPos.xyz, 1.0);
 			newPos = gTM * vec4(newPos.xyz, 1.0);
-			pos = vec4(newPos.xyz - gEmitterVelocity.w * gEmitterVelocity.xyz, newSize);
+			pos = vec4(newPos.xyz - emitterVel.xyz, newSize);
 			//pos = vec4(newPos.xyz, newSize);
 
 			Dir = gRotationTM * vec4( normalize(Dir.xyz), 1.0 );
 			Dir.xyz = GetRandomSpeed(randomF) * Dir.xyz;
 			//vel = gEmitterDeltaTM * vec4(Dir.xyz, 1.0);
-			vel.xyz = Dir.xyz + gEmitterVelocity.w * gEmitterVelocity.xyz;
+			vel.xyz = Dir.xyz + emitterVel.xyz;
 			rot = vec4(0.0); // Age1 = 0.0;                  
 			
 			vel.w = gShellLifetime + (rand(vec2(randomF,0.487)) * 2.0 - 1.0) * gShellLifetime * gShellLifetimeVariation;
 			rotVel = vec4(0.0, 0.0, 0.0, 1.0); // Index1 = 1.0; // rand(vec2(randomF, 1.0));
+
+			return length(emitterVel);
 		}
 	}
 	
@@ -658,8 +688,8 @@ namespace Evaluate
 			
 			float lifetime = Velocity0[0].w;
 			
-			if ( gFlags.x > 0.0 && lifetime < 0.0 && Age >= -lifetime) {
-				
+			if ( gFlags.x > 0.0 && lifetime < 0.0 && Age >= -lifetime) 
+			{	
 				vec4 newPosition = Position0[0];
 				vec4 newVelocity = Velocity0[0];
 				vec4 newRotation = Rot0[0];
@@ -669,25 +699,21 @@ namespace Evaluate
 				// launcher has a negative size value
 				newPosition.w = -1.0 * newPosition.w;
 				
-				GenerateNewParticle(randomF, newPosition, newVelocity, newRotation, newRotVel, newColor);
+				float l = GenerateNewParticle(randomF, newPosition, newVelocity, newRotation, newRotVel, newColor);
 				
-				if (0.0 == gSkipZeroAlpha || newColor.a > 0.5)
+				if (newColor.a > gSkipAlphaLimit && l > gGenerateOnMotionLimit)
 				{
-					float l = length(newVelocity.xyz);
-					if (l > 5.0)
-					{
-						Position1 = newPosition;
-						Velocity1 = newVelocity; 	
-						Rot1 = newRotation;
-						RotVel1 = newRotVel;
-						Color1 = newColor;
+					Position1 = newPosition;
+					Velocity1 = newVelocity; 	
+					Rot1 = newRotation;
+					RotVel1 = newRotVel;
+					Color1 = newColor;
 				
-						EmitVertex();                                                           
-						EndPrimitive();                                                         
-					}
-					// reset launcher age to next time (one launch per second)
-					Age = -1.0f * lifetime - 1.0;  
+					EmitVertex();                                                           
+					EndPrimitive();                                                         
 				}
+				// reset launcher age to next time (one launch per second)
+				Age = -1.0f * lifetime - 1.0;  
 			}
 			
 			//

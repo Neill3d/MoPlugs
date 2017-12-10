@@ -106,9 +106,14 @@ struct evaluateBlock
 	float					gSize;
 	float					gInheritEmitterColor;
 	float					gUseEmitterMask;
-	float					gSkipZeroAlpha;
+	float					gSkipAlphaLimit;	// don't emit particles from a transparency pixel
 	
 	vec4					gColor;
+
+	float					gGenerateOnMotionLimit;
+	float					gEvalTemp1;
+	float					gEvalTemp2;
+	float					gEvalTemp3;
 };
 
 struct	renderBlock

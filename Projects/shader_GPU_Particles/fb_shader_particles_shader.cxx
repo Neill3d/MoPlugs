@@ -178,6 +178,12 @@ void GPUshader_Particles::AddPropertiesToPropertyViewManager()
 	AddPropertyViewForParticles("Particle Rate", "Particle generation");
 	AddPropertyViewForParticles("Use PreGenerated Particles", "Particle generation");
 
+	AddPropertyViewForParticles("Generate On Motion", "Particle generation");
+	AddPropertyViewForParticles("Generate On Motion Factor", "Particle generation");
+
+	AddPropertyViewForParticles("Generation Skip Zero Alpha", "Particle generation");
+	AddPropertyViewForParticles("Generate Alpha Limit", "Particle generation");
+
 	AddPropertyViewForParticles("Maximum Particles", "Particle generation");
 
 	AddPropertyViewForParticles("Use Custom Range", "Particle generation");
@@ -314,11 +320,15 @@ bool GPUshader_Particles::FBCreate()
 	FBPropertyPublish( this, ResetTime, "Reset Time", nullptr, nullptr );
 	FBPropertyPublish( this, ResetCount, "Reset Quantity", nullptr, nullptr );
 
+	FBPropertyPublish( this, GenerateOnMotion, "Generate On Motion", nullptr, nullptr );
+	FBPropertyPublish( this, GenerateOnMotionFactor, "Generate On Motion Factor", nullptr, nullptr );
+
 	FBPropertyPublish( this, UseGenerationMask, "Use Generation Mask", nullptr, nullptr );
 	FBPropertyPublish( this, GenerationMask, "Generation Mask", nullptr, nullptr );
 
 	FBPropertyPublish( this, ExtrudeResetPosition, "Extrude Reset Position", nullptr, nullptr );
 	FBPropertyPublish( this, GenerationSkipZeroAlpha, "Generation Skip Zero Alpha", nullptr, nullptr );
+	FBPropertyPublish( this, GenerateSkipAlphaLimit, "Generate Alpha Limit", nullptr, nullptr );
 
 	FBPropertyPublish( this, EmitDirection, "Emit Direction", nullptr, nullptr );
 	FBPropertyPublish( this, EmitDirSpreadHor, "Dir Spread Latitude", nullptr, nullptr );
@@ -368,8 +378,12 @@ bool GPUshader_Particles::FBCreate()
 	ResetCount = 0;			// total amount of particles in a frame
 	ResetCount.SetMinMax(0.0, MaximumParticles, true, false);
 
+	GenerateOnMotion = false;
+	GenerateOnMotionFactor = 10.0;	// velocity speed
+
 	ExtrudeResetPosition = 0.0;
 	GenerationSkipZeroAlpha = true;
+	GenerateSkipAlphaLimit = 128.0;
 	UseGenerationMask = true;
 	GenerationMask.SetFilter( FBTexture::GetInternalClassId() );
 	GenerationMask.SetSingleConnect(true);
@@ -1897,5 +1911,9 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticleSystem *
 	
 	data.gColor = color;
 
-	data.gSkipZeroAlpha = (true == GenerationSkipZeroAlpha) ? 1.0f : 0.0f;
+	double alphaLimit = GenerateSkipAlphaLimit / 255.0;
+	data.gSkipAlphaLimit = (true == GenerationSkipZeroAlpha) ? (float)alphaLimit : -1.0f;
+
+	double motionFactor = GenerateOnMotionFactor;
+	data.gGenerateOnMotionLimit = (true == GenerateOnMotion) ? (float) motionFactor : -1.0f;
 }

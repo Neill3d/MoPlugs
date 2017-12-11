@@ -36,7 +36,7 @@ void EvaluationExchange::SetDirection(evaluateBlock &data, const vec3 &dir,
 	data.gDirSpreadVer = spreadV;
 }
 void EvaluationExchange::SetSpeed(evaluateBlock &data, const float speed, const float spread, 
-	const vec4 &emittervel, vec4 &emitterPivot, vec4 &angularVelocity, const double *TMdelta)
+	const vec4 &emittervel, vec4 emitterPivot, vec4 angularVelocity, const double *TMdelta)
 {
 	data.gEmitSpeed = speed;
 	data.gSpeedSpread = spread;

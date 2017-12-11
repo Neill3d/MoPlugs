@@ -153,7 +153,7 @@ bool CollisionTerrain::FBCreate()
 	FBPropertyPublish( this, DebugNormals, "Debug Normals", nullptr, nullptr );
 
 	Enabled = true;
-	Friction = 0.5;
+	Friction = 50.0;
 
 	Size = 50.0;
 	Color = FBColor(0.4, 0.3, 0.8);
@@ -753,9 +753,10 @@ void CollisionTerrain::FillCollisionData( TCollision &data )
 	}
 
 	int iEnabled = (Enabled) ? PARTICLE_COLLISION_TERRAIN_TYPE : PARTICLE_COLLISION_DISABLED;
+	double friction = 0.01 * Friction;
 
 	CollisionExchange::SetPosition( data, iEnabled, vec3( -size+(float)T[0], -z+(float)T[1], -size+(float)T[2]) );
-	CollisionExchange::SetFriction( data, Friction );
+	CollisionExchange::SetFriction( data, friction );
 	CollisionExchange::SetTerrainScale( data, vec4(2.0f*size, 2.0f*z, 2.0f*size, 1.0f) );
 	CollisionExchange::SetTerrainSize( data, vec4(res, res, 0.9f*z+T[1], 1.0f) );
 

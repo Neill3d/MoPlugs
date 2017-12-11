@@ -15,7 +15,7 @@
 
 #version 430
 
-layout (local_size_x = 32, local_size_y = 1) in;
+layout (local_size_x = 256, local_size_y = 1) in;
 
 uniform int		gNumParticles;
 uniform float	DeltaTimeSecs;
@@ -55,9 +55,8 @@ uint get_invocation()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MAIN
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//shared vec4 tmp[gl_WorkGroupSize.x];
-//shared vec4 tmpVel[gl_WorkGroupSize.x];
-//shared float tmpIndex[gl_WorkGroupSize.x];
+shared vec4 tmp[gl_WorkGroupSize.x];
+shared vec4 tmpVel[gl_WorkGroupSize.x];
 
 void main()
 {
@@ -83,7 +82,7 @@ void main()
 	
 		//
 		// linear calculation
-		
+		/*
 		for (int i=0; i<gNumParticles; ++i)
 		{
 			vec4 other = particleBuffer.particles[i].Pos;
@@ -107,94 +106,61 @@ void main()
 				acceleration = acceleration - optimizedP * mass * n;
 			}
 		}
-	}
-
-	/*
-	int groupSize = int(gl_WorkGroupSize.x);
+		*/
+		
+		int N = int(gl_NumWorkGroups.x*gl_WorkGroupSize.x);
+		int groupSize = int(gl_WorkGroupSize.x);
 	
-	for(int tile = 0; tile<N; tile+=groupSize) 
-	{
-		tmpIndex[gl_LocalInvocationIndex] = tile + int(gl_LocalInvocationIndex);
-		if (tmpIndex[gl_LocalInvocationIndex] < gNumParticles)
+		for(int tile = 0; tile<N; tile+=groupSize) 
 		{
-			tmp[gl_LocalInvocationIndex] = particleBuffer.particles[tile + int(gl_LocalInvocationIndex)].Pos;
-			tmpVel[gl_LocalInvocationIndex] = particleBuffer.particles[tile + int(gl_LocalInvocationIndex)].Vel;
-		}
-		groupMemoryBarrier();
-		barrier();
-		for(int i=0; i<gl_WorkGroupSize.x; ++i) 
-		{
-			if (tmpIndex[i] >= gNumParticles)
-				continue;
-			
-			vec4 othervel = tmpVel[i];
-			
-			if (othervel.w <= 0.0)
-				continue;
-			
-			float radius2 = tmp[i].w;
-			
-			vec3 n = pos.xyz - tmp[i].xyz;
-			float udiff = length(n);
-			
-			if (udiff >= (radius1 + radius2))
+			int id = tile + int(gl_LocalInvocationIndex);
+			//tmpIndex[gl_LocalInvocationIndex] = tile + int(gl_LocalInvocationIndex);
+			if (id < gNumParticles)
 			{
-				continue;
+				tmp[gl_LocalInvocationIndex] = particleBuffer.particles[id].Pos;
+				tmpVel[gl_LocalInvocationIndex] = particleBuffer.particles[id].Vel;
 			}
-			n = normalize(n);
+			else
+			{
+				tmp[gl_LocalInvocationIndex] = vec4(0.0);
+				tmpVel[gl_LocalInvocationIndex] = vec4(0.0);
+			}
+			
+			groupMemoryBarrier();
+			barrier();
+			for(int i=0; i<groupSize; ++i) 
+			{
+				vec4 other = tmp[i];
+				vec4 othervel = tmpVel[i];
 
-			float a1 = dot(vel.xyz, n);
-			float a2 = dot(othervel.xyz, n);
+				vec3 n = pos.xyz - other.xyz;
+				float udiff = length(n);
+				float radsum = radius1 + other.w;
 
-			float optimizedP = (2.0 * (a1 - a2)) / (mass + mass); 
+				if ( othervel.w > 0.0 && udiff >= radsum )
+				{
+					n = normalize(n);
 
-			// calculate v1', the new movement vector of circle1
-			//vel.xyz = vel.xyz - optimizedP * mass * n;
-			acceleration -= optimizedP * mass * n;
+					float a1 = dot(vel.xyz, n);
+					float a2 = dot(othervel.xyz, n);
+
+					float optimizedP = (2.0 * (a1 - a2)) / (mass + mass); 
+
+					// calculate v1', the new movement vector of circle1
+					//vel.xyz = vel.xyz - optimizedP * mass * n;
+					acceleration = acceleration - optimizedP * mass * n;
+				}
+			}
+			groupMemoryBarrier();
+			barrier();
 		}
-		groupMemoryBarrier();
-        barrier();
 	}
-	*/
-	/*
-	for(int tile = 0;tile<N;tile+=int(gl_WorkGroupSize.x)) 
-	{
-		tmp[gl_LocalInvocationIndex] = particleBuffer.particles[tile + int(gl_LocalInvocationIndex)].Pos;
-		groupMemoryBarrier();
-		barrier();
-		for(int i=0; i<gl_WorkGroupSize.x; ++i) 
-		{
-			if ()
-			vec3 other = tmp[i].xyz;
-			vec3 diff = pos.xyz - other;
-			float invdist = 1.0/(length(diff)+0.001);
-			acceleration -= diff*0.1*invdist*invdist*invdist;
-		}
-		groupMemoryBarrier();
-        barrier();
-	}
-	*/
-	/*
-	for(int tile = 0;tile<N;tile+=int(gl_WorkGroupSize.x)) {\n"
-        "       tmp[gl_LocalInvocationIndex] = positions[tile + int(gl_LocalInvocationIndex)];\n"
-        "       groupMemoryBarrier();\n"
-        "       barrier();\n"
-        "       for(int i = 0;i<gl_WorkGroupSize.x;++i) {\n"
-        "           vec3 other = tmp[i].xyz;\n"
-        "           vec3 diff = position - other;\n"
-        "           float invdist = 1.0/(length(diff)+0.001);\n"
-        "           acceleration -= diff*0.1*invdist*invdist*invdist;\n"
-        "       }\n"
-        "       groupMemoryBarrier();\n"
-        "       barrier();\n"
-        "   }\n"
-	*/
-	
+
 	float accLen = length(acceleration);
 	if (accLen > ACCELERATION_LIMIT)
 		acceleration = ACCELERATION_LIMIT * normalize(acceleration);
 	
 
-	particleBuffer.particles[flattened_id].Vel = vec4(vel.xyz + acceleration * DeltaTimeSecs, vel.w);	// in w we store lifetime
+	particleBuffer.particles[flattened_id].Vel = vec4(vel.xyz + acceleration, vel.w);	// in w we store lifetime // DeltaTimeSecs
 	//particleBuffer.particles[flattened_id].RotVel = vec4(acceleration.xyz, rotVel.w);
 }

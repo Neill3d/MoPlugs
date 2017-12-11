@@ -31,7 +31,7 @@
 #include "algorithm\math3d_mobu.h"
 #include "graphics\checkglerror.h"
 
-#include "model_force_drag.h"
+#include "model_force_gravity.h"
 #include "model_force_motor.h"
 #include "model_force_wind.h"
 
@@ -1469,7 +1469,7 @@ void GPUshader_Particles::UpdateConnectedForcesData()
 	for (int i=0; i<srcCount; ++i)
 	{
 		FBPlug *pPlug = GetSrc(i);
-		if (FBIS(pPlug, ForceDrag) || FBIS(pPlug, ForceWind) || FBIS(pPlug, ForceMotor) )
+		if (FBIS(pPlug, ForceGravity) || FBIS(pPlug, ForceWind) || FBIS(pPlug, ForceMotor) )
 			forcesCount += 1;
 	}
 
@@ -1481,9 +1481,9 @@ void GPUshader_Particles::UpdateConnectedForcesData()
 	for (int i=0; i<srcCount; ++i)
 	{
 		FBPlug *pPlug = GetSrc(i);
-		if (FBIS(pPlug, ForceDrag) )
+		if (FBIS(pPlug, ForceGravity) )
 		{
-			( (ForceDrag*) pPlug)->FillForceData(data);
+			( (ForceGravity*) pPlug)->FillForceData(data);
 			mParticleConnections.SetForceData(forcesCount, data);
 			forcesCount += 1;
 		}
@@ -1514,7 +1514,7 @@ void GPUshader_Particles::UpdateConnectedData()
 		FBPlug *pPlug = GetSrc(i);
 		if (FBIS(pPlug, CollisionSphere) || FBIS(pPlug, CollisionTerrain) )
 			collisionsCount += 1;
-		else if (FBIS(pPlug, ForceDrag) || FBIS(pPlug, ForceWind) || FBIS(pPlug, ForceMotor) )
+		else if (FBIS(pPlug, ForceGravity) || FBIS(pPlug, ForceWind) || FBIS(pPlug, ForceMotor) )
 			forcesCount += 1;
 	}
 
@@ -1544,9 +1544,9 @@ void GPUshader_Particles::UpdateConnectedData()
 			mParticleConnections.SetCollisionData(collisionsCount, coldata);
 			collisionsCount += 1;
 		}
-		else if (FBIS(pPlug, ForceDrag) )
+		else if (FBIS(pPlug, ForceGravity) )
 		{
-			( (ForceDrag*) pPlug)->FillForceData(data);
+			( (ForceGravity*) pPlug)->FillForceData(data);
 			mParticleConnections.SetForceData(forcesCount, data);
 			forcesCount += 1;
 		}
@@ -1876,10 +1876,11 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticleSystem *
 	EvaluationExchange::SetVelocity( data, vec3((float)velocity[0], (float)velocity[1], (float)velocity[2]), 
 		vec3((float)velRandom[0]*0.01f, (float)velRandom[1]*0.01f, (float)velRandom[2]*0.01f), vec4((float)emitterVel[0], (float)emitterVel[1], (float)emitterVel[2], (InheritEmitterVelocity) ? 1.0f : 0.0f) );
 	*/
+	vec4 femitterVel((float)emitterVel[0], (float)emitterVel[1], (float)emitterVel[2], (InheritEmitterSpeed) ? 1.0f : 0.0f);
 	EvaluationExchange::SetDirection( data, vec3((float)direction[0], (float)direction[1], (float)direction[2]), 
 		(float) dirSpreadHor * 0.01f, (float) dirSpreadVer * 0.01f, UseEmitterNormals );
 	EvaluationExchange::SetSpeed( data, (float) speed, (float) speedSpread * 0.01f, 
-		vec4((float)emitterVel[0], (float)emitterVel[1], (float)emitterVel[2], (InheritEmitterSpeed) ? 1.0f : 0.0f),
+		femitterVel,
 		vec4(), vec4(), emitterDelta );
 	
 	EvaluationExchange::SetDynamicParameters( data, 0.01f * (float) Mass, 0.01f * (float) Damping );

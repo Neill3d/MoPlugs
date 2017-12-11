@@ -26,7 +26,7 @@
     <ClCompile Include="fb_shader_particles_shader.cxx" />
     <ClCompile Include="model_collision_sphere.cxx" />
     <ClCompile Include="model_collision_terrain.cxx" />
-    <ClCompile Include="model_force_drag.cxx" />
+    <ClCompile Include="model_force_gravity.cxx" />
     <ClCompile Include="model_force_motor.cxx" />
     <ClCompile Include="model_force_wind.cxx" />
     <ClCompile Include="ParticleSystem.cxx" />
@@ -44,7 +44,7 @@
     <ClInclude Include="fb_shader_particles_shader.h" />
     <ClInclude Include="model_collision_sphere.h" />
     <ClInclude Include="model_collision_terrain.h" />
-    <ClInclude Include="model_force_drag.h" />
+    <ClInclude Include="model_force_gravity.h" />
     <ClInclude Include="model_force_motor.h" />
     <ClInclude Include="model_force_wind.h" />
     <ClInclude Include="ParticleSystem.h" />

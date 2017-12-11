@@ -38,7 +38,7 @@ Particle System
 
  - shadows slices
  - depth sorting for correct transparency output
- - self collisions
+ + self collisions
  - rotation and rotation velocity
  - sprite sheets
  - vector fields, good article in the sub-folder
@@ -63,6 +63,9 @@ Particle System
   + add support of transparency modes (old task - sort particles and draw after everything)
 
 LOG
+
+10.12.2017
+ * fixed self-collisions
 
 01.12.2017
 

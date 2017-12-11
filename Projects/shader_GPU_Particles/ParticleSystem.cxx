@@ -714,6 +714,7 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 			//
 			//
 
+
 			mShader->BindSimulation(false);
 			mShader->DispatchSimulation( (float)timeStep, (float)globalTime, mInstanceCount, COMPUTE_SHADER_GROUP_SIZE, 1, 1);
 			//glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
@@ -722,7 +723,7 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 
 			//
 			mShader->BindSelfCollisions();
-			mShader->DispatchSelfCollisions( (float) timeStep, mInstanceCount, 32, 1, 1 );
+			mShader->DispatchSelfCollisions( (float) timeStep, mInstanceCount, 256, 1, 1 );
 			mShader->UnBindSelfCollisions();
 
 			// GL_ALL_BARRIER_BITS

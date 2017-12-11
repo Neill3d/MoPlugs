@@ -96,10 +96,10 @@ void ParticleSystem::RenderParticles(int type, const bool pointSmooth, const boo
 	
 		} break;
 	case 1: // billboard
-		//RenderBillboards();
+		RenderBillboards();
 		break;
 	case 2: // stretched billboard
-		//RenderStretchedBillboards();
+		RenderStretchedBillboards();
 		break;
 	case 3:
 		RenderInstances();
@@ -158,170 +158,64 @@ void ParticleSystem::RenderPoints()
 	glDisable(GL_PROGRAM_POINT_SIZE);
 	
 }
-/*
+
 void ParticleSystem::RenderBillboards()
 {
-	checkGlError("begin rendering billboard");
+	
+	mShader->BindRenderBillboards();
 
-	mBillboardProgram.bind();
- 
-	mBillboardProgram.SetMV(MV);
-	mBillboardProgram.SetVP(VP);
-	//glDepthFunc(GL_LESS);
-	//glDepthMask(GL_FALSE);
-
-	if (mTexture) {
-		glActiveTexture(GL_TEXTURE0);
-		mBillboardProgram.SetUseColorMap(TRUE);
-		mTexture->OGLInit();
-		glBindTexture(GL_TEXTURE_2D, mTexture->TextureOGLId);
-
-		//glEnable(GL_BLEND);
-		//glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	}
-	else
-	{
-		mBillboardProgram.SetUseColorMap(FALSE);
-	}
-			
-	if (lSizeTexId && mUseSizeCurve)
-	{
-		mBillboardProgram.SetSizeCurve(5);
-
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_1D, lSizeTexId);
-		glActiveTexture(GL_TEXTURE0);
-	}
-			
-	if (lColorTexId && mUseColorCurve)
-	{
-		mBillboardProgram.SetColorCurve(2);
-
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_1D, lColorTexId);
-		glActiveTexture(GL_TEXTURE0);
-	}
-			
-	glBindBuffer(GL_ARRAY_BUFFER, mParticleBuffer[mCurrTFB]);    
 	glEnableVertexAttribArray(0);
-			
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)16);       // pos
-			
-	glDrawTransformFeedback(GL_POINTS, mTransformFeedback[mCurrTFB]);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mParticleBuffer[mCurrTFB]);
+	
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)0);  // position
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)16);  // velocity
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)32);  // color
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)48);  // rotation
+	
+	//glDrawTransformFeedback(GL_POINTS, mTransformFeedback[mCurrTFB]);
+	glDrawArrays( GL_POINTS, 0, mInstanceCount );
 
 	glDisableVertexAttribArray(0);
-			
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+	glDisableVertexAttribArray(3);
 
-	//glDepthMask(GL_TRUE);
-			
-	if (lSizeTexId && mUseSizeCurve)
-	{
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_1D, 0);
-		glActiveTexture(GL_TEXTURE0);
-	}
-			
-	if (lColorTexId && mUseColorCurve)
-	{
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_1D, 0);
-		glActiveTexture(GL_TEXTURE0);
-	}
-			
-	if (mTexture) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		//glDisable(GL_BLEND);
-	}
-			
-	mBillboardProgram.unbind();
+	mShader->UnBindRenderBillboards();
 
-	checkGlError("end rendering billboard");
 }
 
 void ParticleSystem::RenderStretchedBillboards()
 {
-	checkGlError("begin rendering stretched billboard");
+	mShader->BindRenderStretchedBillboards();
 
-	mStretchedBillboardProgram.bind();
- 
-	mStretchedBillboardProgram.SetMV(MV);
-	mStretchedBillboardProgram.SetVP(VP);
-	//glDepthFunc(GL_LESS);
-	//glDepthMask(GL_FALSE);
-
-	if (mTexture) {
-		glActiveTexture(GL_TEXTURE0);
-		mStretchedBillboardProgram.SetUseColorMap(TRUE);
-		mTexture->OGLInit();
-		glBindTexture(GL_TEXTURE_2D, mTexture->TextureOGLId);
-
-		//glEnable(GL_BLEND);
-		//glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	}
-	else
-	{
-		mStretchedBillboardProgram.SetUseColorMap(FALSE);
-	}
-			
-	if (lSizeTexId && mUseSizeCurve)
-	{
-		mStretchedBillboardProgram.SetSizeCurve(5);
-
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_1D, lSizeTexId);
-		glActiveTexture(GL_TEXTURE0);
-	}
-			
-	if (lColorTexId && mUseColorCurve)
-	{
-		mStretchedBillboardProgram.SetColorCurve(2);
-
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_1D, lColorTexId);
-		glActiveTexture(GL_TEXTURE0);
-	}
-			
-	glBindBuffer(GL_ARRAY_BUFFER, mParticleBuffer[mCurrTFB]);    
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)0);		// old pos
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)16);       // pos
-			
-	glDrawTransformFeedback(GL_POINTS, mTransformFeedback[mCurrTFB]);
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mParticleBuffer[mCurrTFB]);
+	
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)0);  // position
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)16);  // velocity
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)32);  // color
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)48);  // rotation
+	
+	//glDrawTransformFeedback(GL_POINTS, mTransformFeedback[mCurrTFB]);
+	glDrawArrays( GL_POINTS, 0, mInstanceCount );
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+	glDisableVertexAttribArray(3);
 
-	//glDepthMask(GL_TRUE);
-			
-	if (lSizeTexId && mUseSizeCurve)
-	{
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_1D, 0);
-		glActiveTexture(GL_TEXTURE0);
-	}
-			
-	if (lColorTexId && mUseColorCurve)
-	{
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_1D, 0);
-		glActiveTexture(GL_TEXTURE0);
-	}
-			
-	if (mTexture) {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		//glDisable(GL_BLEND);
-	}
-			
-	mStretchedBillboardProgram.unbind();
+	mShader->UnBindRenderStretchedBillboards();
 
-	checkGlError("end rendering stretched billboard");
 }
 
-
-*/
 
 void ParticleSystem::RenderInstances()
 {

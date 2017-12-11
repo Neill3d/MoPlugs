@@ -417,6 +417,7 @@ bool ParticleShaderFX::loadEffect(const char *effectFileName)
 	if(fx_TechRenderPoints && (!fx_TechRenderPoints->validate()))
         return false;
 	
+
 	fx_TechRenderBillboards = fx_Effect->findTechnique("renderBillboards");
 	if(fx_TechRenderBillboards && (!fx_TechRenderBillboards->validate()))
         return false;

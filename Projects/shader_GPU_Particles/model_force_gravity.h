@@ -18,19 +18,19 @@
 #include "ParticleSystem_types.h"
 
 //--- Registration define
-#define FORCEDRAG__CLASSNAME	ForceDrag
-#define FORCEDRAG__CLASSSTR		"ForceDrag"
-#define FORCEDRAG__DESCSTR	    "Force Drag"
+#define FORCEGRAVITY__CLASSNAME		ForceGravity
+#define FORCEGRAVITY__CLASSSTR		"ForceGravity"
+#define FORCEGRAVITY__DESCSTR	    "Force Gravity"
 
-/**	Force Drag for a GPU Particles.
+/**	Force Gravity for a GPU Particles.
 */
-class ForceDrag : public FBModelMarker
+class ForceGravity : public FBModelMarker
 {
 	//--- FiLMBOX class declaration.
-	FBStorableClassDeclare( ForceDrag, FBModelMarker );
+	FBStorableClassDeclare( ForceGravity, FBModelMarker );
 
 public:
-	ForceDrag(const char *pName, HIObject pObject= NULL);
+	ForceGravity(const char *pName, HIObject pObject= NULL);
 
 	//--- FiLMBOX Construction/Destruction,
 	virtual bool FBCreate() override;		//!< FiLMBOX Creation function.

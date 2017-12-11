@@ -14,7 +14,7 @@
 #include "fb_shader_particles_association.h"
 
 #include "fb_shader_particles_shader.h"
-#include "model_force_drag.h"
+#include "model_force_gravity.h"
 #include "model_force_motor.h"
 #include "model_force_wind.h"
 
@@ -31,7 +31,7 @@ FBRegisterApplyManagerRule( KShaderParticlesAssociation, "KShaderParticlesAssoci
 
 bool KShaderParticlesAssociation::IsValidSrc( FBComponent *pSrc)
 {
-	if (FBIS(pSrc, ForceDrag) || FBIS(pSrc, ForceMotor) || FBIS(pSrc, ForceWind) || FBIS(pSrc, CollisionSphere) || FBIS(pSrc, CollisionTerrain))
+	if (FBIS(pSrc, ForceGravity) || FBIS(pSrc, ForceMotor) || FBIS(pSrc, ForceWind) || FBIS(pSrc, CollisionSphere) || FBIS(pSrc, CollisionTerrain))
 	{
 		return true;
 	}
@@ -55,7 +55,7 @@ bool KShaderParticlesAssociation::IsValidConnection( FBComponent* pSrc, FBCompon
 		pAllowMultiple = true;
 		GPUshader_Particles *pShader = (GPUshader_Particles*) pDst;
 		
-		if (FBIS(pSrc, ForceDrag) || FBIS(pSrc, ForceMotor) || FBIS(pSrc, ForceWind))
+		if (FBIS(pSrc, ForceGravity) || FBIS(pSrc, ForceMotor) || FBIS(pSrc, ForceWind))
 		{
 			if (pShader->Forces.Find(pSrc) < 0)
 			{
@@ -98,7 +98,7 @@ bool KShaderParticlesAssociation::IsValidConnection( FBComponent* pSrc, FBCompon
 		pAllowMultiple = true;
 		GPUshader_Particles *pShader = (GPUshader_Particles*) pSrc;
 
-		if (FBIS(pDst, ForceDrag) || FBIS(pDst, ForceMotor) || FBIS(pDst, ForceWind))
+		if (FBIS(pDst, ForceGravity) || FBIS(pDst, ForceMotor) || FBIS(pDst, ForceWind))
 		{
 			if (pShader->Forces.Find(pDst) < 0)
 			{

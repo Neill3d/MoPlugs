@@ -1,7 +1,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// file: model_force_drag.cxx
+// file: model_force_gravity.cxx
 //
 //	Author Sergey Solokhin (Neill3d)
 //
@@ -12,7 +12,7 @@
 
 
 //--- Class declaration
-#include "model_force_drag.h"
+#include "model_force_gravity.h"
 #include "GL\glew.h"
 #include "graphics\checkglerror.h"
 #include "graphics\ParticlesDrawHelper.h"
@@ -21,16 +21,16 @@
 
 using namespace GPUParticles;
 
-FBClassImplementation( ForceDrag );								                //!< Register class
-FBStorableCustomModelImplementation( ForceDrag, FORCEDRAG__DESCSTR );			//!< Register to the store/retrieve system
-FBElementClassImplementation2( ForceDrag, "Force Drag", FB_DEFAULT_SDK_ICON );	                //!< Register to the asset system
+FBClassImplementation( ForceGravity );								                //!< Register class
+FBStorableCustomModelImplementation( ForceGravity, FORCEGRAVITY__DESCSTR );			//!< Register to the store/retrieve system
+FBElementClassImplementation2( ForceGravity, "Force Gravity", FB_DEFAULT_SDK_ICON );	                //!< Register to the asset system
 
 void AddPropertyViewForForceDrag(const char* pPropertyName, const char* pHierarchy, bool pIsFolder=false)
 {
-	FBPropertyViewManager::TheOne().AddPropertyView(FORCEDRAG__CLASSSTR, pPropertyName, pHierarchy);
+	FBPropertyViewManager::TheOne().AddPropertyView(FORCEGRAVITY__CLASSSTR, pPropertyName, pHierarchy);
 }
 
-void ForceDrag::AddPropertiesToPropertyViewManager()
+void ForceGravity::AddPropertiesToPropertyViewManager()
 {
 	
 	AddPropertyViewForForceDrag("Enabled", "");
@@ -51,7 +51,7 @@ void ForceDrag::AddPropertiesToPropertyViewManager()
 /************************************************
 *	Constructor.
 ************************************************/
-ForceDrag::ForceDrag( const char* pName, HIObject pObject ) 
+ForceGravity::ForceGravity( const char* pName, HIObject pObject ) 
     : FBModelMarker( pName, pObject )
 {
     FBClassInit;
@@ -60,7 +60,7 @@ ForceDrag::ForceDrag( const char* pName, HIObject pObject )
 /************************************************
 *	FiLMBOX Constructor.
 ************************************************/
-bool ForceDrag::FBCreate()
+bool ForceGravity::FBCreate()
 {
     ShadingMode = kFBModelShadingTexture;
     Size = 50.0;
@@ -100,7 +100,7 @@ bool ForceDrag::FBCreate()
 /************************************************
 *	FiLMBOX Destructor.
 ************************************************/
-void ForceDrag::FBDestroy()
+void ForceGravity::FBDestroy()
 {
     ParentClass::FBDestroy();
 }
@@ -217,7 +217,7 @@ void DrawArrow(const int type, const double lineLen, const double arrowlen)
 
 /** Custom display
 */
-void ForceDrag::CustomModelDisplay( FBCamera* pCamera, FBModelShadingMode pShadingMode, FBModelRenderPass pRenderPass, float pPickingAreaWidth, float pPickingAreaHeight)
+void ForceGravity::CustomModelDisplay( FBCamera* pCamera, FBModelShadingMode pShadingMode, FBModelRenderPass pRenderPass, float pPickingAreaWidth, float pPickingAreaHeight)
 {
     FBMatrix		 MatrixView;
     FBMatrix		 MatrixProjection;
@@ -284,18 +284,18 @@ void ForceDrag::CustomModelDisplay( FBCamera* pCamera, FBModelShadingMode pShadi
 	CHECK_GL_ERROR();
 }
 
-bool ForceDrag::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
+bool ForceGravity::FbxStore(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
 {
     return true;
 }
 
-bool ForceDrag::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
+bool ForceGravity::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat)
 {
     return true;
 }
 
 
-void ForceDrag::FillForceData( TForce &data )
+void ForceGravity::FillForceData( TForce &data )
 {
 	
 	FBVector3d P, T(0.0, 0.0, 1.0);

@@ -19,7 +19,7 @@
 #endif
 
 #include "fb_shader_particles_shader.h"
-#include "model_force_drag.h"
+#include "model_force_gravity.h"
 #include "model_force_wind.h"
 #include "model_collision_terrain.h"
 
@@ -41,8 +41,8 @@ FBLibraryDeclare( gpushader_particles )
 	FBLibraryRegisterStorable(ForceMotor);
 	FBLibraryRegisterElement(ForceMotor);
 
-	FBLibraryRegisterStorable(ForceDrag);
-	FBLibraryRegisterElement(ForceDrag);
+	FBLibraryRegisterStorable(ForceGravity);
+	FBLibraryRegisterElement(ForceGravity);
 
 	FBLibraryRegisterStorable(CollisionSphere);
 	FBLibraryRegisterElement(CollisionSphere);
@@ -64,7 +64,7 @@ bool FBLibrary::LibReady()	{
 	glewInit();
 	GPUshader_Particles::AddPropertiesToPropertyViewManager();
 	ForceWind::AddPropertiesToPropertyViewManager();
-	ForceDrag::AddPropertiesToPropertyViewManager();
+	ForceGravity::AddPropertiesToPropertyViewManager();
 	CollisionTerrain::AddPropertiesToPropertyViewManager();
 
 	//

@@ -53,7 +53,7 @@ bool CollisionSphere::FBCreate()
 	FBPropertyPublish( this, Softness, "Softness", nullptr, nullptr );
 
 	Enabled = true;
-	Friction = 0.5;
+	Friction = 50.0;
 	Softness = 50.0;
 
     return true;
@@ -164,11 +164,12 @@ void CollisionSphere::FillCollisionData( TCollision	&data )
 	double maxscale = Scl[0];
 	if (Scl[1] > maxscale) maxscale = Scl[1];
 	if (Scl[2] > maxscale) maxscale = Scl[2];
+	double friction = 0.01 * Friction;
 
 	CollisionExchange::SetPosition( data, iEnabled, vec3( (float)T[0], (float)T[1], (float)T[2] ) );
 	CollisionExchange::SetVelocity(data, vec4( (float)vel[0], (float)vel[1], (float)vel[2], maxscale ) );
 	CollisionExchange::SetRadius(data, Size );
-	CollisionExchange::SetFriction(data, Friction);
+	CollisionExchange::SetFriction(data, friction);
 
 	double dsoftness;
 	Softness.GetData( &dsoftness, sizeof(double) );

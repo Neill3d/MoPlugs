@@ -95,13 +95,16 @@ void ParticleSystem::RenderParticles(int type, const bool pointSmooth, const boo
 				glDisable(GL_POINT_SMOOTH);
 	
 		} break;
-	case 1: // billboard
+	case 1:
+		RenderQuads();
+		break;
+	case 2: // billboard
 		RenderBillboards();
 		break;
-	case 2: // stretched billboard
+	case 3: // stretched billboard
 		RenderStretchedBillboards();
 		break;
-	case 3:
+	case 4:
 		RenderInstances();
 		break;
 	}
@@ -157,6 +160,36 @@ void ParticleSystem::RenderPoints()
 	//glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
 	glDisable(GL_PROGRAM_POINT_SIZE);
 	
+}
+
+void ParticleSystem::RenderQuads()
+{
+	
+
+	mShader->BindRenderQuads();
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mParticleBuffer[mCurrTFB]);
+	
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)0);  // position
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)16);  // velocity
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)32);  // color
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)48);  // rotation
+	
+	//glDrawTransformFeedback(GL_POINTS, mTransformFeedback[mCurrTFB]);
+	glDrawArrays( GL_POINTS, 0, mInstanceCount );
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+	glDisableVertexAttribArray(3);
+
+	mShader->UnBindRenderQuads();
+
 }
 
 void ParticleSystem::RenderBillboards()

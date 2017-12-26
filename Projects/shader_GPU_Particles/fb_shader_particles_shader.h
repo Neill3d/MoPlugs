@@ -45,6 +45,7 @@ const char * FBPropertyBaseEnum<FBParticlePlayMode>::mStrings[] = {
 enum FBParticlePrimitive
 {
 	kFBParticlePoints,
+	kFBParticleQuads,
 	kFBParticleBillboard,
 	kFBParticleStretchedBillboard,
 	kFBParticleInstance
@@ -52,6 +53,7 @@ enum FBParticlePrimitive
 
 const char * FBPropertyBaseEnum<FBParticlePrimitive>::mStrings[] = {
 	"Points",
+	"Quads",
 	"Billboard",
 	"Stretched Billboard",
 	"Instancing",
@@ -237,6 +239,15 @@ public:
 	FBPropertyAnimatableDouble					EmitSpeedSpread;	// randomize start speed
 	FBPropertyBool								InheritEmitterSpeed;	// use difference between prev and current pos to calculate directions
 	
+	// emit rotation
+
+	FBPropertyAnimatableVector3d				InitialOrientation;
+	FBPropertyAnimatableVector3d				InitialOrientationSpread;
+
+	// angular velocity for each euler angle
+	FBPropertyAnimatableVector3d				AngularVelocity;					
+	FBPropertyAnimatableVector3d				AngularVelocitySpread;
+
 
 	//
 	// DYNAMIC parameters
@@ -311,7 +322,26 @@ public:
 	FBPropertyAnimatableDouble							SizeCurveHolder;
 	//ORPopup_CurveEditor									SizeCurveEditor;
 
-	
+	//
+	// TODO: Caching block (WIP)
+
+	FBPropertyBool			UseCache;
+	FBPropertyBool			AutoCache;
+
+	FBPropertyAction		CacheCutLeft;
+	FBPropertyAction		CacheCutRight;
+	FBPropertyAction		ClearCache;	// remove or just disconnect
+	FBPropertyAction		LoadCache; // assign a cache file
+	FBPropertyAction		SaveCache;
+	FBPropertyAction		CacheTimeRange; // do a cache for a current time
+
+	FBPropertyString		CacheFile;
+	FBPropertyInt			CacheFrames; // read-only - number of cached frames
+	FBPropertyInt			CacheFPS;		// read-only - cache file number of frames
+
+	FBPropertyInt			FrameInMemory; // pre-load n-frames in memory
+	FBPropertyInt			MemoryUsed; // amount of memory used for pre-caching
+
 	static void AddPropertiesToPropertyViewManager();
 
 	// Accessors and mutators for transparency type property.

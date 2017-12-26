@@ -89,6 +89,7 @@ ParticleShaderFX::ParticleShaderFX()
 	fx_passSimulate = nullptr;
 */
 	fx_TechRenderPoints = nullptr;
+	fx_TechRenderQuads = nullptr;
 	fx_TechRenderBillboards = nullptr;
 	fx_TechRenderStretchedBillboards = nullptr;
 	fx_TechRenderInstances = nullptr;
@@ -191,11 +192,11 @@ bool ParticleShaderFX::Initialize()
 	try
 	{
 
-
 		lSuccess = loadEffect( fx_location );
 
 		if (false == lSuccess)
 			throw std::exception( "failed to load particles effect" );
+
 
 		//
 		programCompute = loadComputeShader(fx_computeLocation);
@@ -217,7 +218,8 @@ bool ParticleShaderFX::Initialize()
 		locComputeUseSizeAtten = glGetUniformLocation(programCompute, "gUseSizeAttenuation");
 
 		locComputeUpdatePosition = glGetUniformLocation(programCompute, "gUpdatePosition");
-		
+		locEmitterPointCount = glGetUniformLocation(programCompute, "gEmitterPointCount");
+
 		// self collisions shader
 		programSelfCollisions = loadComputeShader(fx_computeSelfCollisionsLocation);
 
@@ -417,7 +419,10 @@ bool ParticleShaderFX::loadEffect(const char *effectFileName)
 	if(fx_TechRenderPoints && (!fx_TechRenderPoints->validate()))
         return false;
 	
-
+	fx_TechRenderQuads = fx_Effect->findTechnique("renderQuads");
+	if(fx_TechRenderQuads && (!fx_TechRenderQuads->validate()))
+        return false;
+	
 	fx_TechRenderBillboards = fx_Effect->findTechnique("renderBillboards");
 	if(fx_TechRenderBillboards && (!fx_TechRenderBillboards->validate()))
         return false;
@@ -525,6 +530,7 @@ void ParticleShaderFX::UploadEvaluateDataBlock(const evaluateBlock &_evaluateBlo
     }
 
 	CHECK_GL_ERROR();
+
 
 	// update the compute shader uniforms
 	if (programCompute > 0)
@@ -719,6 +725,20 @@ void ParticleShaderFX::BindRenderPoints()
 }
 
 void ParticleShaderFX::UnBindRenderPoints()
+{
+	if (fx_passRender)
+		fx_passRender->unbindProgram();
+}
+
+void ParticleShaderFX::BindRenderQuads()
+{
+	fx_passRender = (fx_TechRenderQuads) ? fx_TechRenderQuads->getPass(0) : nullptr;
+
+	if (fx_passRender)
+		fx_passRender->execute();
+}
+
+void ParticleShaderFX::UnBindRenderQuads()
 {
 	if (fx_passRender)
 		fx_passRender->unbindProgram();

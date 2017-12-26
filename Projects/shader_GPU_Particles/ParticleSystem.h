@@ -361,6 +361,7 @@ protected:
 
 
 	void RenderPoints();
+	void RenderQuads();
 	void RenderBillboards();
 	void RenderStretchedBillboards();
 	void RenderInstances();

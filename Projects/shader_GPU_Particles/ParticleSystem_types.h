@@ -51,10 +51,16 @@ namespace GPUParticles
 struct Particle
 {
 //    vec4				OldPos;				// in w store Particle Type  
-    vec4				Pos;				// in w hold normalized Age from 0.0 to 1.0 (normalized)
+    vec4				Pos;				// in w - particle size (radius)
     vec4				Vel;				// in w hold total lifetime
+	// pack color into one float, and we have 3 free floats !
+
+	// r - packed color, g - total lifetime, b - age, a - index 
+
 	vec4				Color;				// inherit color from the emitter surface, custom color simulation
-    vec4				Rot;				// in w - float				AgeMillis;			// current Age
+    
+	// we store rotations in quaternions
+	vec4				Rot;				// in w - float				AgeMillis;			// current Age
 	vec4				RotVel;				// in w - float				Index;				// individual assigned index from 0.0 to 1.0 (normalized)
 };
 
@@ -80,6 +86,11 @@ struct evaluateBlock
 	//vec4					gAngularVelocity;
 	//mat4					gEmitterDeltaTM;	// computed diff between two frames
 	
+	vec4					gRotation;
+	vec4					gRotationSpread;
+	vec4					gAngularVelocity;
+	vec4					gAngularVelocitySpread;
+
 	vec4					gDynamic;		// 1st - mass, 2nd - damping
 	vec4					gGravity;		// vec3 - gravity direction XYZ, 4-th component - use or not to use gravity
 	vec4					gFlags;			// 1st - useForces, 2nd - useCollisions, 3rd - emitter type(0.0-vertices, 1.0-volume)
@@ -232,9 +243,14 @@ struct	TForce
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // exchange data types
 
+//vec4 Color_UnPack (float depth);
+//float Color_Pack (const vec4 &colour);
+
+
 struct EvaluationExchange
 {
 	//
+	static void SetOrientation(evaluateBlock &data, const vec3 &rot, const vec3 &rotSpread, const vec3 &vel, const vec3 &velSpread);
 	static void SetDirection(evaluateBlock &data, const vec3 &dir, const float spreadH, const float spreadV, bool useNormals);
 	static void SetSpeed(evaluateBlock &data, const float speed, const float spread, 
 		const vec4 &emittervel, vec4 pivot, vec4 angular, const double *TMdelta);

@@ -15,8 +15,21 @@
 
 using namespace GPUParticles;
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+void EvaluationExchange::SetOrientation(evaluateBlock &data, const vec3 &rot, const vec3 &rotSpread, const vec3 &vel, const vec3 &velSpread)
+{
+	data.gRotation = vec4( rot.x * 3.1415 / 180.0, 
+		rot.y * 3.1415 / 180.0, 
+		rot.z * 3.1415 / 180.0, 0.0 );
+	data.gRotationSpread = vec4( rotSpread.x, rotSpread.y, rotSpread.z, 0.0 );
+	data.gAngularVelocity = vec4( vel.x * 3.1415 / 180.0, 
+		vel.y * 3.1415 / 180.0, 
+		vel.z * 3.1415 / 180.0, 0.0 );
+	data.gAngularVelocitySpread = vec4( velSpread.x, velSpread.y, velSpread.z, 0.0 );
+}
+
 void EvaluationExchange::SetDirection(evaluateBlock &data, const vec3 &dir, 
 	const float spreadH, const float spreadV, bool useNormals)
 {

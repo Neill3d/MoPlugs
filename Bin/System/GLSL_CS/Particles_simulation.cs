@@ -77,10 +77,11 @@ uniform int		gUpdatePosition;
 struct TParticle
 { 
 	vec4				Pos;				// in w hold lifetime from 0.0 to 1.0 (normalized)
-	vec4				Vel;				// in w hold total lifetime
-	vec4				Color;				// inherit color from the emitter surface, custom color simulation
-	vec4				Rot;				// in w - float				AgeMillis;			// current Age
-	vec4 				RotVel;				// in w - float				Index;				// individual assigned index from 0.0 to 1.0 (normalized)
+	vec4				Vel;				// 
+	// color packed in x. inherit color from the emitter surface, custom color simulation
+	vec4				Color;				// in y - total lifetime, z - AgeMillis, w - Index
+	vec4				Rot;				// 
+	vec4 				RotVel;				// 
 };
 
 struct TCollision
@@ -168,6 +169,15 @@ mat3 rotationMatrix(vec3 axisIn, float angle)
 				oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,
 				oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c);
 }
+
+vec4 quat_mul(vec4 q0, vec4 q1) {
+		  vec4 d;
+		  d.x = q0.w * q1.x + q0.x * q1.w + q0.y * q1.z - q0.z * q1.y;
+		  d.y = q0.w * q1.y - q0.x * q1.z + q0.y * q1.w + q0.z * q1.x;
+		  d.z = q0.w * q1.z + q0.x * q1.y - q0.y * q1.x + q0.z * q1.w;
+		  d.w = q0.w * q1.w - q0.x * q1.x - q0.y * q1.y - q0.z * q1.z;
+		  return d;
+		}
 
 uint get_invocation()
 {
@@ -328,6 +338,42 @@ void GetRandomDir(in vec3 inDir, in vec2 dirRnd, out vec3 dir)                  
 	ConvertSphericalToUnitVector(sv, result);
 	dir = result.xyz;
 }  
+
+	
+vec4 Color_UnPack (float depth)
+		{
+			/*
+			const vec4 bitSh = vec4(160581375.0,
+									65025.0,
+									255.0,
+									1.0);
+			float bitMsk = 1.0/255.0;
+			
+			vec4 comp = fract(depth * bitSh);
+			comp -= comp.zyxx * bitMsk;
+			return comp;
+			*/
+			vec4 kEncodeMul = vec4(1.0, 255.0, 65025.0, 160581375.0);
+	float kEncodeBit = 1.0/255.0;
+	vec4 enc = kEncodeMul * depth;
+	enc = fract (enc);
+	enc -= enc.yzww * kEncodeBit;
+	return enc;
+		}
+
+
+		float Color_Pack (vec4 colour)
+		{
+			/*
+			const vec4 bitShifts = vec4(1.0 / (160581375.0),
+										1.0 / (65025.0),
+										1.0 / 255.0,
+										1.0);
+			return dot(colour , bitShifts);
+			*/
+			vec4 kDecodeDot = vec4(1.0, 1/255.0, 1/65025.0, 1/160581375.0);
+			return dot( colour, kDecodeDot );
+		}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CONSTRAINT AND COLLIDE
@@ -658,6 +704,23 @@ void ApplyConstraint(in float time, in vec3 particleHold, inout vec3 force, inou
 	}
 }
 
+vec4 deltaRotation(in vec3 em, float deltaTime)
+{
+   vec4 q;
+   vec3 ha = em * deltaTime * 0.5; // vector of half angle
+   float l = length(ha);
+   ha = normalize(ha); // magnitude
+   if( l > 0.0 )
+   {
+      float ss = sin(l)/l;
+      q = vec4(cos(l), ha.x*ss, ha.y*ss, ha.z*ss);
+   }else{
+      q = vec4(1.0, ha.x, ha.y, ha.z);
+   }
+
+   return q;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MAIN
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -672,26 +735,30 @@ void main()
 	
 	// Read position and velocity
 	vec4 pos = particleBuffer.particles[flattened_id].Pos;
+	vec4 packedColor = particleBuffer.particles[flattened_id].Color;
 	vec4 vel = particleBuffer.particles[flattened_id].Vel;
 	vec4 rot = particleBuffer.particles[flattened_id].Rot;
-	
-	float lifetime = vel.w;
+	vec4 rotVel = particleBuffer.particles[flattened_id].RotVel;
+
+	float lifetime = packedColor.y;
 	
 	if (lifetime == 0.0)
 		return;
 	
-	float Age = rot.w + DeltaTimeSecs; 
-	
+	float Age = packedColor.z + DeltaTimeSecs; 
+	packedColor.z = Age;
+
 	// launcher has a negative size and negative lifetime value
 	if (pos.w < 0.0 || lifetime < 0.0) // PARTICLE_TYPE_LAUNCHER
 	{
-		particleBuffer.particles[flattened_id].Rot = vec4(rot.xyz, Age);
+		particleBuffer.particles[flattened_id].Color = packedColor;
 		return;
 	}
 	else if (Age >= lifetime)
 	{
 		// dead particle, don't process it
-		particleBuffer.particles[flattened_id].Vel = vec4(0.0);	
+		packedColor.y = 0.0;
+		particleBuffer.particles[flattened_id].Color = packedColor;	
 		return;
 	}
 	
@@ -707,6 +774,14 @@ void main()
 	
 	// predicted position next timestep
 	vec3 pos_next = pos.xyz + vel.xyz * DeltaTimeSecs; 
+
+	// accumulate
+	vec4 Qupdate = deltaRotation(rotVel.xyz, DeltaTimeSecs);
+	//float theta = 0.5 * length(rotVel.xyz) * DeltaTimeSecs;
+	//vec3 rotV = normalize(rotVel.xyz);
+	//vec4 Qupdate = vec4(cos(theta), rotV.x * sin(theta), rotV.y * sin(theta), rotV.z * sin(theta) );
+	Qupdate = vec4(rotVel.xyz * 0.5 * DeltaTimeSecs, 0.0);
+	rot += quat_mul(Qupdate, rot);
 
 	// update velocity - gravity force
 	vec3 force = GRAVITY * USE_GRAVITY;	// in w - use gravity flag
@@ -813,8 +888,9 @@ void main()
 	
 	// write back
 	particleBuffer.particles[flattened_id].Pos = pos; // pos.w - particle size
-	particleBuffer.particles[flattened_id].Vel = vel;	// in w we store lifetime
-	particleBuffer.particles[flattened_id].Rot = vec4(rot.xyz, Age);
+	particleBuffer.particles[flattened_id].Vel = vel;
+	particleBuffer.particles[flattened_id].Color = packedColor;	// in y we store lifetime, in z - Age, in W - Index
+	particleBuffer.particles[flattened_id].Rot = rot;
 
 	/*
 	// noise3 based color

@@ -282,10 +282,11 @@ bool ParticleSystem::InitParticleSystem(const vec3 &Pos)
 	memset( Particles, 0, sizeof(Particle)*mMaxParticles );
 
     //Particles[0].OldPos = vec4(0.0f, 0.0f, 0.0f, PARTICLE_TYPE_LAUNCHER);
-    Particles[0].Pos = vec4(Pos[0], Pos[1], Pos[2], 0.0);	// in w hold normalized lifetime
-    Particles[0].Vel = vec4(0.0f, 0.1f, 0.0f, 10000.0);		// hold total lifetime
-    Particles[0].Rot = vec4(0.0, 0.0f, 0.0f, 0.0f); // AgeMillis = 0.0f;
-	Particles[0].RotVel = vec4(0.0f, 0.0f, 0.0f, 1.0f); // Index = 1.0f;
+    Particles[0].Pos = vec4(Pos[0], Pos[1], Pos[2], 0.0);	// in w - size
+    Particles[0].Vel = vec4(0.0f, 0.1f, 0.0f, 0.0f);
+	Particles[0].Color = vec4(0.0f, 10000.0f, 0.0f, 1.0f); // g-total lifetime, b-Age, -Index
+    Particles[0].Rot = vec4(0.0, 0.0f, 0.0f, 0.0f); 
+	Particles[0].RotVel = vec4(0.0f, 0.0f, 0.0f, 0.0f); 
 	
 
 	if (mTransformFeedback[0] == 0)
@@ -488,9 +489,11 @@ bool ParticleSystem::ResetParticles(unsigned int maxparticles, const int randomS
 		GenerateParticle(EMITTER_TYPE, true, extrudeDist, *iter);
 
 		iter->Pos.w = -1.0f * iter->Pos.w; // negative size value for launcher !
-		iter->Vel.w = -dist(e2) - 0.001f;	// negative lifetime value for launcher !!
-		iter->Rot = vec4(0.0f, 0.0f, 0.0f, 0.0f); // AgeMillis = 1.0f; // Particles[i].Vel.w - 1000.0f;		// one launch per second for this launcher
-		iter->RotVel = vec4(0.0f, 0.0f, 0.0f, 0.0f); // Index = 1.0f;
+		iter->Color.y = -dist(e2) - 0.001f;	// negative lifetime value for launcher !! 
+		iter->Color.z = 0.0f; // AgeMillis
+		iter->Color.w = 0.0f; // Index
+		//iter->Rot = vec4(0.0f, 0.0f, 0.0f, 0.0f); // AgeMillis = 1.0f; // Particles[i].Vel.w - 1000.0f;		// one launch per second for this launcher
+		//iter->RotVel = vec4(0.0f, 0.0f, 0.0f, 0.0f); // Index = 1.0f;
 	}
 	
 	// assign pre particles
@@ -502,11 +505,11 @@ bool ParticleSystem::ResetParticles(unsigned int maxparticles, const int randomS
 		{
 			GenerateParticle(EMITTER_TYPE, false, extrudeDist, *iter);
 			
-			iter->Vel.w = mEvaluateData.gShellLifetime + (dist(e2) * 2.0 - 1.0) * mEvaluateData.gShellLifetime * mEvaluateData.gShellLifetimeVariation;	// lifetime
-			if (iter->Vel.w < 0.0f)
-				iter->Vel.w = 0.0;	// this defines the particle type (launcher or shell)
+			iter->Color.y = mEvaluateData.gShellLifetime + (dist(e2) * 2.0 - 1.0) * mEvaluateData.gShellLifetime * mEvaluateData.gShellLifetimeVariation;	// lifetime
+			if (iter->Color.y < 0.0f)
+				iter->Color.y = 0.0;	// this defines the particle type (launcher or shell)
 
-			iter->Rot = iter->Pos;
+			iter->Rot = iter->Pos;	// TODO: temproary this is a constrained position
 			iter->Rot.w = 0.0f;
 		}
 	}
@@ -747,6 +750,8 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 	else
 	{
 		//mShader->BindSimulation(true);
+
+
 
 		while(ltime > timeStep)
 		{

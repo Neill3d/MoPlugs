@@ -21,9 +21,21 @@ Particle System
 
  TODO
  
- + make sphere collision scalable (to be able to fit a character body)
+ - add a set of initial colors for particles (choose from 3 colors for example)
+ - add a 3d field force (pre-baked combination of forces inside a 3d texture)
+	and could be nice to add a force to move particles along a curve !
  - cleanup motor force (vortex)
 
+ - write / read particles cache
+ - import / export from other formats (exchange with Maya)
+
+ 
+ 
+
+ - sort particles by 3d clusters from a camera view. That could help
+  - to boost performance for n-body interaction
+  - to draw transparent particles in correct order from a camera
+ 
  - GetEmitDir - function to get a spread emit direction is very slow.
 	Better to implement something like 4 vectors wind, interpolate inside pre-computed cone
 
@@ -38,8 +50,6 @@ Particle System
 
  - shadows slices
  - depth sorting for correct transparency output
- + self collisions
- - rotation and rotation velocity
  - sprite sheets
  - vector fields, good article in the sub-folder
  - soft particles, mix with a scene depth buffer
@@ -63,6 +73,13 @@ Particle System
   + add support of transparency modes (old task - sort particles and draw after everything)
 
 LOG
+
+26.12.2017
+ + added a support for rotation (simulate snowflakes)
+
+22.12.2017
+ * added quads primitives (for future 3d rotation support)
+ + make sphere collision scalable (to be able to fit a character body)
 
 10.12.2017
  * fixed self-collisions

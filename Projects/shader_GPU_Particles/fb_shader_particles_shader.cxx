@@ -339,6 +339,11 @@ bool GPUshader_Particles::FBCreate()
 	FBPropertyPublish( this, EmitSpeedSpread, "Emit Speed Spread", nullptr, nullptr );
 	FBPropertyPublish( this, InheritEmitterSpeed, "Inherit Emitter Speed", nullptr, nullptr );
 
+	FBPropertyPublish( this, InitialOrientation, "Initial Orientation", nullptr, nullptr );
+	FBPropertyPublish( this, InitialOrientationSpread, "Initial Direction Spread", nullptr, nullptr );
+	FBPropertyPublish( this, AngularVelocity, "Angular Velocity", nullptr, nullptr );
+	FBPropertyPublish( this, AngularVelocitySpread, "Angular Velocity Spread", nullptr, nullptr );
+
 	FBPropertyPublish( this, Mass, "Mass", nullptr, nullptr );
 	FBPropertyPublish( this, Damping, "Damping", nullptr, nullptr );
 	FBPropertyPublish( this, UseGravity, "Use Gravity", nullptr, nullptr );
@@ -411,6 +416,12 @@ bool GPUshader_Particles::FBCreate()
 	EmitSpeedSpread.SetMinMax(0.0, 100.0, true, true);
 	InheritEmitterSpeed = true;
 	UseEmitterNormals = true;
+
+	InitialOrientation = FBVector3d(0.0, 0.0, 0.0);
+	InitialOrientationSpread = FBVector3d(5.0, 5.0, 5.0);
+
+	AngularVelocity = FBVector3d(0.0, 0.0, 0.0);
+	AngularVelocitySpread = FBVector3d(0.0, 0.0, 0.0);
 
 	Mass = 100.0;		// result is 0.01
 	Damping = 99.0;		// result is * 0.01
@@ -1871,6 +1882,12 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticleSystem *
 	const double speed = EmitSpeed;
 	const double speedSpread = EmitSpeedSpread;
 	const FBVector3d gravityDir = Gravity;
+
+	const FBVector3d rotation = InitialOrientation;
+	const FBVector3d rotSpread = InitialOrientationSpread;
+	const FBVector3d angular = AngularVelocity;
+	const FBVector3d angularSpread = AngularVelocitySpread;
+
 	/*
 	EvaluationExchange::SetDirection( data, vec3((float)direction[0], (float)direction[1], (float)direction[2]), vec3( (float)dirRandom[0]*0.01f, (float)dirRandom[1]*0.01f, (float)dirRandom[2]*0.01f), UseEmitterNormals );
 	EvaluationExchange::SetVelocity( data, vec3((float)velocity[0], (float)velocity[1], (float)velocity[2]), 
@@ -1883,6 +1900,11 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticleSystem *
 		femitterVel,
 		vec4(), vec4(), emitterDelta );
 	
+	EvaluationExchange::SetOrientation( data, vec3( (float)rotation[0], (float)rotation[1], (float)rotation[2] ),
+		vec3( (float)rotSpread[0], (float)rotSpread[1], (float)rotSpread[2] ),
+		vec3( (float)angular[0], (float)angular[1], (float)angular[2] ),
+		vec3( (float)angularSpread[0], (float)angularSpread[1], (float)angularSpread[2]) );
+
 	EvaluationExchange::SetDynamicParameters( data, 0.01f * (float) Mass, 0.01f * (float) Damping );
 	EvaluationExchange::SetFlags( data, enableEmit, UseCollisions, (int) Emitter );
 	EvaluationExchange::SetTurbulence( data, UseTurbulence, 0.0001f * NoiseFrequency, 0.0001f * NoiseSpeed, 0.01f * NoiseAmplitude );

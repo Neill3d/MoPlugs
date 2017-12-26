@@ -126,6 +126,9 @@ public:
 	void	BindRenderPoints();
 	void	UnBindRenderPoints();
 
+	void	BindRenderQuads();
+	void	UnBindRenderQuads();
+
 	void	BindRenderBillboards();
 	void	UnBindRenderBillboards();
 
@@ -197,6 +200,7 @@ protected:
 	nvFX::IPass*        fx_passSimulate;
 	*/
 	nvFX::ITechnique*   fx_TechRenderPoints;
+	nvFX::ITechnique*   fx_TechRenderQuads;
 	nvFX::ITechnique*   fx_TechRenderBillboards;
 	nvFX::ITechnique*   fx_TechRenderStretchedBillboards;
 	nvFX::ITechnique*   fx_TechRenderInstances;
@@ -251,6 +255,7 @@ protected:
 	GLint				locComputeNumCollisions;
 	GLint				locComputeUseSizeAtten;
 	GLint				locComputeUpdatePosition;	// do we have to run integrate shader after ?!
+	GLint				locEmitterPointCount;
 
 	//
 	// self collisions compute shader

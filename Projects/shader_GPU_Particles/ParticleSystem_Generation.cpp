@@ -18,6 +18,8 @@
 #include "algorithm\nv_math.h"
 #include "algorithm\math3d.h"
 
+#include "ParticleSystem_types.h"
+
 using namespace GPUParticles;
 
 #define _USE_MATH_DEFINES
@@ -34,7 +36,42 @@ struct SurfaceColor
 	BYTE		alpha;
 };
 
+///////////////////////////////////////////////////////////
+//
+// C++ offers `modf (...)`, which does the same thing, but this is simpler.
+float fract (float f) {
+  return f-(long)f;
+}
 
+vec4 fract(const vec4 &v)
+{
+	return vec4( fract(v.x), fract(v.y), fract(v.z), fract(v.w) );
+}
+
+vec4 Color_UnPack (float depth)
+{
+    const vec4 bitSh = vec4(256.0f * 256.0f * 256.0f,
+                            256.0f * 256.0f,
+                            256.0f,
+                            1.0f);
+    const vec4 bitMsk = vec4(0.0f,
+                                1.0f / 256.0f,
+                                1.0f / 256.0f,
+                                1.0f / 256.0f);
+    vec4 comp = fract( depth * bitSh);
+    comp -= vec4(comp.x, comp.x, comp.y, comp.z) * bitMsk;
+    return comp;
+}
+
+
+float Color_Pack (const vec4 &colour)
+{
+    const vec4 bitShifts = vec4(1.0f / (256.0f * 256.0f * 256.0f),
+                                1.0f / (256.0f * 256.0f),
+                                1.0f / 256.0f,
+                                1.0f);
+    return dot(colour , bitShifts);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -369,7 +406,10 @@ void ParticleSystem::GetRandomSurfaceColor(const int vertIndex, float r1, float 
 void ParticleSystem::GenerateParticle(const int emitType, const bool local, const double extrudeDist, Particle &particle)
 {
 	if (false == mInheritSurfaceColor)
-		particle.Color = GenerateParticleColor(mPointColor, mPointColorVariation);
+	{
+		vec4 color = GenerateParticleColor(mPointColor, mPointColorVariation);
+		particle.Color.x = Color_Pack(color);
+	}
 
 	if (mEvaluateData.gDirection.w < 1.0f)
 	{
@@ -387,7 +427,11 @@ void ParticleSystem::GenerateParticle(const int emitType, const bool local, cons
 			GetRandomVerticesDir(vertIndex, particle.Vel);
 	
 		if (true == mInheritSurfaceColor)
-			GetRandomVerticesColor(vertIndex, particle.Color);
+		{
+			vec4 color;
+			GetRandomVerticesColor(vertIndex, color);
+			particle.Color.x = Color_Pack(color);
+		}
 	}
 	else if (emitType == PARTICLE_EMIT_FROM_SURFACE)
 	{
@@ -401,13 +445,14 @@ void ParticleSystem::GenerateParticle(const int emitType, const bool local, cons
 
 		if (true == mInheritSurfaceColor)
 		{
-			GetRandomSurfaceColor(vertIndex, r1, r2, r3, particle.Color);
-
+			vec4 color;
+			GetRandomSurfaceColor(vertIndex, r1, r2, r3, color);
+			
 			const bool skipZeroAlpha = true;
 
 			if (true == skipZeroAlpha)
 			{
-				float alpha = particle.Color.w;
+				float alpha = color.w;
 
 				int trycount=0;
 				while (alpha < 0.5f && trycount < 10)
@@ -416,13 +461,15 @@ void ParticleSystem::GenerateParticle(const int emitType, const bool local, cons
 					
 					if (mEvaluateData.gDirection.w > 0.0f)
 						GetRandomSurfaceDir(vertIndex, particle.Vel);
-					GetRandomSurfaceColor(vertIndex, r1, r2, r3, particle.Color);
+					GetRandomSurfaceColor(vertIndex, r1, r2, r3, color);
 
-					alpha = particle.Color.w;
+					alpha = color.w;
 
 					trycount += 1;
 				}
 			}
+
+			particle.Color.x = Color_Pack(color);
 		}
 	}
 	else
@@ -434,7 +481,11 @@ void ParticleSystem::GenerateParticle(const int emitType, const bool local, cons
 			GetRandomVolumeDir(particle.Vel);
 
 		if (true == mInheritSurfaceColor)
-			GetRandomVolumeColor(particle.Pos, particle.Color);
+		{
+			vec4 color;
+			GetRandomVolumeColor(particle.Pos, color);
+			particle.Color.x = Color_Pack(color);
+		}
 	}
 
 	//

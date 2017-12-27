@@ -35,6 +35,8 @@ uniform int		gUseSizeAttenuation;
 uniform int		gUseColorAttenuation;
 
 uniform int		gUpdatePosition;
+uniform int		gEmitterPointCount;
+
 
 	#define PARTICLE_TYPE_LAUNCHER 0.0f                                                 
 	#define PARTICLE_TYPE_SHELL 1.0f                                                    
@@ -64,8 +66,9 @@ uniform int		gUpdatePosition;
 #define		EMITTER_TYPE_VOLUME		1.0
 
 #define		FORCE_WIND				1.0
-#define		FORCE_DRAG				2.0
+#define		FORCE_GRAVITY			2.0
 #define		FORCE_MOTOR				3.0
+#define		FORCE_VORTEX			4.0
 
 #define		COLLISION_SPHERE		1.0
 #define		COLLISION_TERRIAN		4.0
@@ -77,10 +80,11 @@ uniform int		gUpdatePosition;
 struct TParticle
 { 
 	vec4				Pos;				// in w hold lifetime from 0.0 to 1.0 (normalized)
-	vec4				Vel;				// in w hold total lifetime
-	vec4				Color;				// inherit color from the emitter surface, custom color simulation
-	vec4				Rot;				// in w - float				AgeMillis;			// current Age
-	vec4 				RotVel;				// in w - float				Index;				// individual assigned index from 0.0 to 1.0 (normalized)
+	vec4				Vel;				// in w - individual birth randomF
+	// color packed in x. inherit color from the emitter surface, custom color simulation
+	vec4				Color;				// in y - total lifetime, z - AgeMillis, w - Index
+	vec4				Rot;				// 
+	vec4 				RotVel;				// 
 };
 
 struct TCollision
@@ -113,6 +117,15 @@ struct TForce
 	vec4			wind2;	
 };
 
+// emitter surface
+struct TTriangle
+{
+	vec4	p[3];
+	vec4	n;
+	vec2	uv[3];
+		
+	vec2	temp;	// to align type
+};
 
 layout (std430, binding = 0) buffer ParticleBuffer
 {
@@ -128,6 +141,11 @@ layout (std430, binding = 2) readonly buffer CollisionBuffer
 {
 	TCollision collisions[];
 } collisionBuffer;
+
+layout (std430, binding = 3) readonly buffer MeshBuffer
+{
+	TTriangle	mesh[];
+} meshBuffer;
 
 // terrain depth
 layout(binding=0) uniform sampler2D 	TerrainSampler;
@@ -168,6 +186,15 @@ mat3 rotationMatrix(vec3 axisIn, float angle)
 				oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,
 				oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c);
 }
+
+vec4 quat_mul(vec4 q0, vec4 q1) {
+		  vec4 d;
+		  d.x = q0.w * q1.x + q0.x * q1.w + q0.y * q1.z - q0.z * q1.y;
+		  d.y = q0.w * q1.y - q0.x * q1.z + q0.y * q1.w + q0.z * q1.x;
+		  d.z = q0.w * q1.z + q0.x * q1.y - q0.y * q1.x + q0.z * q1.w;
+		  d.w = q0.w * q1.w - q0.x * q1.x - q0.y * q1.y - q0.z * q1.z;
+		  return d;
+		}
 
 uint get_invocation()
 {
@@ -328,6 +355,61 @@ void GetRandomDir(in vec3 inDir, in vec2 dirRnd, out vec3 dir)                  
 	ConvertSphericalToUnitVector(sv, result);
 	dir = result.xyz;
 }  
+
+	
+vec4 Color_UnPack (float x)
+{
+	float a,b,c,d;
+	a = floor(x*255.0/64.0)*64.0/255.0;
+	x -= a;
+	b = floor(x*255.0/16.0)*16.0/255.0;
+	x -= b;
+	b *= 4.0;
+	c = floor(x*255.0/4.0)*4.0/255.0;
+	x -= c;
+	c *= 16.0;
+	d = x*255.0 * 64.0 / 255.0; // scan be simplified to just x*64.0
+			
+	return vec4(a,b,c,d);
+}
+
+
+float Color_Pack (vec4 colour)
+{
+	float x = 1.0/255.0 * (floor(colour.x*255.0/64.0)*64.0 + floor(colour.y*255.0/64.0)*16.0 + floor(colour.z*255.0/64.0)*4.0 + floor(colour.a*255.0/64.0));
+	return x;
+}
+
+void GetEmitPos(in vec2 randN, out vec4 pos, out int vertIndex, out vec3 bary)
+{
+			
+	float rnd = rand(randN) * gEmitterPointCount;
+	int triIndex = int(rnd);
+
+	// barycentric coords
+	float rnd1 = rand(randN+randN1);
+	float rnd2 = rand(randN+randN2);
+
+	bary.x = 1.0 - sqrt(rnd1);
+	bary.y = sqrt(rnd1) * (1.0 - rnd2);
+	bary.z = sqrt(rnd1) * rnd2; 
+
+	TTriangle tri = meshBuffer.mesh[triIndex];
+	vec4 p0 = tri.p[0];
+	vec4 p1 = tri.p[1];
+	vec4 p2 = tri.p[2];
+
+	p0 *= bary.x;
+	p1 *= bary.y;
+	p2 *= bary.z;
+
+	vec4 P = p0 + p1 + p2;
+	vertIndex = triIndex * 3;
+
+	pos = gTM * vec4(P.xyz, 1.0);
+	//pos = vec4(P.xyz, 1.0);
+	// TODO: extrusion dist is not used !
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CONSTRAINT AND COLLIDE
@@ -532,6 +614,32 @@ void ApplyDragForce2(TForce data, in float time, in vec3 pos_next, inout vec3 fo
 	}
 }
 
+// Thanks for paper - Particle Systems Using 3D Vector Fields with OpenGL Compute Shaders. Johan Anderdahl Alice Darner
+
+void ApplyGravityForce(TForce data, in float time, in vec3 pos_next, inout vec3 force, inout vec3 vel)
+{
+	vec3 center = data.position.xyz;
+	float power = data.magnitude;
+	vec3 dir = center - pos_next;
+
+	float range = data.radius;
+	
+	if (range > 0.0)
+	{
+		
+		float distance = length(dir);
+		float percent = ((range-distance) / range);
+		percent = clamp(percent, 0.0, 1.0);
+		dir = normalize(dir);
+		
+		force += dir * percent * power;
+	}
+	else
+	{
+		force += dir * power;
+	}
+}
+
 void ApplyMotorForce(TForce data, in float time, in vec3 pos_next, inout vec3 force, inout vec3 vel)
 {
 	vec3 lpos = data.position.xyz;
@@ -642,9 +750,17 @@ void ApplyVortex(TForce data, in float time, in vec3 particlePos, inout vec3 for
 	*/
 }
 
-void ApplyConstraint(in float time, in vec3 particleHold, inout vec3 force, inout vec3 vel, inout vec3 pos)
+
+
+void ApplyConstraint(in float time, in float randomF, inout vec3 force, inout vec3 vel, inout vec3 pos)
 {
-	vec4 dst = gTM * vec4(particleHold, 1.0);
+	vec4 dst;
+	int vertIndex = 0;
+	vec3 baryCoords;
+			
+	GetEmitPos(vec2(randomF, 0.487), dst, vertIndex, baryCoords);
+
+	//vec4 dst = gTM * vec4(particleHold, 1.0);
 	vec3 direction = pos - dst.xyz;
 	float distance = length(direction);
 	
@@ -657,6 +773,7 @@ void ApplyConstraint(in float time, in vec3 particleHold, inout vec3 force, inou
 		vel *= 1.0 - CONSTRAINT_MAGN; // * max(1.0, (1.0 / (distance*distance))); // * data.magnitude;
 	}
 }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MAIN
@@ -672,26 +789,30 @@ void main()
 	
 	// Read position and velocity
 	vec4 pos = particleBuffer.particles[flattened_id].Pos;
+	vec4 packedColor = particleBuffer.particles[flattened_id].Color;
 	vec4 vel = particleBuffer.particles[flattened_id].Vel;
 	vec4 rot = particleBuffer.particles[flattened_id].Rot;
-	
-	float lifetime = vel.w;
+	vec4 rotVel = particleBuffer.particles[flattened_id].RotVel;
+
+	float lifetime = packedColor.y;
 	
 	if (lifetime == 0.0)
 		return;
 	
-	float Age = rot.w + DeltaTimeSecs; 
-	
+	float Age = packedColor.z + DeltaTimeSecs; 
+	packedColor.z = Age;
+
 	// launcher has a negative size and negative lifetime value
 	if (pos.w < 0.0 || lifetime < 0.0) // PARTICLE_TYPE_LAUNCHER
 	{
-		particleBuffer.particles[flattened_id].Rot = vec4(rot.xyz, Age);
+		particleBuffer.particles[flattened_id].Color = packedColor;
 		return;
 	}
 	else if (Age >= lifetime)
 	{
 		// dead particle, don't process it
-		particleBuffer.particles[flattened_id].Vel = vec4(0.0);	
+		packedColor.y = 0.0;
+		particleBuffer.particles[flattened_id].Color = packedColor;	
 		return;
 	}
 	
@@ -708,6 +829,11 @@ void main()
 	// predicted position next timestep
 	vec3 pos_next = pos.xyz + vel.xyz * DeltaTimeSecs; 
 
+	// accumulate rotation by angular velocity
+	
+	vec4 Qupdate = vec4(rotVel.xyz * 0.5 * DeltaTimeSecs, 0.0);
+	rot += quat_mul(Qupdate, rot);
+
 	// update velocity - gravity force
 	vec3 force = GRAVITY * USE_GRAVITY;	// in w - use gravity flag
 	
@@ -719,9 +845,11 @@ void main()
 			
 			if (type == FORCE_WIND) 
 				ApplyWindForce2(forceBuffer.forces[i], gTime * 0.01, pos_next, force, vel.xyz, DeltaTimeSecs);
-			else if (type == FORCE_DRAG) 
-				ApplyDragForce2(forceBuffer.forces[i], gTime * 0.01, pos_next, force, vel.xyz);
-			else if (type == FORCE_MOTOR) 
+			else if (type == FORCE_GRAVITY) 
+				ApplyGravityForce(forceBuffer.forces[i], gTime * 0.01, pos_next, force, vel.xyz);
+			else if (type == FORCE_MOTOR)
+				ApplyMotorForce(forceBuffer.forces[i], gTime * 0.01, pos_next, force, vel.xyz);
+			else if (type == FORCE_VORTEX) 
 				ApplyVortex(forceBuffer.forces[i], gTime * 0.01, pos_next, force, vel.xyz);
 		}
 	}
@@ -783,7 +911,7 @@ void main()
 		
 		if (CONSTRAINT_MAGN > 0.0)
 		{
-			ApplyConstraint(gTime * 0.01, rot.xyz, force, vel.xyz, pos.xyz);
+			ApplyConstraint(gTime * 0.01, vel.w, force, vel.xyz, pos.xyz);
 		}
 		
 		if (USE_COLLISIONS)
@@ -813,8 +941,9 @@ void main()
 	
 	// write back
 	particleBuffer.particles[flattened_id].Pos = pos; // pos.w - particle size
-	particleBuffer.particles[flattened_id].Vel = vel;	// in w we store lifetime
-	particleBuffer.particles[flattened_id].Rot = vec4(rot.xyz, Age);
+	particleBuffer.particles[flattened_id].Vel = vel;
+	particleBuffer.particles[flattened_id].Color = packedColor;	// in y we store lifetime, in z - Age, in W - Index
+	particleBuffer.particles[flattened_id].Rot = rot;
 
 	/*
 	// noise3 based color

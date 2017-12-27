@@ -308,7 +308,7 @@ void ForceGravity::FillForceData( TForce &data )
 	T = VectorSubtract(P, LastTranslation);
 	LastTranslation = P;
 
-	int iEnabled = (Enabled) ? PARTICLE_FORCE_DRAG_TYPE : PARTICLE_FORCE_DISABLED;
+	int iEnabled = (Enabled) ? PARTICLE_FORCE_GRAVITY_TYPE : PARTICLE_FORCE_DISABLED;
 	
 	if (UserDirection)
 	{

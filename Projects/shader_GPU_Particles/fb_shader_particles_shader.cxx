@@ -209,6 +209,13 @@ void GPUshader_Particles::AddPropertiesToPropertyViewManager()
 	AddPropertyViewForParticles("Emit Speed Spread", "Particle generation.Emit Speed");
 	AddPropertyViewForParticles("Inherit Emitter Speed", "Particle generation.Emit Speed");
 
+	AddPropertyViewForParticles("Particle generation.Emit Rotation", "Particle generation", true);
+	AddPropertyViewForParticles("Initial Orientation", "Particle generation.Emit Rotation");
+	AddPropertyViewForParticles("Initial Direction Spread", "Particle generation.Emit Rotation");
+	AddPropertyViewForParticles("Angular Velocity", "Particle generation.Emit Rotation");
+	AddPropertyViewForParticles("Angular Velocity Spread", "Particle generation.Emit Rotation");
+
+
 	//
 	AddPropertyViewForParticles("Dynamic parameters", "", true );
 	AddPropertyViewForParticles("Constraint Magnitude", "Dynamic parameters" );
@@ -248,6 +255,10 @@ void GPUshader_Particles::AddPropertiesToPropertyViewManager()
 	AddPropertyViewForParticles("Particle visualization.Particle Color", "Particle visualization", true);
 	AddPropertyViewForParticles("Color", "Particle visualization.Particle Color");
 	AddPropertyViewForParticles("Color Variation (%)", "Particle visualization.Particle Color");
+	AddPropertyViewForParticles("Use Color 2", "Particle visualization.Particle Color");
+	AddPropertyViewForParticles("Color 2", "Particle visualization.Particle Color");
+	AddPropertyViewForParticles("Use Color 3", "Particle visualization.Particle Color");
+	AddPropertyViewForParticles("Color 3", "Particle visualization.Particle Color");
 	AddPropertyViewForParticles("Use Color Curve", "Particle visualization.Particle Color");
 	AddPropertyViewForParticles("Color Curve", "Particle visualization.Particle Color");
 
@@ -491,6 +502,10 @@ bool GPUshader_Particles::FBCreate()
 
 	FBPropertyPublish( this, Color, "Color", nullptr, nullptr );
 	FBPropertyPublish( this, ColorVariation, "Color Variation (%)", nullptr, nullptr );
+	FBPropertyPublish( this, UseColor2, "Use Color 2", nullptr, nullptr );
+	FBPropertyPublish( this, Color2, "Color 2", nullptr, nullptr );
+	FBPropertyPublish( this, UseColor3, "Use Color 3", nullptr, nullptr );
+	FBPropertyPublish( this, Color3, "Color 3", nullptr, nullptr );
 	FBPropertyPublish( this, UseColorCurve, "Use Color Curve", nullptr, nullptr );
 	FBPropertyPublish( this, ColorCurve, "Color Curve", nullptr, SetColorCurve );
 	FBPropertyPublish( this, ColorCurveHolder, "ColorCurveHolder", nullptr, nullptr );
@@ -518,6 +533,10 @@ bool GPUshader_Particles::FBCreate()
 	Color = FBColorAndAlpha(1.0, 1.0, 1.0, 1.0);
 	ColorVariation = 0.0;
 	ColorVariation.SetMinMax(0.0, 100.0, true, true);
+	UseColor2 = false;
+	Color2 = FBColorAndAlpha(0.0, 0.0, 0.0, 1.0);
+	UseColor3 = false;
+	Color3 = FBColorAndAlpha(0.5, 0.5, 0.5, 1.0);
 	UseColorCurve = false;
 	ColorCurveHolder = FBColorAndAlpha(1.0, 1.0, 1.0, 1.0);
 	ColorCurveHolder.SetAnimated(true);
@@ -1088,8 +1107,23 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 		FBColorAndAlpha dColor = Color;
 		vec4 fcolor((float)dColor[0], (float)dColor[1], (float)dColor[2], (float)dColor[3]);
 
+		vec4 fcolor2;
+		vec4 fcolor3;
+
+		if (UseColor2)
+		{
+			dColor = Color2;
+			fcolor2 = vec4((float)dColor[0], (float)dColor[1], (float)dColor[2], (float)dColor[3]);
+		}
+		if (UseColor3)
+		{
+			dColor = Color3;
+			fcolor3 = vec4((float)dColor[0], (float)dColor[1], (float)dColor[2], (float)dColor[3]);
+		}
+
 		pParticles->SetParticleSize( Size, 0.01 * SizeVariation );
-		pParticles->SetParticleColor( InheritEmitterColors, fcolor, 0.01 * ColorVariation );
+		pParticles->SetParticleColor( InheritEmitterColors, fcolor, 0.01 * ColorVariation,
+			UseColor2, fcolor2, UseColor3, fcolor3);
 		pParticles->PrepareParticles(MaximumParticles, RandomSeed, ResetCount, UseRate, ParticleRate, ExtrudeResetPosition);
 			pParticles->UploadSimulationDataOnGPU();
 
@@ -1128,9 +1162,11 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 			glActiveTexture(GL_TEXTURE0);
 		}
 
+
 		// run simulation
 		unsigned int Cycles = 0;
-		Cycles = pParticles->SimulateParticles( true, emitType, timeStep, deltaTime, deltaTimeLimit, SubSteps, SelfCollisions );
+		Cycles = pParticles->SimulateParticles( true, emitType, timeStep, deltaTime, 
+			deltaTimeLimit, SubSteps, SelfCollisions, ConstraintMagnitude > 0.0 );
 		//mDisplayedCount += pParticles->GetDisplayedCount();
 		mTotalCycles += Cycles;
 
@@ -1932,7 +1968,14 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticleSystem *
 	FBColorAndAlpha	dColor = Color;
 	vec4 color((float)dColor[0], (float)dColor[1], (float)dColor[2], (float)dColor[3]);
 	
-	data.gColor = color;
+	data.gEmitColor = color;
+	dColor = Color2;
+	data.gEmitColor2 = vec4((float)dColor[0], (float)dColor[1], (float)dColor[2], (float)dColor[3]);
+	dColor = Color3;
+	data.gEmitColor3 = vec4((float)dColor[0], (float)dColor[1], (float)dColor[2], (float)dColor[3]);
+
+	data.gUseEmitColor2 = (UseColor2) ? 1.0f : 0.0f;
+	data.gUseEmitColor3 = (UseColor3) ? 1.0f : 0.0f;
 
 	double alphaLimit = GenerateSkipAlphaLimit / 255.0;
 	data.gSkipAlphaLimit = (true == GenerationSkipZeroAlpha) ? (float)alphaLimit : -1.0f;

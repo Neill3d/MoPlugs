@@ -42,6 +42,7 @@ public:
 
 	// generate
 	bool Generate(FBPropertyAnimatableColorAndAlpha	*prop=nullptr);
+	void Free();
 
 	GLuint		GetTextureId() {
 		return mTexId;
@@ -77,6 +78,7 @@ public:
 
 	// generate
 	bool Generate(FBPropertyAnimatableDouble	*prop=nullptr);
+	void Free();
 
 	GLuint		GetTextureId() {
 		return mTexId;

@@ -20,20 +20,20 @@ layout (local_size_x = 256, local_size_y = 1) in;
 uniform int		gNumParticles;
 uniform float	DeltaTimeSecs;
 
-#define		ACCELERATION_LIMIT		5.0
+#define		ACCELERATION_LIMIT		15.0
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TYPES AND DATA BUFFERS
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct TParticle
-{
-	//vec4				OldPos;				// in w store Particle Type  
+{ 
 	vec4				Pos;				// in w hold lifetime from 0.0 to 1.0 (normalized)
-	vec4				Vel;				// in w hold total lifetime
-	vec4				Color;				// inherit color from the emitter surface, custom color simulation
-	vec4				Rot;				// in w - float				AgeMillis;			// current Age
-	vec4 				RotVel;				// in w - float				Index;				// individual assigned index from 0.0 to 1.0 (normalized)
+	vec4				Vel;				// in w - individual birth randomF
+	// color packed in x. inherit color from the emitter surface, custom color simulation
+	vec4				Color;				// in y - total lifetime, z - AgeMillis, w - Index
+	vec4				Rot;				// 
+	vec4 				RotVel;				// 
 };
 
 layout (std430, binding = 0) buffer ParticleBuffer
@@ -72,27 +72,34 @@ void main()
 	// Read position and velocity
 	vec4 pos = particleBuffer.particles[flattened_id].Pos;
 	vec4 vel = particleBuffer.particles[flattened_id].Vel;
-	
+	vec4 packedColor = particleBuffer.particles[flattened_id].Color;
+	float Age = packedColor.z;
+
 	float mass = 1.0;
 	float radius1 = pos.w;
 
-	if (vel.w > 0.0)
+	if (Age > 0.0)
 	{
 		//int N = int(gl_NumWorkGroups.x*gl_WorkGroupSize.x);
 	
 		//
 		// linear calculation
-		/*
+		
 		for (int i=0; i<gNumParticles; ++i)
 		{
+			
+			if ( i == flattened_id )
+				continue;
+			
 			vec4 other = particleBuffer.particles[i].Pos;
 			vec4 othervel = particleBuffer.particles[i].Vel;
+			vec4 otherColor = particleBuffer.particles[i].Color;
 
 			vec3 n = pos.xyz - other.xyz;
 			float udiff = length(n);
 			float radsum = radius1 + other.w;
 
-			if ( othervel.w <= 0.0 && udiff >= radsum )
+			if ( otherColor.z > 0.0 && udiff < radsum )
 			{
 				n = normalize(n);
 
@@ -106,8 +113,8 @@ void main()
 				acceleration = acceleration - optimizedP * mass * n;
 			}
 		}
-		*/
 		
+		/*
 		int N = int(gl_NumWorkGroups.x*gl_WorkGroupSize.x);
 		int groupSize = int(gl_WorkGroupSize.x);
 	
@@ -119,6 +126,7 @@ void main()
 			{
 				tmp[gl_LocalInvocationIndex] = particleBuffer.particles[id].Pos;
 				tmpVel[gl_LocalInvocationIndex] = particleBuffer.particles[id].Vel;
+				tmpVel[gl_LocalInvocationIndex].w = particleBuffer.particles[id].Color.z; // Age is stored in packedColor.z
 			}
 			else
 			{
@@ -136,8 +144,8 @@ void main()
 				vec3 n = pos.xyz - other.xyz;
 				float udiff = length(n);
 				float radsum = radius1 + other.w;
-
-				if ( othervel.w > 0.0 && udiff >= radsum )
+				
+				if ( othervel.w > 0.0 && udiff < radsum && udiff > 0.0 )
 				{
 					n = normalize(n);
 
@@ -154,6 +162,7 @@ void main()
 			groupMemoryBarrier();
 			barrier();
 		}
+		*/
 	}
 
 	float accLen = length(acceleration);
@@ -161,6 +170,6 @@ void main()
 		acceleration = ACCELERATION_LIMIT * normalize(acceleration);
 	
 
-	particleBuffer.particles[flattened_id].Vel = vec4(vel.xyz + acceleration, vel.w);	// in w we store lifetime // DeltaTimeSecs
+	particleBuffer.particles[flattened_id].Vel = vec4(vel.xyz + acceleration, vel.w);	// in w we individual birth randomF
 	//particleBuffer.particles[flattened_id].RotVel = vec4(acceleration.xyz, rotVel.w);
 }

@@ -48,29 +48,27 @@ vec4 fract(const vec4 &v)
 	return vec4( fract(v.x), fract(v.y), fract(v.z), fract(v.w) );
 }
 
-vec4 Color_UnPack (float depth)
+vec4 Color_UnPack (float x)
 {
-    const vec4 bitSh = vec4(256.0f * 256.0f * 256.0f,
-                            256.0f * 256.0f,
-                            256.0f,
-                            1.0f);
-    const vec4 bitMsk = vec4(0.0f,
-                                1.0f / 256.0f,
-                                1.0f / 256.0f,
-                                1.0f / 256.0f);
-    vec4 comp = fract( depth * bitSh);
-    comp -= vec4(comp.x, comp.x, comp.y, comp.z) * bitMsk;
-    return comp;
+	float a,b,c,d;
+	a = floor(x*255.0/64.0)*64.0/255.0;
+	x -= a;
+	b = floor(x*255.0/16.0)*16.0/255.0;
+	x -= b;
+	b *= 4.0;
+	c = floor(x*255.0/4.0)*4.0/255.0;
+	x -= c;
+	c *= 16.0;
+	d = x*255.0 * 64.0 / 255.0; // scan be simplified to just x*64.0
+			
+	return vec4(a,b,c,d);
 }
 
 
 float Color_Pack (const vec4 &colour)
 {
-    const vec4 bitShifts = vec4(1.0f / (256.0f * 256.0f * 256.0f),
-                                1.0f / (256.0f * 256.0f),
-                                1.0f / 256.0f,
-                                1.0f);
-    return dot(colour , bitShifts);
+	float x = 1.0/255.0 * (floor(colour.x*255.0/64.0)*64.0 + floor(colour.y*255.0/64.0)*16.0 + floor(colour.z*255.0/64.0)*4.0 + floor(colour.w*255.0/64.0));
+	return x;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -276,7 +274,8 @@ void ParticleSystem::GetRandomSurfacePos(const bool local, const double extrudeD
 
 	const int triCount = mSurfaceData.size();
 
-	float rnd = (float) triCount * dist(e2);
+	float randomF = dist(e2);
+	float rnd = (float) triCount * randomF;
 	int triIndex = (int) rnd;
 
 	// barycentric coords
@@ -408,6 +407,22 @@ void ParticleSystem::GenerateParticle(const int emitType, const bool local, cons
 	if (false == mInheritSurfaceColor)
 	{
 		vec4 color = GenerateParticleColor(mPointColor, mPointColorVariation);
+
+		if (mUseColor2)
+		{
+			vec4 color2 = GenerateParticleColor(mPointColor2, mPointColorVariation);
+			float variance = dist(e2);
+			if (variance > 0.66)
+				color = color2;
+		}
+		if (mUseColor3)
+		{
+			vec4 color3 = GenerateParticleColor(mPointColor3, mPointColorVariation);
+			float variance = dist(e2);
+			if (variance < 0.33)
+				color = color3;
+		}
+
 		particle.Color.x = Color_Pack(color);
 	}
 

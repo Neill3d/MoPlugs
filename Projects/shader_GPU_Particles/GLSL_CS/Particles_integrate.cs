@@ -37,13 +37,13 @@ uniform vec4	gFloor;				// in x - floor friction, in y - level, in w - use floor
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct TParticle
-{
-	//vec4				OldPos;				// in w store Particle Type  
+{ 
 	vec4				Pos;				// in w hold lifetime from 0.0 to 1.0 (normalized)
-	vec4				Vel;				// in w hold total lifetime
-	vec4				Color;				// inherit color from the emitter surface, custom color simulation
-	vec4				Rot;				// in w - float				AgeMillis;			// current Age
-	vec4 				RotVel;				// in w - float				Index;				// individual assigned index from 0.0 to 1.0 (normalized)
+	vec4				Vel;				// in w - individual birth randomF
+	// color packed in x. inherit color from the emitter surface, custom color simulation
+	vec4				Color;				// in y - total lifetime, z - AgeMillis, w - Index
+	vec4				Rot;				// 
+	vec4 				RotVel;				// 
 };
 
 struct TCollision
@@ -156,17 +156,18 @@ void main()
 	if (flattened_id >= gNumParticles)
 		return;
 	
-	// Read position and velocity
 	vec4 pos = particleBuffer.particles[flattened_id].Pos;
+	vec4 packedColor = particleBuffer.particles[flattened_id].Color;
 	vec4 vel = particleBuffer.particles[flattened_id].Vel;
+	vec4 rot = particleBuffer.particles[flattened_id].Rot;
 	vec4 rotVel = particleBuffer.particles[flattened_id].RotVel;
 
-	float lifetime = vel.w;
+	float Age = packedColor.z;
 	
-	if (lifetime <= 0.0)
+	if (Age <= 0.0)
 		return;
 	
-	vel.xyz = vel.xyz + rotVel.xyz;
+	//vel.xyz = vel.xyz + rotVel.xyz;
 	pos.xyz = pos.xyz + vel.xyz * DeltaTimeSecs;
 	
 	if (USE_COLLISIONS)
@@ -189,6 +190,6 @@ void main()
 	if (USE_FLOOR > 0.0) 
 		FloorConstraint(pos.xyz, FLOOR_LEVEL);
 	
-	particleBuffer.particles[flattened_id].Vel = vel;
+	//particleBuffer.particles[flattened_id].Vel = vel;
 	particleBuffer.particles[flattened_id].Pos = pos;	// in w we store lifetime
 }

@@ -72,10 +72,12 @@ ConstantBuffer global evaluateBlock
 	uniform float					gSkipAlphaLimit;		// skip generating trasparency particles
 	
 	uniform	vec4					gEmitColor;
+	uniform	vec4					gEmitColor2;
+	uniform	vec4					gEmitColor3;
 
 	uniform float					gGenerateOnMotionLimit;
-	uniform float					gEvalTemp1;
-	uniform float					gEvalTemp2;
+	uniform float					gUseEmitColor2;
+	uniform float					gUseEmitColor3;
 	uniform float					gEvalTemp3;
 }
 
@@ -238,8 +240,6 @@ GLSLShader
 	vec4 Color_UnPack (float depth);
     float Color_Pack (vec4 colour);
 
-	vec4 EncodeExp( in float value );
-	float DecodeExp( in vec4 pack );
 }
 
 //#include "Particles_generation.glslfxh"
@@ -280,23 +280,6 @@ namespace Evaluate
 		{
 			float x = 1.0/255.0 * (floor(colour.x*255.0/64.0)*64.0 + floor(colour.y*255.0/64.0)*16.0 + floor(colour.z*255.0/64.0)*4.0 + floor(colour.a*255.0/64.0));
 			return x;
-		}
-
-		vec4 EncodeExp( in float value )
-		{
-			int exponent  = int( log2( abs( value ) ) + 1.0 );
-			value        /= exp2( float( exponent ) );
-			value         = (value + 1.0) * (256.0*256.0*256.0 - 1.0) / (2.0*256.0*256.0*256.0);
-			vec4 encode   = fract( value * vec4(1.0, 256.0, 256.0*256.0, 256.0*256.0*256.0) );
-			return vec4( encode.xyz - encode.yzw / 256.0 + 1.0/512.0, (float(exponent) + 127.5) / 256.0 );
-		}
-
-		float DecodeExp( in vec4 pack )
-		{
-			int exponent = int( pack.w * 256.0 - 127.0 );
-			float value  = dot( pack.xyz, 1.0 / vec3(1.0, 256.0, 256.0*256.0) );
-			value        = value * (2.0*256.0*256.0*256.0) / (256.0*256.0*256.0 - 1.0) - 1.0;
-			return value * exp2( float(exponent) );
 		}
 	}
 
@@ -608,6 +591,12 @@ namespace Evaluate
 		
 		void GetRandomColor(in vec4 incolor, in float randomF, in float variation, out vec4 outcolor)
 		{
+			if (variation <= 0.0)
+			{
+				outcolor = incolor;
+				return;
+			}
+
 			vec4 varcolor = vec4(rand(vec2(randomF, 3.07)), rand(vec2(randomF, -4.04)), rand(vec2(randomF, 1.01)), 0.0);
 			varcolor = varcolor * vec4(2.0 * variation);
 			varcolor = varcolor - vec4(variation, variation, variation, 0.0);
@@ -674,10 +663,24 @@ namespace Evaluate
 				GetEmitDir(vertIndex, randomF, Dir);
 			
 			if (gInheritEmitterColor > 0)
+			{
 				GetEmitColor(newPos, vertIndex, baryCoords, color);
+			}
 			else
+			{
+				float colorChoise = rand(vec2(randomF, 15.15));
 				GetRandomColor(gEmitColor, randomF, gColorVariation, color);
-			
+
+				if ( gUseEmitColor2 > 0.0 && colorChoise > 0.66 )
+				{
+					GetRandomColor(gEmitColor2, randomF, gColorVariation, color);
+				}
+				if ( gUseEmitColor3 > 0.0 && colorChoise < 0.33 )
+				{
+					GetRandomColor(gEmitColor3, randomF, gColorVariation, color);
+				}
+			}
+
 			float newSize = GetRandomSize(randomF);
 			//newPos = inverse(gEmitterDeltaTM) * vec4(newPos.xyz, 1.0);
 			newPos = gTM * vec4(newPos.xyz, 1.0);
@@ -688,7 +691,8 @@ namespace Evaluate
 			Dir.xyz = GetRandomSpeed(randomF) * Dir.xyz;
 			//vel = gEmitterDeltaTM * vec4(Dir.xyz, 1.0);
 			vel.xyz = Dir.xyz + emitterVel.xyz;
-			
+			vel.w = randomF;
+
 			rot = quat_euler_angles(gRotation.x, gRotation.y, gRotation.z);
 			rotVel = vec4(gAngularVelocity.xyz, 1.0);
 
@@ -1451,18 +1455,25 @@ namespace Render
 
 		layout(binding=6) uniform sampler1D	ColorCurve;
 
+		vec3 rotate_vector( vec4 quat, vec3 vec )
+		{
+			return vec + 2.0 * cross( cross( vec, quat.xyz ) + quat.w * vec, quat.xyz );
+		}
+
 		void main()                                                                         
 		{   
 			float size = ParticlePosition.w; // gBillboardSize;
 			// float normLife = Age / lifetime;
 			life = clamp(Color.z / (Color.y+0.001), 0.0, 1.0);
 
-			vec4 pos = size * Position + ParticlePosition;
+			vec3 pos = ParticlePosition.xyz + size * rotate_vector( Rotation, Position.xyz );
+			//vec4 pos = size * Position + ParticlePosition;
 			vec4 vPosition = gMV * vec4(pos.xyz, 1.0);
 			gl_Position = gVP * vPosition;
 			wv = vPosition.xyz;
 
-			vec4 n = gInvTransposeMV * vec4(Normal.xyz, 1.0);
+			vec3 rotate_n = rotate_vector( Rotation, Normal.xyz );
+			vec4 n = gInvTransposeMV * vec4(rotate_n, 1.0);
 			lNormal = n.xyz;
 
 			//

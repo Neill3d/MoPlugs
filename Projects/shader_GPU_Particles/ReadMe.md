@@ -74,6 +74,9 @@ Particle System
 
 LOG
 
+27.12.2017
+ * fixed surface constraint feature to work with rotation
+
 26.12.2017
  + added a support for rotation (simulate snowflakes)
 

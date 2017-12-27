@@ -300,6 +300,10 @@ public:
     FBPropertyAnimatableDouble					TransparencyFactor; 
 
 	FBPropertyAnimatableColorAndAlpha					Color;
+	FBPropertyBool										UseColor2;
+	FBPropertyAnimatableColorAndAlpha					Color2;
+	FBPropertyBool										UseColor3;
+	FBPropertyAnimatableColorAndAlpha					Color3;
 	FBPropertyAnimatableDouble							ColorVariation;
 	FBPropertyBool										UseColorCurve;
 	FBPropertyAction									ColorCurve;

@@ -54,6 +54,8 @@ public:
 
 	FBPropertyBool					Enabled;
 
+	FBPropertyBool					NewVortexMath;
+
 	FBPropertyAnimatableDouble		Magnitude;
 	FBPropertyAnimatableDouble		RotationSpeed;
 

@@ -255,7 +255,7 @@ protected:
 	GLint				locComputeNumCollisions;
 	GLint				locComputeUseSizeAtten;
 	GLint				locComputeUpdatePosition;	// do we have to run integrate shader after ?!
-	GLint				locEmitterPointCount;
+	GLint				locComputeEmitterPointCount;
 
 	//
 	// self collisions compute shader

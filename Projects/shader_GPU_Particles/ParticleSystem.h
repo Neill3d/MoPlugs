@@ -204,7 +204,10 @@ public:
 	// run evaluate shader
 
 	void SetParticleSize(const double size, const double size_variation);
-	void SetParticleColor(const bool inheritSurfaceColor, const vec4 color, const double color_variation);
+	void SetParticleColor(const bool inheritSurfaceColor, 
+		const vec4 color, const double color_variation,
+		const bool useColor2, const vec4 color2,
+		const bool useColor3, const vec4 color3);
 
 	void PrepareParticles(unsigned int maxparticles, const int randomSeed, unsigned int particleCount, bool useRate, unsigned int rate, const double extrudeDist);
 
@@ -212,8 +215,9 @@ public:
 	bool UploadSimulationDataOnGPU();
 
 	void EmitParticles(const double timeStep, const ETechEmitType	type);
+
 	const unsigned int SimulateParticles(const bool emitEachStep, const ETechEmitType type, 
-		const double timeStep, double &DeltaTime, const double limit, const int SubSteps, const bool selfCollisions);
+		const double timeStep, double &DeltaTime, const double limit, const int SubSteps, const bool selfCollisions, bool surfaceConstraint);
 	// todo: VP, MV, camera pos should be updated into the uniform buffer
 	
 	// run render shader
@@ -267,6 +271,10 @@ protected:
 	bool						mInheritSurfaceColor;
 	vec4						mPointColor;
 	float						mPointColorVariation;
+	bool						mUseColor2;
+	vec4						mPointColor2;
+	bool						mUseColor3;
+	vec4						mPointColor3;
 
 	vec3						mLastEmitterPos;
 	mat4						mLastEmitterTransform;

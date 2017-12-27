@@ -37,8 +37,9 @@ namespace GPUParticles
 #ifndef PARTICLE_FORCE_WIND_TYPE
 	#define		PARTICLE_FORCE_DISABLED			0	
 	#define		PARTICLE_FORCE_WIND_TYPE		1
-	#define		PARTICLE_FORCE_DRAG_TYPE		2
+	#define		PARTICLE_FORCE_GRAVITY_TYPE		2
 	#define		PARTICLE_FORCE_MOTOR_TYPE		3
+	#define		PARTICLE_FORCE_VORTEX_TYPE		4
 #endif
 
 #ifndef	PARTICLE_COLLISION_SPHERE_TYPE
@@ -119,11 +120,13 @@ struct evaluateBlock
 	float					gUseEmitterMask;
 	float					gSkipAlphaLimit;	// don't emit particles from a transparency pixel
 	
-	vec4					gColor;
+	vec4					gEmitColor;
+	vec4					gEmitColor2;
+	vec4					gEmitColor3;
 
 	float					gGenerateOnMotionLimit;
-	float					gEvalTemp1;
-	float					gEvalTemp2;
+	float					gUseEmitColor2;
+	float					gUseEmitColor3;
 	float					gEvalTemp3;
 };
 

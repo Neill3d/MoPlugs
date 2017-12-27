@@ -116,6 +116,7 @@ ParticleShaderFX::ParticleShaderFX()
 	locComputeNumForces = 0;
 	locComputeTurbulence = 0;
 	locComputeUseSizeAtten = 0;
+	locComputeEmitterPointCount = 0;
 
 	//shaderSelfCollisions = 0;
 	programSelfCollisions = 0;
@@ -198,6 +199,8 @@ bool ParticleShaderFX::Initialize()
 			throw std::exception( "failed to load particles effect" );
 
 
+
+
 		//
 		programCompute = loadComputeShader(fx_computeLocation);
 	
@@ -218,7 +221,7 @@ bool ParticleShaderFX::Initialize()
 		locComputeUseSizeAtten = glGetUniformLocation(programCompute, "gUseSizeAttenuation");
 
 		locComputeUpdatePosition = glGetUniformLocation(programCompute, "gUpdatePosition");
-		locEmitterPointCount = glGetUniformLocation(programCompute, "gEmitterPointCount");
+		locComputeEmitterPointCount = glGetUniformLocation(programCompute, "gEmitterPointCount");
 
 		// self collisions shader
 		programSelfCollisions = loadComputeShader(fx_computeSelfCollisionsLocation);
@@ -545,7 +548,7 @@ void ParticleShaderFX::UploadEvaluateDataBlock(const evaluateBlock &_evaluateBlo
 		glUniform1i( locComputeNumForces, _evaluateBlock.gNumForces );
 		glUniform1i( locComputeNumCollisions, _evaluateBlock.gNumCollisions );
 		glUniform1i( locComputeUseSizeAtten, _evaluateBlock.gUseSizeAttenuation );
-
+		glUniform1i( locComputeEmitterPointCount, _evaluateBlock.gPositionCount );
 		glUseProgram( 0 );
 
 		CHECK_GL_ERROR();

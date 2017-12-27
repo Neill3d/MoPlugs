@@ -191,6 +191,9 @@ ParticleSystem::ParticleSystem(unsigned int maxparticles)
 	mPerModelUserData.isFirst = true;
 	mPerModelUserData.isResetDone = false;
 	mPerModelUserData.lastFrameTime = 0.0;
+
+	mUseColor2 = false;
+	mUseColor3 = false;
 }
 
 ParticleSystem::~ParticleSystem()
@@ -329,6 +332,9 @@ float myclampf(const float value, const float minValue, const float maxValue)
 
 vec4 ParticleSystem::GenerateParticleColor(const vec4 &color, const float variation)
 {
+	if (variation <= 0.0)
+		return color;
+
 	float redV = 2.0f * dist(e2) * variation;
 	float greenV = 2.0f * dist(e2) * variation;
 	float blueV = 2.0f * dist(e2) * variation;
@@ -408,11 +414,17 @@ void ParticleSystem::SetParticleSize(const double size, const double size_variat
 		mPointSize = abs(mPointSize) + 0.001f;
 }
 
-void ParticleSystem::SetParticleColor(const bool inheritSurfaceColor, const vec4 color, const double color_variation)
+void ParticleSystem::SetParticleColor(const bool inheritSurfaceColor, const vec4 color, const double color_variation,
+	const bool useColor2, const vec4 color2,
+		const bool useColor3, const vec4 color3)
 {
 	mInheritSurfaceColor = inheritSurfaceColor;
 	mPointColor = color;
 	mPointColorVariation = (float) color_variation;
+	mUseColor2 = useColor2;
+	mPointColor2 = color2;
+	mUseColor3 = useColor3;
+	mPointColor3 = color3;
 }
 
 
@@ -494,6 +506,8 @@ bool ParticleSystem::ResetParticles(unsigned int maxparticles, const int randomS
 		iter->Color.w = 0.0f; // Index
 		//iter->Rot = vec4(0.0f, 0.0f, 0.0f, 0.0f); // AgeMillis = 1.0f; // Particles[i].Vel.w - 1000.0f;		// one launch per second for this launcher
 		//iter->RotVel = vec4(0.0f, 0.0f, 0.0f, 0.0f); // Index = 1.0f;
+
+		iter->Vel.w = dist(e2);	// random factor used when constraint to a surface
 	}
 	
 	// assign pre particles
@@ -511,6 +525,8 @@ bool ParticleSystem::ResetParticles(unsigned int maxparticles, const int randomS
 
 			iter->Rot = iter->Pos;	// TODO: temproary this is a constrained position
 			iter->Rot.w = 0.0f;
+
+			iter->Vel.w = dist(e2);
 		}
 	}
 
@@ -673,7 +689,7 @@ void ParticleSystem::EmitParticles(const double deltaTime, const ETechEmitType	t
 }
 
 const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, const ETechEmitType type, const double timeStep, 
-	double &DeltaTime, const double limit, const int SubSteps, const bool selfCollisions)
+	double &DeltaTime, const double limit, const int SubSteps, const bool selfCollisions, bool surfaceConstraint)
 {
 	if (false == mShader->IsInitialized() )
 	{
@@ -707,6 +723,11 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 			mConnections->BindForces(1);
 			mConnections->BindCollisions(2);
 
+			if (true == surfaceConstraint)
+			{
+				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, mBufferSurface[mSurfaceFront].GetBufferId() );
+			}
+
 			// TODO: bind terrain 2d texture if bindless is not supported
 			const GLuint terrainId = mConnections->GetTextureTerrain();
 			if (terrainId > 0 && mShader->IsBindlessTexturesSupported() == false)
@@ -714,9 +735,9 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 				glBindTexture(GL_TEXTURE_2D, terrainId);
 			}
 			
-			//
-			//
 
+			//
+			//
 
 			mShader->BindSimulation(false);
 			mShader->DispatchSimulation( (float)timeStep, (float)globalTime, mInstanceCount, COMPUTE_SHADER_GROUP_SIZE, 1, 1);
@@ -766,6 +787,11 @@ const unsigned int ParticleSystem::SimulateParticles(const bool emitEachStep, co
 	
 			mConnections->BindForces(1);
 			mConnections->BindCollisions(2);
+
+			if (true == surfaceConstraint)
+			{
+				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, mBufferSurface[mSurfaceFront].GetBufferId() );
+			}
 
 			// TODO: bind terrain 2d texture if bindless is not supported
 			const GLuint terrainId = mConnections->GetTextureTerrain();

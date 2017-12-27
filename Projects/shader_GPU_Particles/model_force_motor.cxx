@@ -49,6 +49,7 @@ bool ForceMotor::FBCreate()
     mPickedSubItem = -1;
 
 	FBPropertyPublish( this, Enabled, "Enabled", nullptr, nullptr );
+	FBPropertyPublish( this, NewVortexMath, "New Vortex Math", nullptr, nullptr );
 	FBPropertyPublish( this, Magnitude, "Magnitude", nullptr, nullptr );
 	FBPropertyPublish( this, RotationSpeed, "Rotation Speed", nullptr, nullptr );
 	FBPropertyPublish( this, LocalInfluence, "Local influence", nullptr, nullptr );
@@ -59,6 +60,7 @@ bool ForceMotor::FBCreate()
 
 
 	Enabled = true;
+	NewVortexMath = true;
 	Magnitude = 1.0;
 	RotationSpeed = 1.0;
 	LocalInfluence = false;
@@ -191,6 +193,7 @@ bool ForceMotor::FbxRetrieve(FBFbxObject* pFbxObject, kFbxObjectStore pStoreWhat
     return true;
 }
 
+
 void ForceMotor::FillForceData( TForce &data )
 {
 	FBVector3d P, T(0.0, 0.0, 1.0);
@@ -199,7 +202,13 @@ void ForceMotor::FillForceData( TForce &data )
 	GetMatrix(m);
 	VectorTransform33( T, m, T );
 
-	int iEnabled = (Enabled) ? PARTICLE_FORCE_MOTOR_TYPE : PARTICLE_FORCE_DISABLED;
+	int iEnabled = PARTICLE_FORCE_DISABLED;
+
+	if (Enabled)
+	{
+		iEnabled = (NewVortexMath) ? PARTICLE_FORCE_VORTEX_TYPE : PARTICLE_FORCE_MOTOR_TYPE;
+	}
+	
 	//float fTurbulence = (Turbulence) ? 1.0f : 0.0f;
 
 	ForceExchange::SetPosition( data, iEnabled, vec3( (float)P[0], (float)P[1], (float)P[2]) );

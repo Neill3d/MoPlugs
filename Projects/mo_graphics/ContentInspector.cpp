@@ -1071,6 +1071,7 @@ void CMaterialsInspector::ConstructFromFBMaterial( FBMaterial *pMaterial, FBEval
 	//
 	mat.useAmbient = 0.0f;
 	mat.useDiffuse = 0.0f;
+	mat.diffuse = -1;
 	mat.useNormalmap = 0.0f;
 	mat.useReflect = 0.0f;
 	mat.useEmissive = 0.0f;

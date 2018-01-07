@@ -358,6 +358,14 @@ bool CGPUCacheSaverQueryMOBU::Init(const char *filename)
 	}
 
 	//
+	for (auto iter=begin(lAffectedMaterials); iter!=end(lAffectedMaterials); ++iter)
+	{
+		FBMaterial *pMaterial = *iter;
+		if ( nullptr != pMaterial->GetTexture() )
+			lAffectedTextures.push_back( pMaterial->GetTexture() );
+	}
+
+	//
 	GetAffectedMedia( lAffectedTextures, lAffectedMedia, lTextureToVideo, mTotalUncompressedSize ); 
 
 	return (pList.GetCount() > 0);

@@ -46,6 +46,9 @@
 
 bool CheckIfStatic(FBModel *pModel)
 {
+	FBModelVertexData *pData = pModel->ModelVertexData;
+	if (nullptr == pData) return false;
+
 	const bool IsDeformable = pModel->IsDeformable;
 	if (IsDeformable == true) return false;
 	

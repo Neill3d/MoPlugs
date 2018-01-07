@@ -644,7 +644,7 @@ void ORShaderGPUCache::ShadeModel( FBRenderOptions* pRenderOptions, FBShaderMode
 		if (false == lIsSelectBufferPicking && false == lIsColorBufferPicking)
 		{
 			mShaderCallback = mShadersFactory.FindTypeByShaderAndGoal(this, eRenderGoalShading);
-			mShaderPass = eShaderPassTransparency;
+			mShaderPass = eShaderPassOpaque; // eShaderPassTransparency;
 
 			options.SetGoal(eRenderGoalShading);
 		}

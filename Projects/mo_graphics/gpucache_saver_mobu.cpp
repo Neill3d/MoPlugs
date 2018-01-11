@@ -445,13 +445,13 @@ const int CGPUCacheSaverQueryMOBU::GetVideoHeight(const int index)
 	return 1;
 }
 
-const int CGPUCacheSaverQueryMOBU::GetVideoFormat(const int index)
+const int CGPUCacheSaverQueryMOBU::GetVideoFormat(const int index, GLint &internalFormat, GLint &format)
 {
 	FBVideo *pVideo = lAffectedMedia[index];
 
 	if (FBIS(pVideo, FBVideoClip) )
 	{
-		GLint internalFormat, format;
+		//GLint internalFormat, format;
 		FBVideoFormatToOpenGL(((FBVideoClip*)pVideo)->Format, internalFormat, format, false);
 		
 		return format;
@@ -531,6 +531,18 @@ const bool CGPUCacheSaverQueryMOBU::IsVideoUsedMipmaps(const int index)
 	return false;
 }
 
+const unsigned char *CGPUCacheSaverQueryMOBU::GetVideoData(const int index)
+{
+	FBVideo *pVideo = lAffectedMedia[index];
+
+	if (FBIS(pVideo, FBVideoClip) )
+	{ 
+		FBVideoClip *pClip = (FBVideoClip*) pVideo;
+		return pClip->GetImage();
+	}
+	return nullptr;
+}
+
 // information about media
 double CGPUCacheSaverQueryMOBU::GetTotalUncompressedSize()
 {
@@ -552,6 +564,7 @@ const char *CGPUCacheSaverQueryMOBU::GetSamplerName(const int index) // pTexture
 const int CGPUCacheSaverQueryMOBU::GetSamplerVideoIndex(const int index) // which video is used for that sampler
 {
 	return lTextureToVideo[index];
+
 }
 
 void CGPUCacheSaverQueryMOBU::GetSamplerMatrix( const int index, mat4 &mat )

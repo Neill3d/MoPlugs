@@ -1,0 +1,24 @@
+<Header models="1" version="1" filename="h/&#x11;" materials="1" textures="1" media="1" shaders="0" lights="0" />
+<Models count="1" submeshes="1" totalVertices="24" totalIndices="36">
+    <Model name="Cube" visible="1" castShadow="1" receiveShadow="1" vertices="24">
+        <Translation x="-5.344822" y="107.445023" z="-19.698254" />
+        <Rotation x="0.000000" y="-0.000000" z="0.000000" />
+        <Scaling x="1.000000" y="1.000000" z="1.000000" />
+        <BoundingBox minx="-6.344822" miny="106.445023" minz="-20.698254" maxx="-4.344822" maxy="108.445023" maxz="-18.698254" />
+        <Patches>
+            <Patch offset="0" size="36" material="Material" materialId="0" />
+        </Patches>
+        <Shaders />
+    </Model>
+    <BoundingBox minx="-6.344822" miny="106.445023" minz="-20.698254" maxx="-4.344822" maxy="108.445023" maxz="-18.698254" />
+</Models>
+<Materials count="1">
+    <Material name="Material">
+        <Diffuse r="0.800000" g="0.800000" b="0.800000" factor="1.000000" map="snowflake.jpg" mapId="0" />
+    </Material>
+</Materials>
+<Textures count="1" UncompressedSize="1920000">
+    <Texture name="snowflake.jpg" width="800" height="800" filename="D:\My Pictures\snowflake.jpg" format="6407" startFrame="0" stopFrame="0" frameRate="24" imageSequence="0" />
+</Textures>
+<Shaders count="0" />
+<Lights count="0" />

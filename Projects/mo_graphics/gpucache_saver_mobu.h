@@ -57,7 +57,7 @@ public:
 	virtual const char *GetVideoName(const int index) override;
 	virtual const int GetVideoWidth(const int index) override;
 	virtual const int GetVideoHeight(const int index) override;
-	virtual const int GetVideoFormat(const int index) override;
+	virtual const int GetVideoFormat(const int index, GLint &internalFormat, GLint &format) override;
 	virtual const bool IsVideoImageSequence(const int index) override;
 	virtual const int GetVideoStartFrame(const int index) override;
 	virtual const int GetVideoStopFrame(const int index) override;
@@ -65,6 +65,7 @@ public:
 	virtual const char *GetVideoFilename(const int index) override;
 	virtual const double GetVideoSize(const int index) override;
 	virtual const bool IsVideoUsedMipmaps(const int index) override;
+	virtual const unsigned char *GetVideoData(const int index) override;
 
 	// information about media
 	virtual double GetTotalUncompressedSize() override;

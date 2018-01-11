@@ -1099,21 +1099,23 @@ Technique WallMaterial
 	{
 		/*
 #ifdef GL_ARB_bindless_texture
+		*/
 		VertexProgram = { Main::VS_Simple };
 		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
 		
 		FragmentProgram = Main::FS_Simple;
 		FragmentProgram<"texturing"> = BindlessTextures::texturing;
 		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+		/*
 #else
-	*/
+	
 		VertexProgram = { Main::VS_Simple };
 		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
 		
 		FragmentProgram = Main::FS_Simple;
 		FragmentProgram<"texturing"> = NoneTextures::texturing;
 		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
-
+		*/
 	}
 	
     Pass pNoTextures
@@ -1141,21 +1143,23 @@ Technique WallMaterial
 	{
 		/*
 #ifdef GL_ARB_bindless_texture
+		*/
 		VertexProgram = { Main::VS };
 		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
 		
 		FragmentProgram = { Main::FS, Lighting, Projectors::FS, CSB::DoContrastSaturationBrightness };
 		FragmentProgram<"texturing"> = BindlessTextures::texturing;
 		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
+		/*
 #else
-	*/
+	
 		VertexProgram = Main::VS;
 		VertexProgram<"vertexDepth"> = VertexDepthAlgorithm::linearDepth;
 		
 		FragmentProgram = { Main::FS, Lighting, Projectors::FS, CSB::DoContrastSaturationBrightness };
 		FragmentProgram<"texturing"> = NoneTextures::texturing;
 		FragmentProgram<"fragmentDepth"> = FragmentDepthAlgorithm::linearDepth;
-
+		*/
 	}
 }
 

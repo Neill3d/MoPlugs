@@ -14,6 +14,7 @@
 //--- Class declaration
 #include "ortexture_advanceBlend_texture.h"
 #include <gl\glew.h>
+#include <exception>
 
 #include "IO\FileUtils.h"
 

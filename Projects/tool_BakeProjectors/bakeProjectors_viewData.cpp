@@ -110,7 +110,7 @@ void ViewBakeProjectorsData::RenderToFramebuffers(bool &grabImage, FBString &gra
 
 		if ( FindEffectLocation( FBString("\\GLSL_FX\\", UBERSHADER_EFFECT), effectPath, effectFullName ) )
 		{
-			mUberShader = new Graphics::ShaderEffect();
+			mUberShader = new Graphics::ProjectorsShaderFX();
 			if( !mUberShader->Initialize( FBString(effectPath, "\\GLSL_FX\\"), UBERSHADER_EFFECT, 512, 512, 1.0) )
 			{
 				mReadyToLoad = false;
@@ -132,16 +132,18 @@ void ViewBakeProjectorsData::RenderToFramebuffers(bool &grabImage, FBString &gra
 		{
 			mOnlyProjectors = mUberShader->FindUniform( "saveOnlyProjectors" );
 			
-			mUberShader->SetBindless(false);
-			mUberShader->SetCubeMapRendering(false);
-			mUberShader->SetLogarithmicDepth(false);
-			mUberShader->SetTechnique( Graphics::eEffectTechniqueShading );
+			mUberShader->ModifyShaderFlags( Graphics::eShaderFlag_Bindless, false );
+			mUberShader->ModifyShaderFlags( Graphics::eShaderFlag_CubeMapRendering, false );
+			mUberShader->ModifyShaderFlags( Graphics::eShaderFlag_LogDepth, false );
 
-			const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
-			mLocTexture = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheTextures); // allTheTextures;
-			mLocMaterial = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheMaterials); // allTheMaterials;
-			mLocShader = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheShaders); // allTheShaders;
-			mLocProjectors = loc->GetFragmentLocation(Graphics::eCustomLocationAllTheProjectors); // allTheProjectors;
+			mUberShader->ModifyShaderFlags( Graphics::eShaderFlag_NoTextures, false );
+			mUberShader->ModifyShaderFlags( Graphics::eShaderFlag_EarlyZ, false );
+
+			const auto loc = mUberShader->GetCurrentEffectLocationsPtr();
+			mLocTexture = loc->fptr()->GetLocation(Graphics::eCustomLocationAllTheTextures); // allTheTextures;
+			mLocMaterial = loc->fptr()->GetLocation(Graphics::eCustomLocationAllTheMaterials); // allTheMaterials;
+			mLocShader = loc->fptr()->GetLocation(Graphics::eCustomLocationAllTheShaders); // allTheShaders;
+			mLocProjectors = loc->fptr()->GetLocation(Graphics::eCustomLocationAllTheProjectors); // allTheProjectors;
 
 			CHECK_GL_ERROR();
 		}
@@ -157,7 +159,7 @@ void ViewBakeProjectorsData::RenderToFramebuffers(bool &grabImage, FBString &gra
 	if (mOnlyProjectors)
 		mOnlyProjectors->setValue1f( (saveOnlyProjectors == true) ? 1.0f : 0.0f );
 
-	const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
+	const auto loc = mUberShader->GetCurrentEffectLocationsPtr();
 
 	// this matrix only for baking projection, fragment shader will use camera matrices
 
@@ -291,7 +293,7 @@ void ViewBakeProjectorsData::RenderToFramebuffers(bool &grabImage, FBString &gra
 		if (hasProjectors)
 		{
 			mUberShader->UpdateNumberOfProjectors( mProjectors.GetNumberOfProjectors() );
-			mProjectors.Bind(loc->GetFragmentId(), mLocProjectors, 0);
+			mProjectors.Bind(loc->fptr()->GetShaderId(), mLocProjectors, 0);
 		}
 		else
 		{
@@ -449,7 +451,7 @@ void ViewBakeProjectorsData::ChangeContext()
 
 void ViewBakeProjectorsData::RenderModel(FBModel *pModel)
 {
-	const auto loc = mUberShader->GetCustomEffectShaderLocationsPtr();
+	const auto loc = mUberShader->GetCurrentEffectLocationsPtr();
 
 	FBModelVertexData *pData = pModel->ModelVertexData;
 
@@ -457,16 +459,19 @@ void ViewBakeProjectorsData::RenderModel(FBModel *pModel)
 	pData->EnableOGLVertexData();
 
 	const GLint positionId = pData->GetVertexArrayVBOId(kFBGeometryArrayID_Point);
+	const GLvoid *posOffset = pData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Point);
 	const GLint normalId = pData->GetVertexArrayVBOId(kFBGeometryArrayID_Normal );
+	const GLvoid *norOffset = pData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Normal);
 	const GLint uvId = pData->GetUVSetVBOId();
+	const GLvoid *uvOffset = pData->GetUVSetVBOOffset();
 
 	glBindBuffer( GL_ARRAY_BUFFER, positionId );
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) 0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) posOffset);
 	glBindBuffer( GL_ARRAY_BUFFER, uvId );
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) 0 ); 
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) uvOffset ); 
 
 	glBindBuffer( GL_ARRAY_BUFFER, normalId );
-	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) 0 ); 
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) norOffset ); 
 
 
 	glEnableVertexAttribArray(0);		// position
@@ -479,8 +484,8 @@ void ViewBakeProjectorsData::RenderModel(FBModel *pModel)
 		FBMaterial *pMaterial = pData->GetSubRegionMaterial(i);
 		UploadMaterial(pMaterial);
 
-		mBufferMaterial.BindAsUniform( loc->GetFragmentId(), mLocMaterial, 0 );
-		mBufferTexture.BindAsUniform( loc->GetFragmentId(), mLocTexture, 0 );
+		mBufferMaterial.BindAsUniform( loc->fptr()->GetShaderId(), mLocMaterial, 0 );
+		mBufferTexture.BindAsUniform( loc->fptr()->GetShaderId(), mLocTexture, 0 );
 
 		//
 		pData->DrawSubRegion(i);

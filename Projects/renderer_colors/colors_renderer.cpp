@@ -502,6 +502,9 @@ void ColorsRendererCallback::RenderNormalizedColors(FBRenderOptions *pRenderOpti
 		//lModelVertexData->VertexArrayMappingRequest();
 		//lModelVertexData->VertexArrayMappingRelease();
 
+
+		// TODO: use gpu offset pointer (needed for GPU skinning feature)
+
         lModelVertexData->EnableOGLVertexData();        //Bind Vertex Array or Vertex Buffer Object.
 
 		if (false == pRenderOptions->IsIDBufferRendering())

@@ -20,8 +20,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">
     <LocalDebuggerCommand>$(ADSK_MOBU_2015_64)\bin\$(Platform)\motionbuilder.exe</LocalDebuggerCommand>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">
+    <LocalDebuggerCommand>$(ADSK_MOBU_2014_64)\bin\$(Platform)\motionbuilder.exe</LocalDebuggerCommand>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">
     <LocalDebuggerCommand>$(ADSK_MOBU_2017_64)\bin\$(Platform)\motionbuilder.exe</LocalDebuggerCommand>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2018|x64'">
+    <LocalDebuggerCommand>$(ADSK_MOBU_2018_64)\bin\$(Platform)\motionbuilder.exe</LocalDebuggerCommand>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerCommandArguments>-console</LocalDebuggerCommandArguments>
@@ -31,7 +37,15 @@
     <LocalDebuggerCommandArguments>-console</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">
+    <LocalDebuggerCommandArguments>-console</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">
+    <LocalDebuggerCommandArguments>-console</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release 2018|x64'">
     <LocalDebuggerCommandArguments>-console</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>

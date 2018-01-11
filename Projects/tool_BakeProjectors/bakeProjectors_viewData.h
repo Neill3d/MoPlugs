@@ -34,7 +34,7 @@ public:
 	FrameBufferInfo				mFramebufferInfo;
 
 	bool						mReadyToLoad;
-	Graphics::ShaderEffect		*mUberShader;
+	Graphics::ProjectorsShaderFX		*mUberShader;
 
 	nvFX::IUniform				*mOnlyProjectors;
 

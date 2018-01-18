@@ -210,12 +210,12 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2013|x64'">$(ADSK_MOBU_2013_64)\bin\$(Platform)\plugins\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">$(ADSK_MOBU_2014_64)\bin\$(Platform)\plugins\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\bin\x64\plugins_2015\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">$(ADSK_MOBU_2017_64)\bin\$(Platform)\plugins\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">..\..\bin\x64\plugins_2017\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ADSK_MOBU_2011_64)\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2013|x64'">$(ADSK_MOBU_2013_64)\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">$(ADSK_MOBU_2014_64)\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\..\obj\$(Configuration)\$(Platform)\plugins\$(ProjectName)\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">$(ADSK_MOBU_2017_64)\obj\$(Platform)\plugins\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">..\..\..\obj\$(Configuration)\$(Platform)\plugins\$(ProjectName)\</IntDir>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</IgnoreImportLibrary>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release 2013|x64'">true</IgnoreImportLibrary>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">true</IgnoreImportLibrary>
@@ -239,7 +239,7 @@
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2013|x64'">$(ADSK_MOBU_2013_64)\OpenRealitySDK\include\fbsdk;$(ADSK_MOBU_2013_64)\OpenRealitySDK\include;..\..\MotionCodeLibrary;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2014|x64'">$(ADSK_MOBU_2014_64)\OpenRealitySDK\include\fbsdk;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;..\..\MotionCodeLibrary;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2015|x64'">..\..\MotionCodeLibrary\Include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include;$(ADSK_MOBU_2015_64)\OpenRealitySDK\include\fbsdk;$(MOPLUGS_FRAMEWORK)\code;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">$(ADSK_MOBU_2017_64)\OpenRealitySDK\include\fbsdk;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include;..\..\MotionCodeLibrary;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">..\..\MotionCodeLibrary\Include;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include\fbsdk;$(MOPLUGS_FRAMEWORK)\code;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ADSK_MOBU_2010_64)\OpenRealitySDK\include\fbsdk;$(ADSK_MOBU_2010_64)\OpenRealitySDK\include;..\..\MotionCodeLibrary;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ADSK_MOBU_2010_64)\OpenRealitySDK\lib\$(Platform);$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ADSK_MOBU_2010_64)\OpenRealitySDK\lib\$(Platform);$(LibraryPath)</LibraryPath>
@@ -709,7 +709,7 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>
@@ -734,7 +734,8 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <ImportLibrary>$(ADSK_MOBU_2017_64)/bin\$(Platform)/plugins/$(ProjectName).lib</ImportLibrary>
+      <ImportLibrary>
+      </ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>

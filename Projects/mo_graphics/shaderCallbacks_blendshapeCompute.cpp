@@ -82,6 +82,14 @@ bool CComputeProgram::PrepProgram(const char *filename)
 				Clear();
 				return false;
 			}
+			else
+			{
+				FBTrace ( "failed to compile a compute shader" );
+			}
+		}
+		else
+		{
+			FBTrace( "failed to find effect location" );
 		}
 	}
 

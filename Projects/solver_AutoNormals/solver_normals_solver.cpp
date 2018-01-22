@@ -18,6 +18,7 @@
 #include <Windows.h>
 #include "resource.h"
 #include "ResourceUtils.h"
+#include "IO\FileUtils.h"
 
 //--- Registration defines
 #define	NORMALSOLVER__CLASS		NORMALSOLVER__CLASSNAME
@@ -38,7 +39,9 @@ FBRegisterApplyManagerRule( KNormalSolverAssociation, "KNormalSolverAssociation"
 
 //extern void DebugOGL_Callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char *message, const void*userParam);
 
-
+#define SHADER_NORMALS_ZERO			"\\GLSL_CS\\recomputeNormalsZero.cs" 
+#define SHADER_RECOMPUTE_NORMALS	"\\GLSL_CS\\recomputeNormals.cs"
+#define SHADER_NORMALS_NORM			"\\GLSL_CS\\recomputeNormalsNorm.cs"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -253,7 +256,11 @@ void SolverCalculateNormals::OnPerFrameRenderingPipelineCallback    (HISender pS
 				FBModel *pModel = (FBModel*) AffectedModels.GetAt(i);
 
 				PrepModelData(pModel);
-				RunReComputeNormals(pModel);
+				if (false == RunReComputeNormals(pModel) )
+				{
+					Active = false;
+					break;
+				}
 			}
 		
 		}
@@ -363,18 +370,39 @@ bool SolverCalculateNormals::LoadShaders()
 	}
 
 	// check for a compute shader
+	
+	FBString effectPath, effectFullName;
+	if (true == FindEffectLocation( SHADER_NORMALS_ZERO, effectPath, effectFullName ) )
+	{
+		if (false == mProgramZero.PrepProgram(effectFullName) )
+		{
+			FBTrace( "failed to load normals zero\n" );
+			return false;
+		}	
+
+		effectFullName = effectPath + SHADER_RECOMPUTE_NORMALS;
+		if (false == mProgramRecomputeNormals.PrepProgram(effectFullName) )
+		{
+			FBTrace ( "failed to load recompute normals\n" );
+			return false;
+		}
+
+		effectFullName = effectPath + SHADER_NORMALS_NORM;
+		if (false == mProgramNorm.PrepProgram(effectFullName) )
+		{
+			FBTrace( "failed to load normals norm\n" );
+			return false;
+		}	
+	}
+	else
+	{
+		FBTrace ( "failed to locate a shader effect\n" );
+	}
+
+	
+	
+
 	/*
-	if (false == mProgramZero.PrepProgram("\\GLSL_CS\\recomputeNormalsZero.cs") )
-		return false;
-
-	if (false == mProgramRecomputeNormals.PrepProgram("\\GLSL_CS\\recomputeNormals.cs") )
-		return false;
-	
-	if (false == mProgramNorm.PrepProgram("\\GLSL_CS\\recomputeNormalsNorm.cs") )
-		return false;
-		*/
-
-	
 	if (0 == mProgramZero.GetProgramId() )
 	{
 		bool res = false;
@@ -487,15 +515,18 @@ bool SolverCalculateNormals::LoadShaders()
 			return false;
 		}
 	}
-
+	*/
 	return true;
 }
 
 bool SolverCalculateNormals::RunReComputeNormals(FBModel *pModel)
 {
 	if (false == LoadShaders() )
+	{
+		FBTrace( "> failed to load shaders" );
 		return false;
-	
+	}
+
 	//
 	// prepare number of blendshapes
 
@@ -529,13 +560,23 @@ bool SolverCalculateNormals::RunReComputeNormals(FBModel *pModel)
 	// run a compute program
 
 	const GLuint posId = pData->GetVertexArrayVBOId( kFBGeometryArrayID_Point, true );
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, posId );
-
 	const GLuint indId = pData->GetIndexArrayVBOId();
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, indId );
-
 	const GLuint deformId = pData->GetVertexArrayVBOId( kFBGeometryArrayID_Normal, true );
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, deformId );
+
+	const GLvoid* positionOffset = pData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Point);
+	const GLvoid* normalOffset = pData->GetVertexArrayVBOOffset(kFBGeometryArrayID_Normal);
+
+	
+	
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, posId );
+	//glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, deformId );
+
+	// appoach that handles GPU Skinning well !
+	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 0, posId, (GLintptr) positionOffset, numberOfVertices * sizeof(vec4));
+	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 2, deformId, (GLintptr) normalOffset, numberOfVertices * sizeof(vec4));
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, indId );
+	
 	
 	// duplicate buffer if allocated
 	int duplicateCount = 0;

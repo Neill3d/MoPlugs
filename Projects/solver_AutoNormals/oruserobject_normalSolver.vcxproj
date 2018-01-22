@@ -23,20 +23,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\MotionCodeLibrary\FileUtils.cpp" />
-    <ClCompile Include="..\..\MotionCodeLibrary\glslComputeShader.cpp" />
-    <ClCompile Include="..\..\MotionCodeLibrary\ResourceUtils.cpp" />
-    <ClCompile Include="nv_math.cpp" />
     <ClCompile Include="solver_normals.cxx" />
     <ClCompile Include="solver_normals_solver.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\MotionCodeLibrary\FileUtils.h" />
-    <ClInclude Include="..\..\MotionCodeLibrary\glslComputeShader.h" />
-    <ClInclude Include="..\..\MotionCodeLibrary\ResourceUtils.h" />
-    <ClInclude Include="nv_algebra.h" />
-    <ClInclude Include="nv_math.h" />
-    <ClInclude Include="nv_mathdecl.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="solver_normals_solver.h" />
   </ItemGroup>
@@ -47,6 +37,14 @@
     <None Include="GLSL_CS\recomputeNormals.cs" />
     <None Include="GLSL_CS\recomputeNormalsNorm.cs" />
     <None Include="GLSL_CS\recomputeNormalsZero.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\MoPlugs_Framework\projects\sg_base.vcxproj">
+      <Project>{60091670-3c61-4ad8-886e-b0e4a2a56b44}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\MotionCodeLibrary\Projects\MoCodeLibrary.vcxproj">
+      <Project>{a17ca844-dd7f-4522-a2b2-d8c7f6308818}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6BD0817A-76DD-4ECC-AE4D-AB6E6BF210EC}</ProjectGuid>
@@ -125,8 +123,8 @@
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug 2017|x64'">$(ADSK_MOBU_2017_64)\OpenRealitySDK\include\fbsdk;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include;..\..\MotionCodeLibrary;D:\Work\MoPlugs\glew-1.11.0\include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug 2015|x64'">$(ADSK_MOBU_2015_64)\OpenRealitySDK\lib\$(Platform);D:\Qt\4.8.5\lib;D:\Work\MoPlugs\glew-1.11.0\lib\Debug\x64;$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug 2017|x64'">$(ADSK_MOBU_2017_64)\OpenRealitySDK\lib\$(Platform);D:\Work\MoPlugs\glew-1.11.0\lib\Debug\x64;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">$(ADSK_MOBU_2017_64)\OpenRealitySDK\include\fbsdk;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include;..\..\MotionCodeLibrary;D:\Work\MoPlugs\glew-1.11.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">$(ADSK_MOBU_2017_64)\OpenRealitySDK\lib\$(Platform);D:\Work\MoPlugs\glew-1.11.0\lib\Release\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">$(ADSK_MOBU_2017_64)\OpenRealitySDK\include\fbsdk;$(ADSK_MOBU_2017_64)\OpenRealitySDK\include;..\..\MotionCodeLibrary\Include;$(MOPLUGS_EXTERNAL)\glew\include;$(MOPLUGS_FRAMEWORK)\code;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release 2017|x64'">$(ADSK_MOBU_2017_64)\OpenRealitySDK\lib\$(Platform);$(MOPLUGS_EXTERNAL)\glew\lib\Release\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -231,6 +229,12 @@
       </ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)\GLSL_CS\*.*" "..\..\bin\System\GLSL_CS" /Y /I</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>copy project glsl shaders</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>

@@ -25,7 +25,7 @@
 
 #include "nv_math.h"
 
-#include "glslComputeShader.h"
+#include "graphics\glslComputeShader.h"
 
 #define NORMALSOLVERASSOCIATION__CLASSNAME	    KNormalSolverAssociation 
 #define NORMALSOLVERASSOCIATION__CLASSSTR		"KNormalSolverAssociation"

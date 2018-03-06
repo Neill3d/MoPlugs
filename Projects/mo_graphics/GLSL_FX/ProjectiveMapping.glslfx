@@ -765,6 +765,7 @@ namespace Main
 			lInfo.worldPosition = inWV;
 			lInfo.position = inPw;
 			lInfo.shininess = theMaterial->specExp;
+			lInfo.tangentMatrix = mat3(1.0);
 			
 			LIGHTRES	lResult;
 			lResult.ambientContrib = vec3(0.0);
@@ -779,6 +780,7 @@ namespace Main
 			if (numPointLights > 0)
 			{
 				evalLighting(lInfo, lResult);
+				//lResult.diffContrib = vec3(1.0);
 			}
 			
 			// material diffuse factor and global shader transparency

@@ -217,7 +217,7 @@ GLSLShader Lighting
 	/**
 	 * Computes contributions from a point light with a linear falloff using a blinn-phong model.
 	 */
-	 /*
+	 
 	void doLight(in LIGHTINFOS info, in LightDATA *pLight, in float shadow, inout vec3 diffContrib, inout vec3 specContrib)
 	{
 		vec3 lightDir = pLight->position.xyz - info.position;
@@ -225,7 +225,7 @@ GLSLShader Lighting
 		lightDir = normalize(lightDir);
 		float inner = 0.0;
 		
-		lightDir = info.tangentMatrix * lightDir;
+		//lightDir = info.tangentMatrix * lightDir;
 		
 		vec3 normal = info.normal;
 		// double sided lighting
@@ -243,16 +243,16 @@ GLSLShader Lighting
 		float spotFactor = 1.0;
 		float specular = 0.0;
 		
-		//if (pLight->castSpecularOnObject > 0.0f)
-		//{
+		if (pLight->castSpecularOnObject > 0.0f)
+		{
 			vec3 eyeVec = normalize(-info.viewDir);
 			eyeVec = info.tangentMatrix * eyeVec;
 			
 			vec3 halfVec = (eyeVec - lightDir)/2.0; // view + light
 			specular = pow( max(0.0, dot( normal, halfVec ) ), 64.0 );
-		//}
-		specular = 0.5;
-		//specular = clamp(specular, 0.0, 1.0);
+		}
+		//specular = 0.5;
+		specular = clamp(specular, 0.0, 1.0);
 		
 		if( pLight->position.w == LIGHT_TYPE_SPOT )
 		{
@@ -268,10 +268,11 @@ GLSLShader Lighting
 		//
 		
 		diffContrib += ndotL * factor * pLight->color.xyz; // * lshadow
-		//specContrib += specular * vec3(1.0); // * pLight->color.xyz;
-		specContrib = vec3(specular);
+		specContrib += specular * pLight->color.xyz;
+		//specContrib = vec3(specular);
 	}
-*/
+
+/*
 	void doLight(in LIGHTINFOS info, in LightDATA *pLight, in float shadow, inout vec3 diffContrib, inout vec3 specContrib)
 	{
 		vec3 lightDir = pLight->position.xyz - info.position;
@@ -315,7 +316,7 @@ GLSLShader Lighting
 		
 		specContrib = vec3(specular);
 	}
-
+*/
 	/**
 	 * Looks up light parameters in constant buffers using light index, and 
 	 * computes lighting by invoking doLight with these.

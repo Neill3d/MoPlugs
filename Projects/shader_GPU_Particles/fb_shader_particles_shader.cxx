@@ -581,6 +581,9 @@ bool GPUshader_Particles::FBCreate()
 
 	UpdatePropertyTextures();
 
+	mIsOfflineRenderer = false;
+	mSystem.OnVideoFrameRendering.Add(this, (FBCallback) &GPUshader_Particles::OnVideoFrameRendering);
+
 	return true;
 }
 
@@ -590,6 +593,8 @@ bool GPUshader_Particles::FBCreate()
  ************************************************/
 void GPUshader_Particles::FBDestroy()
 {
+	mSystem.OnVideoFrameRendering.Remove(this, (FBCallback) &GPUshader_Particles::OnVideoFrameRendering);
+
 	FreeParticles();
 }
 
@@ -788,6 +793,46 @@ void GPUshader_Particles::DetachDisplayContext( FBRenderOptions* pOptions, FBSha
 
 bool GPUshader_Particles::ShaderNeedBeginRender()
 {
+    return true;
+}
+
+static bool shaderBegin = false;
+
+void GPUshader_Particles::ShaderBeginRender( FBRenderOptions* pRenderOptions, FBShaderModelInfo* pShaderModelInfo )
+{
+	if (nullptr == pRenderOptions)
+		return;
+
+	{
+		const int renderFrameId = pRenderOptions->GetRenderFrameId();
+
+		if (renderFrameId <= mLastRenderFrameId)
+			return;
+
+		mLastRenderFrameId = renderFrameId;
+	}
+
+	if (false == pRenderOptions->IsOfflineRendering() && true == mIsOfflineRenderer)
+			return;
+
+#ifdef _DEBUG
+	CHECK_GL_ERROR();
+
+	printf("[ShaderNeedBeginRender] END...\n" );
+#endif
+	firstBeginRender = true;
+	firstShadeModel = true;
+
+#ifdef _DEBUG
+	printf("[ShaderBeginRender] Begin...\n" );
+#endif
+	if (false == firstBeginRender)
+		return;
+
+	
+	
+	//
+	//
 	//CHECK_GL_ERROR();
 
 	bool resetValue;
@@ -827,37 +872,8 @@ bool GPUshader_Particles::ShaderNeedBeginRender()
 	if (PrimitiveType == kFBParticleInstance)
 		UpdateInstanceData();
 
-#ifdef _DEBUG
-	CHECK_GL_ERROR();
-
-	printf("[ShaderNeedBeginRender] END...\n" );
-#endif
-	firstBeginRender = true;
-	firstShadeModel = true;
-
-    return true;
-}
-
-static bool shaderBegin = false;
-
-void GPUshader_Particles::ShaderBeginRender( FBRenderOptions* pRenderOptions, FBShaderModelInfo* pShaderModelInfo )
-{
-#ifdef _DEBUG
-	printf("[ShaderBeginRender] Begin...\n" );
-#endif
-	if (false == firstBeginRender)
-		return;
-
-	if (nullptr != pRenderOptions)
-	{
-		const int renderFrameId = pRenderOptions->GetRenderFrameId();
-
-		if (renderFrameId < mLastRenderFrameId)
-			return;
-
-		mLastRenderFrameId = renderFrameId;
-	}
-	
+	//
+	//
 
 	firstBeginRender = false;
 	shaderBegin = true;
@@ -890,6 +906,12 @@ void GPUshader_Particles::ShaderBeginRender( FBRenderOptions* pRenderOptions, FB
 
 void GPUshader_Particles::ShadeModel( FBRenderOptions* pRenderOptions, FBShaderModelInfo* pShaderModelInfo, FBRenderingPass pPass )
 {
+	if (nullptr == pRenderOptions)
+		return;
+
+	if (false == pRenderOptions->IsOfflineRendering() && true == mIsOfflineRenderer)
+		return;
+
 #ifdef _DEBUG
 	printf("[ShadeModel] Begin...\n" );
 #endif
@@ -1011,8 +1033,11 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 	}
 
 	//
+	const bool isPlayMode = (kFBParticlePlay == PlayMode || true == pRenderOptions->IsOfflineRendering());
+
+	//
 	bool enableEmit = true;
-	if (PlayMode == kFBParticlePlay && UseCustomRange)
+	if ( true == isPlayMode && true == UseCustomRange)
 	{
 		FBTime emitStartTime = EmitStart;
 		FBTime emitStopTime = EmitStop;
@@ -1026,18 +1051,10 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 	//
 	// try to emit
 
-	FBTime localTime = (PlayMode == kFBParticleLife) ? mSystem.SystemTime : mSystem.LocalTime;
+	
 
-	const int currPlayMode = PlayMode;
-	if ( kFBParticlePlay == currPlayMode || true == pRenderOptions->IsOfflineRendering())
-	{
-		localTime = FBGetDisplayInfo()->GetLocalTime();
-	}
-	else
-	{
-		localTime = FBGetDisplayInfo()->GetSystemTime();
-	}
-
+	FBTime localTime( (false==isPlayMode) ? mSystem.SystemTime : mSystem.LocalTime );
+	
 	lFrame = localTime.GetFrame();
 	double timeNow = localTime.GetSecondDouble();
 
@@ -1065,8 +1082,8 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 		isResetDone = false;
 		pParticles->mPerModelUserData.isResetDone = isResetDone;
 	}
-	else
-	if (isResetDone == false && PlayMode == kFBParticlePlay && localTime == ResetTime) {
+	else if (false == isResetDone && true == isPlayMode && localTime == ResetTime) 
+	{
 		pParticles->NeedReset();
 
 		lastFrameTime = timeNow;
@@ -1982,4 +1999,30 @@ void GPUshader_Particles::UpdateEvaluationData(FBModel *pModel, ParticleSystem *
 
 	double motionFactor = GenerateOnMotionFactor;
 	data.gGenerateOnMotionLimit = (true == GenerateOnMotion) ? (float) motionFactor : -1.0f;
+}
+
+void GPUshader_Particles::OnPerFrameRenderingPipelineCallback	(HISender pSender, HKEvent pEvent)
+{
+	FBEventEvalGlobalCallback lEvent(pEvent);
+
+	if (kFBGlobalEvalCallbackBeforeRender == lEvent.GetTiming() )
+	{
+		// TODO:
+	}
+}
+
+void GPUshader_Particles::OnVideoFrameRendering	(HISender pSender, HKEvent pEvent)
+{
+	FBEventVideoFrameRendering lEvent(pEvent);
+
+	if (lEvent.eBeginRendering == lEvent.GetState() )
+	{
+		mIsOfflineRenderer = true;
+		mLastRenderFrameId = -1;
+	}
+	else if (lEvent.eEndRendering == lEvent.GetState() )
+	{
+		mIsOfflineRenderer = false;
+		mLastRenderFrameId = -1;
+	}
 }

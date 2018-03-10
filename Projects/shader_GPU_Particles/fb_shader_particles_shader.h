@@ -139,6 +139,7 @@ public:
 		*/
 	virtual void DetachDisplayContext( FBRenderOptions* pOptions, FBShaderModelInfo* pInfo ) override;
 
+
 public:
 
 	/** PlugDataNotify when overloaded is equivalent of FBSystem.OnConnectionDataNotify but in the context of the derived object only
@@ -171,6 +172,12 @@ public:
 	  * \return should by default return true except in the case of connection requests (kFBRequestConnectSrc or kFBRequestConnectDst)
 	*/
 	virtual	bool PlugNotify(FBConnectionAction pAction,FBPlug* pThis,int pIndex,FBPlug* pPlug = NULL,FBConnectionType pConnectionType=kFBConnectionTypeNone,FBPlug* pNewPlug=NULL ) override;
+
+	//
+
+	void OnPerFrameRenderingPipelineCallback    (HISender pSender, HKEvent pEvent);
+	void OnVideoFrameRendering	(HISender pSender, HKEvent pEvent);
+
 
 //
 // Common particles properties
@@ -376,6 +383,8 @@ public:
 
 protected:
 	FBSystem				mSystem;
+
+	bool					mIsOfflineRenderer;
 
     FBMaterial				*mMaterial;
     int						mRenderFrameId;

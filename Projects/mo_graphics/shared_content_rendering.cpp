@@ -763,6 +763,18 @@ bool CGPUFBScene::RenderModel(bool bindTextures, FBModel *pModel, const int mode
 		return false;
 	}
 
+	bool isEmitter = false;
+	if (pModel->Shaders.GetCount() > 0)
+	{
+		FBShader *pShader = pModel->Shaders[0];
+		isEmitter = (0 == strcmp(pShader->ClassName(), "GPUshader_Particles"));
+	}
+
+	if (true == isEmitter)
+	{
+		return false;
+	}
+
 	//const int regionCount = pData->GetSubRegionCount();
 	const int patchCount = pData->GetSubPatchCount();
 

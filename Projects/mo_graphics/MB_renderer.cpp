@@ -1277,6 +1277,7 @@ void MoRendererCallback::Render(FBRenderOptions* pFBRenderOptions)
 
 			mGPUFBScene->EvaluateOnShaderFX( [] (Graphics::BaseMaterialShaderFX *pShaderFX) {
 				pShaderFX->SetSoftParticles(0.0f);
+				pShaderFX->SetMatCapRotation(0.0f);
 			} );
 
 			// TODO: check we have any "render on back" shader

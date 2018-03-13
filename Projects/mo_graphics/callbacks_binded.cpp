@@ -447,6 +447,9 @@ void CProjTexBindedCallback::InternalInstanceBegin(const bool textureMapping, co
 			}
 
 			mGPUFBScene->BindMatCapTexture(matCapId);
+
+			FBVector3d rotation = pTexture->Rotation;
+			mShaderFX->SetMatCapRotation(rotation[2] / 180.0 * 3.1415);
 		}
 	}
 	

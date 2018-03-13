@@ -243,13 +243,15 @@ GLSLShader Lighting
 		float spotFactor = 1.0;
 		float specular = 0.0;
 		
-		if (pLight->castSpecularOnObject > 0.0f)
+		//if (pLight->castSpecularOnObject > 0.0f)
 		{
-			vec3 eyeVec = normalize(-info.viewDir);
-			eyeVec = info.tangentMatrix * eyeVec;
+			vec3 eyeVec = normalize(- info.position); // -info.viewDir
+			//eyeVec = info.tangentMatrix * eyeVec;
+			vec3 V = reflect(-lightDir, normal);
+			//vec3 halfVec = (eyeVec + lightDir)/2.0; // view + light
+			//specular = pow( max(0.0, dot( normal, halfVec ) ), 64.0 );
 			
-			vec3 halfVec = (eyeVec - lightDir)/2.0; // view + light
-			specular = pow( max(0.0, dot( normal, halfVec ) ), 64.0 );
+			specular = pow( max(0.0, dot( V, eyeVec ) ), info.shininess );
 		}
 		//specular = 0.5;
 		specular = clamp(specular, 0.0, 1.0);
@@ -268,7 +270,7 @@ GLSLShader Lighting
 		//
 		
 		diffContrib += ndotL * factor * pLight->color.xyz; // * lshadow
-		specContrib += specular * pLight->color.xyz;
+		specContrib += specular * factor * pLight->color.xyz;
 		//specContrib = vec3(specular);
 	}
 

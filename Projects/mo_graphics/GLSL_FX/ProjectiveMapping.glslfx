@@ -40,6 +40,8 @@ uniform vec4	SCREEN_SIZE;	// contains offsets and 1.0/width(height)
 
 uniform float	softParticles = 0.0f;
 
+uniform float	matCapRotation = 0.0f;
+
 //////////////////////////////////////////////////////////
 
 GLSLShader 
@@ -720,6 +722,14 @@ namespace Main
 			return reflColor * theMaterial->reflectColor.w;
 		}
 		
+		vec2 rotate2D(vec2 v, float a) 
+		{
+			float s = sin(a);
+			float c = cos(a);
+			mat2 m = mat2(c, -s, s, c);
+			return m * v;
+		}
+		
 		//////////////////////////////////////////////////////////////////////
 	
 		// declare type of subroutine
@@ -784,18 +794,28 @@ namespace Main
 			}
 			
 			// material diffuse factor and global shader transparency
-			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
-			vec3 ambientColor = theMaterial->ambientColor.rgb * globalAmbientLight.rgb * theMaterial->ambientColor.w;
+			float difFactor = theMaterial->diffuseColor.w; //clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			
+			vec3 a = theMaterial->ambientColor.rgb;
+			vec3 ga = globalAmbientLight.rgb;
+			float aw = theMaterial->ambientColor.w;
+			
+			vec3 ambientColor = aw * vec3(a.x * ga.x, a.y*ga.y, a.z*ga.z); // theMaterial->ambientColor.rgb * globalAmbientLight.rgb * theMaterial->ambientColor.w;
 			//difColor += vec4(ambientColor, theShader->transparency);
 			difColor *= vec4(ambientColor + lResult.diffContrib * difFactor, theShader->transparency); // ambientColor +
 			
-			//
+			                     
 			/*theMaterial->emissiveColor.w * theMaterial->emissiveColor.xyz +*/
-			difColor.rgb =  difColor.rgb + theMaterial->specularColor.w * lResult.specContrib;
+			float sw = theMaterial->specularColor.w;
+			//vec3 sc = theMaterial->specularColor.rgb;
+			vec3 sc = sw * theMaterial->specularColor.xyz;
+			difColor.rgb =  difColor.rgb + sc * lResult.specContrib;
+			
 			
 			ApplyRim(Nn, theShader->rimOptions, theShader->rimColor, difColor);
 			
 			vec3 reflColor = ApplyReflection(theMaterial, Vd);
+			
 			difColor.rgb += lResult.diffContrib * reflColor;
 			//difColor.rgb = lResult.diffContrib;
 			return difColor;
@@ -831,7 +851,7 @@ namespace Main
 			}
 			
 			// material diffuse factor and global shader transparency
-			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			float difFactor = theMaterial->diffuseColor.w; //clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
 			
 			// rim lighting
 			ApplyProjectors(difColor);
@@ -909,7 +929,7 @@ namespace Main
 			lResult.specContrib = round( lResult.specContrib * toonF ) / theShader->toonSteps;
 			
 			// material diffuse factor and global shader transparency
-			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			float difFactor = theMaterial->diffuseColor.w; // clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
 			vec3 ambientColor = theMaterial->ambientColor.rgb * globalAmbientLight.rgb * theMaterial->ambientColor.w;
 			//difColor += vec4(ambientColor, theShader->transparency);
 			difColor *= vec4(ambientColor + lResult.diffContrib * difFactor, theShader->transparency); // ambientColor +
@@ -955,7 +975,9 @@ namespace Main
 			vec3 Nn = normalize(inNw);
 			vec3 r = reflect( normalize(inPw.xyz), Nn );
 			float m = 2.0 * sqrt( r.x * r.x + r.y * r.y + ( r.z + 1.0 ) * ( r.z+1.0 ) );
-			vec2 vN = vec2( r.x / m + 0.5,  r.y / m + 0.5 );
+			vec2 vN = vec2( r.x / m,  r.y / m );
+			
+			vN = rotate2D( vN, matCapRotation ) + vec2(0.5);
 			
 			vec4 difColor = texture( matCapSampler, vN );
 			vec4 coords = vec4(inTC.x, inTC.y, 0.0, 1.0);
@@ -973,7 +995,7 @@ namespace Main
 			}
 			
 			// material diffuse factor and global shader transparency
-			float difFactor = clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
+			float difFactor = theMaterial->diffuseColor.w; // clamp(theMaterial->diffuseColor.w, 0.0, 1.0);
 			
 			ApplyProjectors(difColor);
 			ApplyRim(Nn, theShader->rimOptions, theShader->rimColor, difColor);

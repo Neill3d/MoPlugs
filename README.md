@@ -4,6 +4,8 @@ MotionBuilder Extensions Pack
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/neill3d)
 
+[![Sample](https://github.com/Neill3d/MoPlugs/blob/master/docs/Images/MoRenderer/IBL.jpg)]()
+
 ## Documentation ##
 
 [User Guide](https://neill3d.github.io/MoPlugs/)

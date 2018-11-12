@@ -18,6 +18,6 @@ MotionBuilder Extensions Pack
 
   Author of ideas and supervising by Cam Christiansen (Anlanda Studio)
 
- Developed by Sergey Solokhin (Neill3d)
+ Developed by Sergei Solokhin (Neill3d)
  
 

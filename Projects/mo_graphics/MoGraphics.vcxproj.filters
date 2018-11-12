@@ -378,9 +378,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="resource.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="ClassDiagram1.cd" />
     <None Include="compositeMasteringLOG.txt">
       <Filter>CompositerMaster</Filter>

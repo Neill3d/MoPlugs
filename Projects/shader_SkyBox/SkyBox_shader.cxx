@@ -24,7 +24,9 @@
 //#include "shared_textures.h"
 #include "Shader.h"
 
+#include <algorithm>
 #include <vector>
+#include <math.h>
 
 #include "IO\FileUtils.h"
 

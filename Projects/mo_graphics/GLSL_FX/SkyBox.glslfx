@@ -1,0 +1,229 @@
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// file: SkyBox.glslfx
+//
+//	Author Sergey Solokhin (Neill3d)
+//
+//	GitHub page - https://github.com/Neill3d/MoPlugs
+//	Licensed under BSD 3-Clause - https://github.com/Neill3d/MoPlugs/blob/master/LICENSE
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+#extension GL_ARB_separate_shader_objects : enable
+
+uniform		mat4			MVP;
+uniform		mat4			ModelView;
+uniform		vec3			EyePos;
+
+uniform		samplerCube		cube_texture;
+uniform		sampler2D		panorama_texture;
+
+uniform 	float			FlipH;
+uniform		float			FlipV;
+
+uniform		float			TransparencyFactor;
+
+uniform		vec3			UVOffset;
+uniform		vec3			UVScale;
+
+uniform		vec3			WorldOffset;
+uniform		vec3			WorldScale;
+
+//////////////////////////////////////////////////////////
+
+RasterizationState rasterStateFill
+{
+    LINE_WIDTH = 1;
+    POLYGON_MODE={FRONT_AND_BACK, FILL};
+}
+RasterizationState rasterStateWire
+{
+    LINE_WIDTH = 2;
+    POLYGON_MODE={FRONT_AND_BACK, LINE};
+}
+DepthStencilState dstStateFloor
+{
+    DEPTH_TEST = true;
+    DEPTH_WRITEMASK = true;
+    DEPTH_FUNC = LEQUAL;
+}
+//////////////////////////////////////////////////////////////
+// GLSL Globals : meaning that all the GLSL domains (vertex, fragments etc.) will have a copy
+// of these data
+//
+GLSLShader 
+{
+    #version 420 compatibility
+	
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Functions that we will use to output fragments in various ways
+//
+
+////////////////////////////////////////////////////////////////////
+/// Flat things
+////////////////////////////////////////////////////////////////////
+namespace Flat
+{
+    ////////////////////////////////////////////////////////////////////
+    /// WIRE's VERTEX PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+    GLSLShader VS
+    {
+		// in
+        layout(location=0) in vec4 Position;	
+		layout(location=1) in vec3 Normal;
+		
+		// out
+		out vec3 texcoords;
+        out gl_PerVertex {
+            vec4 gl_Position;
+        };
+		
+        void main(void)
+        {
+			texcoords = normalize(Position.xyz);
+			texcoords.x = texcoords.x * FlipH;
+			texcoords.z = texcoords.z * FlipV;
+			texcoords.y = -texcoords.y;
+			texcoords = normalize(Normal);
+			//texcoords = texcoords * UVScale + UVOffset;
+			
+			//gl_Position = MVP * vec4(WorldScale * Position.xyz + WorldOffset, 1.0);
+			gl_Position = MVP * vec4(Position.xyz, 1.0);
+        }
+    }
+	
+	GLSLShader VS_Plane
+    {
+		// in
+        layout(location=0) in vec3 Position;	
+		
+		// out
+		out vec3 texcoords;
+        out gl_PerVertex {
+            vec4 gl_Position;
+        };
+		
+        void main(void)
+        {
+			//texcoords = normalize(EyePos - Position) * 100.0;
+			
+			vec4 position4 = ModelView * vec4(Position, 1.0);
+			vec3 position3 = position4.xyz / position4.w;
+			
+			vec3 i = normalize(position3);
+			vec4 normal = transpose(inverse(ModelView)) * vec4(0.0, 1.0, 0.0, 1.0);
+			vec3 n = normalize(normal.xyz);
+			
+			texcoords = refract(i, n, 1.0) * 100.0;
+			texcoords = i;
+			//texcoords = normalize(EyePos - Position) * 1000.0;
+			
+			gl_Position = MVP * vec4(Position, 1.0);
+        }
+    }
+	
+    ////////////////////////////////////////////////////////////////////
+    /// WIRE's FRAGMENT PROGRAM ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////
+    GLSLShader FS
+    {
+		in vec3 texcoords;
+		layout(location=0) out vec4 color;
+		
+        void main() 
+        {
+			color = texture( cube_texture, normalize(texcoords) );
+			color.a *= TransparencyFactor;
+        }
+    }
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	// PANORAMA
+	
+	GLSLShader Panorama_VS
+    {
+		// in
+        layout(location=0) in vec4 Position;	
+		
+		// out
+		out vec3 texcoords;
+        out gl_PerVertex {
+            vec4 gl_Position;
+        };
+		
+        void main(void)
+        {
+			texcoords = normalize(Position.xyz);
+			//texcoords.x = texcoords.x * FlipH;
+			//texcoords.y = texcoords.y * FlipV;
+			
+			
+			gl_Position = MVP * vec4(WorldScale * Position.xyz + WorldOffset, 1.0);
+        }
+    }
+	
+	
+	GLSLShader Panorama_FS
+    {
+		in vec3 texcoords;
+		layout(location=0) out vec4 color;
+		
+        void main() 
+        {
+			float PI = 3.14159265358979323846264;
+
+			float yaw = .5 - atan( texcoords.z, - texcoords.x ) / ( 2.0 * PI );
+			float pitch = .5 - asin( texcoords.y ) / PI;
+			color = texture( panorama_texture, vec2( yaw, 1. - pitch ) );
+        }
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+// Material Technique
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
+Technique Init
+{
+    Pass init
+    {
+        PolygonOffset = {1.0,1.0};
+        DEPTH_TEST = True;
+        DEPTH_FUNC = LEQUAL;
+        DEPTH_MASK = True;
+    }
+}
+
+Technique t0
+{
+	Pass p0
+	{
+		VertexProgram = Flat::VS;
+		FragmentProgram = Flat::FS;
+	}
+}
+
+Technique t1
+{
+	Pass p0
+	{
+		VertexProgram = Flat::VS_Plane;
+		FragmentProgram = Flat::FS;
+	}
+}
+
+Technique tp
+{
+	Pass p0
+	{
+		VertexProgram = Flat::Panorama_VS;
+		FragmentProgram = Flat::Panorama_FS;
+	}
+}

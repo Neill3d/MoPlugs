@@ -68,7 +68,4 @@
       <Filter>GLSL_FX</Filter>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="skybox.rc" />
-  </ItemGroup>
 </Project>

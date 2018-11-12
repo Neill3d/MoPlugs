@@ -24,6 +24,7 @@
 #include <Windows.h>
 #include <CommDlg.h>
 
+#include <algorithm>
 #include <vector>
 #include "graphics\glslShader.h"
 #include "IO\FileUtils.h"

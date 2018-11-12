@@ -114,11 +114,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="shader_gpu_particles.rc">
-      <Filter>Source Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="ReadMe.md" />
     <None Include="GLSL_CS\Particles_integrate.cs">
       <Filter>GLSL_CS</Filter>

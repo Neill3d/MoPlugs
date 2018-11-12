@@ -1,0 +1,72 @@
+
+ == MoPlugs Project ==
+
+ Plugins and scripts for Autodesk MotionBuilder.
+
+Supported versions
+- 2014, 2015, 2016, 2017, 2018
+
+Plugins
+* camera linkvis
+* constraint - aim sprite
+* import geometry cache
+* mo_graphics - MoPlugs Renderer
+* constraint - column
+* renderer colors
+* shader - gpu particles
+* shader - skybox
+* tool bake projections
+* tool blend shape (and sculpt brush)
+* tool render layers (and command line renderer)
+
+Scripts\Actions
+- CarSim \ ReConnectJoystick
+- AssignUVSet
+- ComputeAcceleration
+- CopyBlendShapeAnimation
+- DuplicateUnderTheRoot
+- ExtractTrajectoryPath
+- FromLayeredToSingleTexture
+- GroupedWithNull
+- InsertParent
+- Lights_HardTurnOnOff
+- Lights_TurnOnOff
+- MainCar_WindowSetup
+- MakeCircle
+- ModelAndLTCDevice
+- Physics_MakeJointChain
+- RefreshModelsTextures
+- RefreshTextures
+- RefreshTextures2015
+- RemoveGPUCacheDuplicates
+- SaveLocalPositions
+- SelCharAndCR_ByModelSelection
+- SelectAllCharacterNodes_ByModelSelection
+- StoreRelationInConnections
+- Story_ReplaceMediaInTrackClips
+- StoryTrackFromSelection
+
+Script Startup Tools
+- Array Tool
+- Batch Render
+- Camera and Group Linking Tool (camera linkvis)
+- Camera RIG Tool
+- Character Selection Tool
+- CleanUp Manager
+- Cmd Line Rendering Tool
+- Composition Tree (mo_graphics)
+- Compute Ball Toss Tool
+- Extended Rendering Tool (mo_graphics)
+- FacialRIG_HelperTool
+- FacialRIG_PrepStarter
+- Google StreetView Grabber Tool
+- Lights Visor Tool
+- MoPlugs_menu
+- Store Relation In Connections
+- Story IO Tool
+- Viewport Grabber Tool
+
+==  Contact ==
+  
+  Sergei Solokhin (Neill3d)
+  MoPlugs homepage: https://github.com/Neill3d/MoPlugs

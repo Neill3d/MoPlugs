@@ -2,6 +2,8 @@
 
 MotionBuilder Extensions Pack
 
+Please post issues and feature requests to this [github repository issues section](https://github.com/Neill3d/MoPlugs/issues)
+
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/neill3d)
 
 [![Sample](https://github.com/Neill3d/MoPlugs/blob/master/docs/Images/MoRenderer/IBL.jpg)]()

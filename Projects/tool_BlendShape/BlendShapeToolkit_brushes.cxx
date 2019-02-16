@@ -272,9 +272,9 @@ FBColorF	Mix(const FBColorF color1, const FBColorF color2, const double f)
 	result[1] = color1[1] * (1.0 - f) + color2[1] * f;
 	result[2] = color1[2] * (1.0 - f) + color2[2] * f;
 
-	result[0] = std::min(result[0], 1.0f);
-	result[1] = std::min(result[1], 1.0f);
-	result[2] = std::min(result[2], 1.0f);
+	if (result[0] > 1.0f) result[0] = 1.0f;
+	if (result[1] > 1.0f) result[1] = 1.0f;
+	if (result[2] > 1.0f) result[2] = 1.0f;
 
 	return result;
 }

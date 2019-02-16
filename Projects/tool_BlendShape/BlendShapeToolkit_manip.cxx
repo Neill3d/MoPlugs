@@ -1897,7 +1897,7 @@ void ORManip_Sculpt::AddBlendShapeDynamic(const FBTime &_currTime, const bool se
 	// 1 - calculate differences
 
 	const int numberOfBaseVertices = pGeom->VertexCount();
-	const int numberOfVertices = min(numberOfBaseVertices, mBuffer.vertices.size());
+	const int numberOfVertices = (numberOfBaseVertices < mBuffer.vertices.size()) ? numberOfBaseVertices : mBuffer.vertices.size() - 1;
 
 	if (numberOfVertices == 0) 
 		return;

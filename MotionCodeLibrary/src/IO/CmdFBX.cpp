@@ -19,7 +19,7 @@
 // DONE: run cmdFBX application and fill data into the shared memory block
 
 //#ifdef CMD_SEND_CODE
-//#include "IO\FileUtils.h"
+#include "IO\FileUtils.h"
 
 bool CmdMakeSnapshotFBX_Send(const char *filename, const char *uniqueName, InputModelData &data, const bool ResetXForm)
 {
@@ -63,9 +63,9 @@ bool CmdMakeSnapshotFBX_Send(const char *filename, const char *uniqueName, Input
 	try
 	{
 
-		//FBString out_path, out_fullpath;
-		//if ( FindEffectLocation( "\\cmdFBX.exe", out_path, out_fullpath ) == false)
-		//	throw "failed to find cmdFBX";
+		FBString out_path, out_fullpath;
+		if ( FindEffectLocation( "\\cmdFBX.exe", out_path, out_fullpath ) == false)
+			throw "failed to find cmdFBX";
 
 		// filename is a path for saving temp fbx !!
 
@@ -78,11 +78,17 @@ bool CmdMakeSnapshotFBX_Send(const char *filename, const char *uniqueName, Input
 		//out_fullpath += " ";
 		//out_fullpath += uniqueName;
 
-		std::string		out_fullpath("C:\\Program Files\\Autodesk\\MotionBuilder 2017\\bin\\x64\\plugins\\cmdFBX.exe");
+		//std::string		out_fullpath("D:\\Program Files\\Autodesk\\MotionBuilder 2017\\bin\\x64\\plugins\\cmdFBX.exe");
+
+		// prepare command line with filename and unique name
+		out_fullpath += " ";
+		out_fullpath += filename;
+		out_fullpath += " ";
+		out_fullpath += uniqueName;
 
 		// Start the child process. 
 		if( !CreateProcess( NULL,   // No module name (use command line)
-			(char*)out_fullpath.c_str(),        // Command line
+			out_fullpath,        // Command line
 			NULL,           // Process handle not inheritable
 			NULL,           // Thread handle not inheritable
 			FALSE,          // Set handle inheritance to FALSE

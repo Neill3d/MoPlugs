@@ -1220,10 +1220,10 @@ void ORTool_BlendShape::EventButtonCalcDeltaClick( HISender pSender, HKEvent pEv
 
 			modelNameBASE = lNameProp->AsString();
 
-			FBModel *pModelBASE = FBFindModelByLabelName(modelNameBASE);
+			pModelBASE = FBFindModelByLabelName(modelNameBASE);
 			if (pModelBASE == nullptr)
 				throw ( "Base model is not found" );
-			FBGeometry *pGeometryBASE = pModelBASE->Geometry;
+			pGeometryBASE = pModelBASE->Geometry;
 
 			//
 			// snapshot matrix (if exist)

@@ -328,7 +328,7 @@
     <IncludePath>..\include;C:\Program Files\Autodesk\MotionBuilder 2014\OpenRealitySDK\include;..\..\glew-1.11.0\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>..\include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;..\..\glew-1.11.0\include;..\..\Cg\include;..\..\Include;..\..\SceneGraph_Shared\code;$(IncludePath)</IncludePath>
+    <IncludePath>..\include;$(ADSK_MOBU_2014_64)\OpenRealitySDK\include;$(MOPLUGS_EXTERNAL)\glew\include;..\..\Cg\include;..\..\Include;..\..\SceneGraph_Shared\code;$(MOPLUGS_FRAMEWORK)\code;$(IncludePath)</IncludePath>
     <OutDir>..\lib\</OutDir>
     <TargetName>$(ProjectName)_$(Platform)_$(Configuration)</TargetName>
   </PropertyGroup>
@@ -576,7 +576,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>GLM_FORCE_SSE4;WIN32;NDEBUG;_LIB;NOMINMAX;CMD_SEND_CODE;TIXML_USE_STL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLM_FORCE_SSE4;WIN32;NDEBUG;_LIB;NOMINMAX;CMD_SEND_CODE;TIXML_USE_STL;FBXSDK_COMPILER_MSC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -760,7 +760,7 @@
     <ClCompile Include="..\src\WindowSubMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\SceneGraph_Shared\projects\sg_base.vcxproj">
+    <ProjectReference Include="..\..\..\MoPlugs_Framework\projects\sg_base.vcxproj">
       <Project>{60091670-3c61-4ad8-886e-b0e4a2a56b44}</Project>
     </ProjectReference>
   </ItemGroup>

@@ -104,22 +104,6 @@ bool CollisionTerrain::FBCreate()
 	mTextureAddress = 0;
 
 	//
-	//
-	mShader = QueryShader();
-
-	if (mShader->IsInitialized() == false )
-		if( false == mShader->Initialize() )
-		{
-			FreeShader();
-			mShader = nullptr;
-		}
-	
-
-	CHECK_GL_ERROR();
-	
-
-
-	//
     ShadingMode = kFBModelShadingTexture;
 	/*
     Size = 50.0;
@@ -388,7 +372,27 @@ bool CollisionTerrain::RenderToHeightMap()
 
 	if (mShader == nullptr || mShader->IsInitialized() == false)
 	{
-		return false;
+		if (mShader)
+		{
+			FreeShader();
+			mShader = nullptr;
+		}
+
+		//
+		//
+		mShader = QueryShader();
+
+		if (mShader->IsInitialized() == false)
+		if (false == mShader->Initialize())
+		{
+			FreeShader();
+			mShader = nullptr;
+			Enabled = false;
+
+			return false;
+		}
+
+		CHECK_GL_ERROR();
 	}
 
 	// if needed - prepare framebuffer

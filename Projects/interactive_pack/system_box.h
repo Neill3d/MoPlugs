@@ -123,7 +123,7 @@ class BoxTakeList : public FBBox
 public: 
     BoxTakeList(const char* pName)
 		: FBBox(pName) 
-		, rng(rd)
+		, rng(rd())
 	{ 
 		FBClassInit; 
 	} 
@@ -188,7 +188,7 @@ class BoxCameraList : public FBBox
 public: 
     BoxCameraList(const char* pName)
 		: FBBox(pName) 
-		, rng(rd)
+		, rng(rd())
 	{ 
 		FBClassInit; 
 	} 

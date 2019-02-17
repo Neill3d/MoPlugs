@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "interactive_pack", "interactive_pack\interactive_pack.vcxproj", "{67C89902-400C-4A8D-AD18-A038CB49A1DE}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "library_MoCode", "..\MotionCodeLibrary\Projects\MoCodeLibrary.vcxproj", "{A17CA844-DD7F-4522-A2B2-D8C7F6308818}"
@@ -23,6 +25,8 @@ Global
 		Release 2015|x64 = Release 2015|x64
 		Release 2017|Win32 = Release 2017|Win32
 		Release 2017|x64 = Release 2017|x64
+		Release 2018|Win32 = Release 2018|Win32
+		Release 2018|x64 = Release 2018|x64
 		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
 	EndGlobalSection
@@ -45,6 +49,9 @@ Global
 		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release 2017|Win32.ActiveCfg = Release 2015|x64
 		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release 2017|x64.ActiveCfg = Release 2017|x64
 		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release 2017|x64.Build.0 = Release 2017|x64
+		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release 2018|Win32.ActiveCfg = Release 2015|x64
+		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release 2018|x64.ActiveCfg = Release 2018|x64
+		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release 2018|x64.Build.0 = Release 2018|x64
 		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release|Win32.ActiveCfg = Release|x64
 		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release|x64.ActiveCfg = Release|x64
 		{67C89902-400C-4A8D-AD18-A038CB49A1DE}.Release|x64.Build.0 = Release|x64
@@ -72,6 +79,10 @@ Global
 		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release 2017|Win32.Build.0 = Release 2017|Win32
 		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release 2017|x64.ActiveCfg = Release 2017|x64
 		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release 2017|x64.Build.0 = Release 2017|x64
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release 2018|Win32.ActiveCfg = Release 2017|Win32
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release 2018|Win32.Build.0 = Release 2017|Win32
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release 2018|x64.ActiveCfg = Release 2018|x64
+		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release 2018|x64.Build.0 = Release 2018|x64
 		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release|Win32.ActiveCfg = Release|Win32
 		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release|Win32.Build.0 = Release|Win32
 		{A17CA844-DD7F-4522-A2B2-D8C7F6308818}.Release|x64.ActiveCfg = Release|x64
@@ -95,6 +106,9 @@ Global
 		{60091670-3C61-4AD8-886E-B0E4A2A56B44}.Release 2017|Win32.ActiveCfg = Release|x64
 		{60091670-3C61-4AD8-886E-B0E4A2A56B44}.Release 2017|x64.ActiveCfg = Release|x64
 		{60091670-3C61-4AD8-886E-B0E4A2A56B44}.Release 2017|x64.Build.0 = Release|x64
+		{60091670-3C61-4AD8-886E-B0E4A2A56B44}.Release 2018|Win32.ActiveCfg = Release|x64
+		{60091670-3C61-4AD8-886E-B0E4A2A56B44}.Release 2018|x64.ActiveCfg = Release|x64
+		{60091670-3C61-4AD8-886E-B0E4A2A56B44}.Release 2018|x64.Build.0 = Release|x64
 		{60091670-3C61-4AD8-886E-B0E4A2A56B44}.Release|Win32.ActiveCfg = Release|Win32
 		{60091670-3C61-4AD8-886E-B0E4A2A56B44}.Release|Win32.Build.0 = Release|Win32
 		{60091670-3C61-4AD8-886E-B0E4A2A56B44}.Release|x64.ActiveCfg = Release|x64

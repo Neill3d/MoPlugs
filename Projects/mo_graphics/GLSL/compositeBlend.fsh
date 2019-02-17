@@ -272,15 +272,13 @@ void main (void)
 	vec2 tx  = gl_TexCoord [0].xy;
 	vec4 aColor = texture2D ( aTex, tx );
 	vec4 bColor = texture2D ( bTex, tx );
-	float maskColor = texture2D ( maskSampler, tx ).r;
 	
-	if (useMask > 0)
-	{
-		gl_FragColor = aColor * (1.0 - maskColor) + bColor * maskColor;
-	}
-	else
-	{
-		gl_FragColor =  vec4(BlendOpacity( aColor.rgb, bColor.rgb, BlendOperation, opacity * bColor.w ), 1.0);
-	}
-	//gl_FragColor = vec4(BlendOpacity( aColor, bColor, BlendMultiply, 0.5), 1.0);
+	vec4 out_color = vec4(BlendOpacity( aColor.rgb, bColor.rgb, BlendOperation, opacity * bColor.w ), 1.0);
+
+#ifdef USE_MASK
+	float maskColor = texture2D ( maskSampler, tx ).r;
+	out_color = aColor * (1.0 - maskColor) + out_color * maskColor;
+#endif
+	
+	gl_FragColor = out_color;
 }

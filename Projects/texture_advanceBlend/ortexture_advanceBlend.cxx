@@ -42,6 +42,7 @@ FBLibraryDeclare( ortexture_advanceblend )
 
 	FBLibraryRegisterStorable(ORTextureParamBlend);
 	FBLibraryRegisterShadingElement(ORTextureParamBlend);
+
 }
 FBLibraryDeclareEnd;
 

@@ -253,7 +253,7 @@ void ORTextureAdvanceBlend::TextureLayerComposition(FBTime pTime,FBTime pTimeInC
 		{
 			const GLuint maskId = GetTextureId(lMask);
 
-			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE7);
 			glBindTexture(GL_TEXTURE_2D, maskId);
 		}
 
@@ -277,7 +277,7 @@ void ORTextureAdvanceBlend::TextureLayerComposition(FBTime pTime,FBTime pTimeInC
 
 		if (lUseMask && lMask != nullptr)
 		{
-			glActiveTexture(GL_TEXTURE2);
+			glActiveTexture(GL_TEXTURE7);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 

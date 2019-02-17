@@ -36,7 +36,7 @@ FBColor	gCommandColors[] = {
 };
 
 std::random_device		rd;
-std::mt19937			rng(rd);	// random-number engine used
+std::mt19937			rng(rd());	// random-number engine used
 
 char	gFileName[256] = "";
 

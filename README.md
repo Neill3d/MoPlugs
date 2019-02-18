@@ -8,6 +8,12 @@ Please post issues and feature requests to this [github repository issues sectio
 
 [![Sample](https://github.com/Neill3d/MoPlugs/blob/master/docs/Images/MoRenderer/IBL.jpg)]()
 
+## Introduction webinars
+* Part 1 - https://youtu.be/sgzunIbNcp4
+* Part 2 - https://youtu.be/5By9h3KO6JE
+* Part 3 - https://youtu.be/OcH3vusjros
+* Part 4 - https://youtu.be/qNmFzHt0O0w
+
 ## Documentation ##
 
 [User Guide](https://neill3d.github.io/MoPlugs/)

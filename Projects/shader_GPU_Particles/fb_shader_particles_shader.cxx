@@ -793,6 +793,7 @@ void GPUshader_Particles::DetachDisplayContext( FBRenderOptions* pOptions, FBSha
 
 bool GPUshader_Particles::ShaderNeedBeginRender()
 {
+	FBTrace("[ShaderNeedBeginRender] call\n");
     return true;
 }
 
@@ -801,35 +802,44 @@ static bool shaderBegin = false;
 void GPUshader_Particles::ShaderBeginRender( FBRenderOptions* pRenderOptions, FBShaderModelInfo* pShaderModelInfo )
 {
 	if (nullptr == pRenderOptions)
+	{
+		FBTrace("[ShaderBeginRender] return: empty render options\n");
 		return;
+	}
+
+#ifdef _DEBUG
+	printf("[ShaderBeginRender] RenderFrameId %d, Model %s\n", pRenderOptions->GetRenderFrameId(), pShaderModelInfo->GetFBModel()->Name.AsString());
+#endif
 
 	{
 		const int renderFrameId = pRenderOptions->GetRenderFrameId();
 
 		if (renderFrameId <= mLastRenderFrameId)
+		{
+			FBTrace("[ShaderBeginRender] return: renderFrameId <= mLastRenderFrameId\n");
 			return;
-
+		}
+		
 		mLastRenderFrameId = renderFrameId;
 	}
-
+	/*
 	if (false == pRenderOptions->IsOfflineRendering() && true == mIsOfflineRenderer)
-			return;
-
+	{
+		FBTrace("[ShaderBeginRender] because of offline renderer\n");
+		return;
+	}*/
+	
 #ifdef _DEBUG
 	CHECK_GL_ERROR();
-
-	printf("[ShaderNeedBeginRender] END...\n" );
 #endif
 	firstBeginRender = true;
 	firstShadeModel = true;
 
-#ifdef _DEBUG
-	printf("[ShaderBeginRender] Begin...\n" );
-#endif
 	if (false == firstBeginRender)
+	{
+		printf("[ShaderBeginRender] firstBeginRender is false\n");
 		return;
-
-	
+	}
 	
 	//
 	//
@@ -852,9 +862,7 @@ void GPUshader_Particles::ShaderBeginRender( FBRenderOptions* pRenderOptions, FB
 	}
 
 	// TODO: this one is connected to specified FBShader, should be updated only once per instance
-#ifdef _DEBUG
-	printf("[ShaderNeedBeginRender] Begin...\n" );
-#endif
+
 	//
 	// render terrain collision depth
 	UpdateConnectedTerrain();
@@ -907,13 +915,19 @@ void GPUshader_Particles::ShaderBeginRender( FBRenderOptions* pRenderOptions, FB
 void GPUshader_Particles::ShadeModel( FBRenderOptions* pRenderOptions, FBShaderModelInfo* pShaderModelInfo, FBRenderingPass pPass )
 {
 	if (nullptr == pRenderOptions)
+	{
+		FBTrace("[ShadeModel] return: nullptr == pRenderOptions\n");
 		return;
-
+	}
+		
 	if (false == pRenderOptions->IsOfflineRendering() && true == mIsOfflineRenderer)
+	{
+		FBTrace("[ShadeModel] return: offline rendering flag\n");
 		return;
-
+	}
+	
 #ifdef _DEBUG
-	printf("[ShadeModel] Begin...\n" );
+	FBTrace("[ShadeModel] Begin %s\n", pShaderModelInfo->GetFBModel()->Name.AsString() );
 #endif
 	FBViewingOptions* lViewingOptions = pRenderOptions->GetViewerOptions();
 	bool lIsSelectBufferPicking = (pRenderOptions->IsIDBufferRendering() || lViewingOptions->IsInSelectionBufferPicking());
@@ -921,10 +935,18 @@ void GPUshader_Particles::ShadeModel( FBRenderOptions* pRenderOptions, FBShaderM
 
 	
 	if (lIsSelectBufferPicking || lIsColorBufferPicking)
+	{
+		FBTrace("[ShadeModel] return: select buffer\n");
 		return;
+	}
 	
 	if (false == firstShadeModel)
+	{
+
+
+		FBTrace("[ShadeModel] first shade model is empty!\n");
 		return;
+	}
 		
 	firstShadeModel = false;
 
@@ -940,20 +962,19 @@ void GPUshader_Particles::ShadeModel( FBRenderOptions* pRenderOptions, FBShaderM
 
 #ifdef _DEBUG
 	if (shaderBegin == false)
-		printf("error\n" );
+	{
+		FBTrace("[ShadeModel] shaderBegin is false\n");
+	}
 #endif
-	shaderBegin = false;
 
+	shaderBegin = false;
 	mNeedReloadShaders = false;
-	
-	if( pShaderModelInfo == nullptr )
-		return;	
 }
 
 void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOptions, FBModel *pModel )
 {
 #ifdef _DEBUG
-	printf("[ShaderBeginRender] Begin...\n" );
+	FBTrace("[LocalShaderBeginRender] Begin %s\n", pModel->Name.AsString() );
 #endif
 	shaderBegin = true;
 
@@ -978,6 +999,7 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 		}
 		else
 		{
+			FBTrace("[LocalShaderBeginRender] New particles for Model - %s\n", pModel->Name.AsString());
 			mParticleMap[pModel] = newParticleSystem;
 			particleIter = mParticleMap.find(pModel);
 		}
@@ -1209,14 +1231,14 @@ void GPUshader_Particles::LocalShaderBeginRender( FBRenderOptions* pRenderOption
 
 	CHECK_GL_ERROR();
 #ifdef _DEBUG
-	printf("[ShaderBeginRender] END...\n" );
+	FBTrace("[LocalShaderBeginRender] END...\n" );
 #endif
 }
 
 void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBModel *pModel, FBRenderingPass pPass )
 {
 #ifdef _DEBUG
-	printf("[ShadeModel] Begin...\n" );
+	printf("[LocalShadeModel] Begin...\n" );
 #endif
 	FBViewingOptions* lViewingOptions = pRenderOptions->GetViewerOptions();
 	bool lIsSelectBufferPicking = (pRenderOptions->IsIDBufferRendering() || lViewingOptions->IsInSelectionBufferPicking());
@@ -1228,7 +1250,10 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 		return;
 #ifdef _DEBUG
 	if (shaderBegin == false)
-		printf("error\n" );
+	{
+		printf("[LocalShadeModel] shaderBegin == false for model %s\n", pModel->Name.AsString());
+	}
+		
 #endif
 	shaderBegin = false;
 
@@ -1251,6 +1276,7 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 	if ( (particleIter == end(mParticleMap)) 
 		|| ( 0 == particleIter->second->GetTotalCycles() ) )
 	{
+		printf("[LocalShadeModel] particles not found for model %s\n", pModel->Name.AsString());
 		return;
 	}
 	auto pParticles = particleIter->second;
@@ -1347,9 +1373,13 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 	renderData.gUseColorMap = (texId > 0) ? 1.0f : 0.0f;
 
 	if (texId > 0)
-		for (int i=0; i<16; ++i)
-			renderData.gTexMatrix.mat_array[i] = (float) texMat[i];
-
+	{
+		for (int i = 0; i < 16; ++i)
+		{
+			renderData.gTexMatrix.mat_array[i] = static_cast<float>(texMat[i]);
+		}
+	}
+	
 	pParticles->UploadRenderDataOnGPU();
 
 	pParticles->SetRenderSizeAndColorCurves(mSizeCurve.GetTextureId(), mColorCurve.GetTextureId() );
@@ -1372,12 +1402,18 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 	}
 
 	if (true == ready)
-		pParticles->RenderParticles(PrimitiveType, PointSmooth, PointFalloff);
-
+	{
+		pParticles->RenderParticles(PrimitiveType, ShadeMode.AsInt(), PointSmooth, PointFalloff);
+	}
+	else
+	{
+		FBTrace("[LocalShadeModel] particle model is not ready %s\n", pModel->Name.AsString());
+	}
+	
 	glPopClientAttrib();
 	CHECK_GL_ERROR();
 #ifdef _DEBUG
-	printf("[ShadeModel] End...\n" );
+	FBTrace("[LocalShadeModel] %d End...\n", pParticles->GetDisplayedCount() );
 #endif
 }
 

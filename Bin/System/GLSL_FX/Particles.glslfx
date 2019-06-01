@@ -1494,7 +1494,94 @@ namespace Render
 		} 
 	}
 
-	GLSLShader FS_Instancing
+	GLSLShader FS_InstancingSimple
+	{
+		
+		in vec3 lNormal;
+		in float life;
+		in vec4 pcolor;
+		in vec3	wv;
+		in vec2 puv;                                                   
+
+		layout(location=0) out vec4 	outColor;
+		layout(location=1) out vec4		outNormal;	// output a view space normal
+		layout(location=2) out vec4		outMask;
+		layout(location=3) out vec4		outPosition;
+		
+		layout(binding=0) uniform sampler2D		ColorSampler;
+
+		float ApplyLight(in vec3 L, in vec3 N)
+		{
+			float lambertTerm = clamp(dot(N, L), 0.0, 1.0);
+			vec3 E = normalize(wv);
+			vec3 R = reflect(-L, N);
+			float specular = clamp(pow(max(dot(R, E), 0.0), 64.0), 0.0, 1.0);
+
+			return lambertTerm + specular;
+		}
+
+		void main()                                                                         
+		{
+			vec3 lightDir[2];
+			lightDir[0] = normalize(vec3(1.0, 1.0, 1.0));
+			lightDir[1] = normalize(vec3(-1.0, -1.0, -1.0));
+			
+			vec3 n = normalize(lNormal);
+			
+			float diffuse = ApplyLight(lightDir[0], n);
+			diffuse += ApplyLight(lightDir[1], n);
+
+			vec4 color = pcolor;
+			
+			if (gUseColorMap > 0.0)
+			{
+				color = color * texture(ColorSampler, puv);
+			}
+			//
+			outColor = vec4(diffuse * color.xyz, color.w);
+						
+			outNormal = vec4(n, 1.0); // vec4(0.0, 1.0, 0.0, 0.0); 
+			outPosition = vec4(wv, 1.0); // fMesh->lightmap);
+			outMask = vec4(0.0); // theShader->mask;
+		}
+	}
+
+	GLSLShader FS_InstancingFlat
+	{
+		
+		in vec3 lNormal;
+		in float life;
+		in vec4 pcolor;
+		in vec3	wv;
+		in vec2 puv;                                                   
+
+		layout(location=0) out vec4 	outColor;
+		layout(location=1) out vec4		outNormal;	// output a view space normal
+		layout(location=2) out vec4		outMask;
+		layout(location=3) out vec4		outPosition;
+		
+		layout(binding=0) uniform sampler2D		ColorSampler;
+
+		void main()                                                                         
+		{
+			vec3 n = normalize(lNormal);
+			vec4 color = pcolor;
+			
+			if (gUseColorMap > 0.0)
+			{
+				color = color * texture(ColorSampler, puv);
+			}
+			//
+			outColor = color;
+					
+			outNormal = vec4(n, 1.0); // vec4(0.0, 1.0, 0.0, 0.0); 
+			outPosition = vec4(wv, 1.0); // fMesh->lightmap);
+			outMask = vec4(0.0); // theShader->mask;
+		}
+	}
+
+
+	GLSLShader FS_InstancingDynamic
 	{
 		
 		in vec3 lNormal;
@@ -1530,7 +1617,6 @@ namespace Render
 			outMask = vec4(0.0); // theShader->mask;
 		}
 	}
-
 }
 
 // DONE: convert glsl 330 into glsl 420 syntax
@@ -1737,12 +1823,30 @@ Technique renderStretchedBillboards
 	}
 }
 
-Technique renderInstances
+Technique renderInstancesSimple
 {
 	Pass p0
 	{
 		VertexProgram = {Evaluate::ColorCode, Render::VS_Instancing};
-		FragmentProgram = Render::FS_Instancing;
+		FragmentProgram = Render::FS_InstancingSimple;
+	}
+}
+
+Technique renderInstancesFlat
+{
+	Pass p0
+	{
+		VertexProgram = {Evaluate::ColorCode, Render::VS_Instancing};
+		FragmentProgram = Render::FS_InstancingFlat;
+	}
+}
+
+Technique renderInstancesDynamic
+{
+	Pass p0
+	{
+		VertexProgram = {Evaluate::ColorCode, Render::VS_Instancing};
+		FragmentProgram = Render::FS_InstancingDynamic;
 	}
 }
 

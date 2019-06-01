@@ -135,7 +135,7 @@ public:
 	void	BindRenderStretchedBillboards();
 	void	UnBindRenderStretchedBillboards();
 
-	void	BindRenderInstances();
+	void	BindRenderInstances(const int lighting);
 	void	UnBindRenderInstances();
 
 	void	BindTerrainDepth();
@@ -203,7 +203,9 @@ protected:
 	nvFX::ITechnique*   fx_TechRenderQuads;
 	nvFX::ITechnique*   fx_TechRenderBillboards;
 	nvFX::ITechnique*   fx_TechRenderStretchedBillboards;
-	nvFX::ITechnique*   fx_TechRenderInstances;
+	nvFX::ITechnique*   fx_TechRenderInstancesSimple;
+	nvFX::ITechnique*   fx_TechRenderInstancesFlat;
+	nvFX::ITechnique*   fx_TechRenderInstancesDynamic;
 	nvFX::IPass*        fx_passRender;
 	
 	nvFX::ITechnique	*fx_TechTerrainPrep;

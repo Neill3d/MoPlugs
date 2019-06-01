@@ -54,7 +54,7 @@ void ParticleSystem::SetRenderSizeAndColorCurves( GLuint sizeTextureId, GLuint c
 	mColorTextureId = colorTextureId;
 }
 
-void ParticleSystem::RenderParticles(int type, const bool pointSmooth, const bool pointFalloff)
+void ParticleSystem::RenderParticles(int type, int lighting, const bool pointSmooth, const bool pointFalloff)
 {
 	//GLuint lSizeTexId = mSizeCurve.GetTextureId();
 	//GLuint lColorTexId = mColorCurve.GetTextureId();
@@ -105,7 +105,7 @@ void ParticleSystem::RenderParticles(int type, const bool pointSmooth, const boo
 		RenderStretchedBillboards();
 		break;
 	case 4:
-		RenderInstances();
+		RenderInstances(lighting);
 		break;
 	}
 	
@@ -250,7 +250,7 @@ void ParticleSystem::RenderStretchedBillboards()
 }
 
 
-void ParticleSystem::RenderInstances()
+void ParticleSystem::RenderInstances(const int lighting)
 {
 	if ( nullptr!=mConnections && mConnections->GetNumberOfInstanceSubPatches() > 0 )
 	{
@@ -276,7 +276,7 @@ void ParticleSystem::RenderInstances()
 		glBindBuffer(GL_ARRAY_BUFFER, stream.uvId);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*) stream.uvOffset); // normals
 
-		mShader->BindRenderInstances();
+		mShader->BindRenderInstances(lighting);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindBuffer(GL_ARRAY_BUFFER, mParticleBuffer[mCurrTFB]);

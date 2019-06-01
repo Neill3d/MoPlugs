@@ -237,7 +237,7 @@ public:
 
 	// textures for size and color lookup ( 0 - to disable )
 	void	SetRenderSizeAndColorCurves( GLuint sizeTextureId, GLuint colorTextureId );
-    void RenderParticles(int type, const bool pointSmooth, const bool pointFalloff);
+    void RenderParticles(int type, int lighting, const bool pointSmooth, const bool pointFalloff);
 
 	void SetConnections(ParticleSystemConnections	*pConnections)
 	{
@@ -372,7 +372,7 @@ protected:
 	void RenderQuads();
 	void RenderBillboards();
 	void RenderStretchedBillboards();
-	void RenderInstances();
+	void RenderInstances(const int lighting);
 
 	void SwapBuffers();	// operation to switch update and render double-buffers
 	void SwapSurfaceBuffers();

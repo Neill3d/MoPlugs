@@ -12,6 +12,17 @@ Please post issues and feature requests to this [github repository issues sectio
 * Part 3 - https://youtu.be/OcH3vusjros
 * Part 4 - https://youtu.be/qNmFzHt0O0w
 
+## Installation Package
+
+ There are some ready to use installation packages, you can find them in a ["Release" section of the repository](https://github.com/Neill3d/MoPlugs/releases).
+
+## Binaries
+ 
+ If you want to install manually or copy just updated binary, you can find precompiled binaries in the "bin" folder.
+ 
+ To setup custom plugins and scripts path, please, try a configuration application - https://github.com/Neill3d/MoBu_ConfigApp
+
+
 ## Documentation ##
 
 [User Guide](https://neill3d.github.io/MoPlugs/)

@@ -31,7 +31,7 @@ FBModel *MakeSnapshot(FBModel *pModel, const bool ResetXForm)
 	pVertexData->VertexArrayMappingRequest();
 	
 	int vertCountInMesh = lGeom->VertexCount();
-	int *indices = pVertexData->GetIndexArray();
+//	int *indices = pVertexData->GetIndexArray();
 
 	//unsigned int dubCount = 0;
 	//const int *dubIndices = pVertexData->GetVertexArrayDuplicationMap( dubCount );
@@ -47,8 +47,8 @@ FBModel *MakeSnapshot(FBModel *pModel, const bool ResetXForm)
 	int uvCount, uvIndexCount;
 
 	FBUV	*uvs = lMesh->GetUVSetDirectArray(uvCount);
-	int *uvIndices = lMesh->GetUVSetIndexArray(uvIndexCount);
-	FBGeometryMappingMode uvMode = lMesh->GetUVSetMappingMode();
+//	int *uvIndices = lMesh->GetUVSetIndexArray(uvIndexCount);
+//	FBGeometryMappingMode uvMode = lMesh->GetUVSetMappingMode();
 	
 	lMesh->GeometryEnd();
 	
@@ -185,7 +185,7 @@ void FillInputModelData(FBModelList &modelList, InputModelData &data, FBArrayTem
 	int numberOfMaterials = 0;
 
 
-	int lmaterialIndexCount = 0;
+//	int lmaterialIndexCount = 0;
 		//int *lmaterialIndices = lMesh->GetMaterialIndexArray( lmaterialIndexCount );
 
 		//data.materialIndices.resize( materialIndexCount + lmaterialIndexCount );
@@ -208,7 +208,7 @@ void FillInputModelData(FBModelList &modelList, InputModelData &data, FBArrayTem
 
 		FBGeometry *lGeom = pModel->Geometry;
 		FBMesh *lMesh = (FBMesh*) lGeom;
-		FBModelVertexData	*pVertexData = pModel->ModelVertexData;
+//		FBModelVertexData	*pVertexData = pModel->ModelVertexData;
 
 		const int lvertCountInMesh = lGeom->VertexCount();
 		vertCountInMesh += lvertCountInMesh;
@@ -217,11 +217,11 @@ void FillInputModelData(FBModelList &modelList, InputModelData &data, FBArrayTem
 		polyCount += lpolyCount;
 
 		int polyVertexCount;
-		int *polyVertexIndices = (int*) lMesh->PolygonVertexArrayGet(polyVertexCount);
+		lMesh->PolygonVertexArrayGet(polyVertexCount); // int *polyVertexIndices = (int*) 
 
-		int lnormalDirectCount, lnormalIndicesCount;
-		float *normals = (float*) lMesh->GetNormalsDirectArray( lnormalDirectCount );
-		int *normalIndices = lMesh->GetNormalsIndexArray( lnormalIndicesCount );
+		int lnormalDirectCount; // , lnormalIndicesCount;
+		lMesh->GetNormalsDirectArray( lnormalDirectCount ); // float *normals = (float*) 
+		//int *normalIndices = lMesh->GetNormalsIndexArray( lnormalIndicesCount );
 
 		// Important! For indices I will use polygon vertex mapping type, so indices count == poly vertices count
 
@@ -235,10 +235,10 @@ void FillInputModelData(FBModelList &modelList, InputModelData &data, FBArrayTem
 
 		if (uvSets.GetCount() )
 		{
-			int luvDirectCount, luvIndicesCount;
+			int luvDirectCount; // , luvIndicesCount;
 
-			FBUV *uvs = lMesh->GetUVSetDirectArray( luvDirectCount );
-			int *uvIndices = lMesh->GetUVSetIndexArray( luvIndicesCount );
+			lMesh->GetUVSetDirectArray( luvDirectCount ); // FBUV *uvs =
+			//int *uvIndices = lMesh->GetUVSetIndexArray( luvIndicesCount );
 
 			uvDirectCount += luvDirectCount;
 			uvIndicesCount += polyVertexCount;
@@ -977,7 +977,7 @@ void ReComputeNormals(FBModel *pModel)
 void InvertNormals(FBModel *pModel)
 {
 	FBGeometry *pGeometry = pModel->Geometry;
-	FBMesh *pMesh = (FBMesh*) pGeometry;
+//	FBMesh *pMesh = (FBMesh*) pGeometry;
 
 	if (pGeometry)
 	{	

@@ -257,7 +257,7 @@ void CIBLBindedCallback::InternalInstanceEnd()
 
 	if (FBIS(mShader, ORIBLShader))
 	{
-		ORIBLShader *projTex = (ORIBLShader*) mShader;
+//		ORIBLShader *projTex = (ORIBLShader*) mShader;
 
 		if (hasExclusiveLights)
 			mGPUFBScene->BindLights(false);
@@ -386,7 +386,7 @@ void CIBLBindedCallback::PrepareInstance(const CRenderOptions &options, FBShader
 	if (nullptr == mShader || false == mShader->Enable )
 		return;
 
-	const unsigned int uniqueFrameId = options.GetUniqueFrameId();
+//	const unsigned int uniqueFrameId = options.GetUniqueFrameId();
 
 	if (FBIS(mShader, ORIBLShader) )
 	{
@@ -418,7 +418,7 @@ void CIBLBindedCallback::PrepareInstance(const CRenderOptions &options, FBShader
 
 void CIBLBindedCallback::PrepareModel(const CRenderOptions &options, FBModel *pModel, FBShader *pShader)
 {
-	const unsigned int uniqueFrameId = options.GetUniqueFrameId();
+//	const unsigned int uniqueFrameId = options.GetUniqueFrameId();
 
 	// TODO: prepare buffers to compute blendshape normals in real-time
 
@@ -459,7 +459,7 @@ void CIBLBindedCallback::FrameEvaluation(FBShader *pShader)
 			if (nullptr == pGeometry || nullptr == pData)
 				return;
 
-			const int geomUpdateId = pModel->GeometryUpdateId;
+//			const int geomUpdateId = pModel->GeometryUpdateId;
 			//if (data.geometryUpdateId != geomUpdateId || data.mBufferBlendshapes == 0)
 			//{
 
@@ -481,7 +481,7 @@ void CIBLBindedCallback::FrameEvaluation(FBShader *pShader)
 					{
 						const int diffCount = pGeometry->ShapeGetDiffPointCount(i);
 
-						const int startIndex = vertexCount * i;
+//						const int startIndex = vertexCount * i;
 
 						for (int j=0; j<diffCount; ++j)
 						{
@@ -489,7 +489,7 @@ void CIBLBindedCallback::FrameEvaluation(FBShader *pShader)
 							FBVertex pPosDiff;
 							FBNormal pNormalDiff;
 
-							bool res = pGeometry->ShapeGetDiffPoint(i, j, oriIndex, pPosDiff);
+//							bool res = pGeometry->ShapeGetDiffPoint(i, j, oriIndex, pPosDiff);
 
 							if (oriIndex >= 0 && oriIndex < vertexCount)
 							{

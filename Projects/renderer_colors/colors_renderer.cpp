@@ -493,7 +493,7 @@ void ColorsRendererCallback::RenderNormalizedColors(FBRenderOptions *pRenderOpti
 			
 		}
 
-        const int lSubRegionCount = lModelVertexData->GetSubRegionCount();
+//        const int lSubRegionCount = lModelVertexData->GetSubRegionCount();
 
         //Calling PushZDepthClipOverride() disables the OpenGL custom clip-plane (used for Z-Depth HideFront selection) if this model is selected using
         //Z-Depth HideFront selection tool. This is so that the model is not clipped, i.e., remains visible.

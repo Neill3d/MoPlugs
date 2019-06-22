@@ -227,7 +227,7 @@ void MoRendererCallback::SelectStaticObjects()
 
 void MoRendererCallback::ExportGPUCache()
 {
-	bool modeOverride = true;	// override or merge mode for exporting ?
+//	bool modeOverride = true;	// override or merge mode for exporting ?
 
 	// selection prefer to be static
 	FBModelList pList;
@@ -438,7 +438,7 @@ void MoRendererCallback::CheckFreeGPUMemory()
 void MoRendererCallback::ConvertAllBoxIntoGPUCacheObject()
 {
 	FBScene *pScene = mSystem.Scene;
-	FBShader *pShaderONE = nullptr;
+//	FBShader *pShaderONE = nullptr;
 
 	std::vector<FBModel*>	connections;
 
@@ -470,7 +470,7 @@ void MoRendererCallback::ConvertAllBoxIntoGPUCacheObject()
 		if (pSrcModel == nullptr)
 			continue;
 
-		FBModel *pParent = pSrcModel->Parent;
+//		FBModel *pParent = pSrcModel->Parent;
 
 		FBString srcName( pSrcModel->LongName );
 		pSrcModel->Name = "temproaryGPUBoxName";

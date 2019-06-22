@@ -418,7 +418,7 @@ void ORIBLShader::ShaderPassModelDraw ( FBRenderOptions* pRenderOptions, FBRende
 	if (true == mSelectionMode)
 		return;
 
-	int regionIndex = pInfo->GetSubRegionIndex();
+	//int regionIndex = pInfo->GetSubRegionIndex();
 	/*
 	if (regionIndex > 0)
 	{

@@ -372,8 +372,8 @@ bool CompositeBackground::PrepRender(const CCompositionInfo *pInfo, bool allowTo
 		shaderOk = mBackgroundProgram->IsOk();
 	}
 
-	const int w = mProcessingWidth;
-	const int h = mProcessingHeight;
+	//const int w = mProcessingWidth;
+//	const int h = mProcessingHeight;
 	
 	if (nullptr == mBackgroundProgram)
 	{

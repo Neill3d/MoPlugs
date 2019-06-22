@@ -617,7 +617,7 @@ void ProjTexShader::ShaderPassModelDraw ( FBRenderOptions* pRenderOptions, FBRen
 	if (true == mSelectionMode)
 		return;
 
-	int regionIndex = pInfo->GetSubRegionIndex();
+//	int regionIndex = pInfo->GetSubRegionIndex();
 	/*
 	if (regionIndex > 0)
 	{

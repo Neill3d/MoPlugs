@@ -145,7 +145,7 @@ void ObjectCompositionRender::CopyFrom(ObjectCompositeBase *pNode)
 {
 	if ( FBIS(pNode, ObjectCompositionRender) )
 	{
-		ObjectCompositionRender *pRender = (ObjectCompositionRender*) pNode;
+		//ObjectCompositionRender *pRender = (ObjectCompositionRender*) pNode;
 
 		//PropertyCopy( DepthOutput, pRender->DepthOutput );
 		//PropertyCopy( NormalOutput, pRender->NormalOutput );
@@ -565,7 +565,7 @@ void ObjectCompositionColor::CopyFrom(ObjectCompositeBase *pNode)
 {
 	if ( FBIS(pNode, ObjectCompositionColor) )
 	{
-		ObjectCompositionColor *pColor = (ObjectCompositionColor*) pNode;
+//		ObjectCompositionColor *pColor = (ObjectCompositionColor*) pNode;
 		/*
 		PropertyCopy( Color, pColor->Color );
 		PropertyCopy( Gradient, pColor->Gradient );
@@ -787,7 +787,7 @@ void ObjectCompositionShadow::CopyFrom(ObjectCompositeBase *pNode)
 {
 	if ( FBIS(pNode, ObjectCompositionColor) )
 	{
-		ObjectCompositionShadow *pShadowNode = (ObjectCompositionShadow*) pNode;
+//		ObjectCompositionShadow *pShadowNode = (ObjectCompositionShadow*) pNode;
 		/*
 		PropertyCopy( Color, pColor->Color );
 		PropertyCopy( Gradient, pColor->Gradient );
@@ -898,7 +898,7 @@ bool ObjectCompositionShadow::ReadyToApply(const CCompositionInfo *pInfo, const 
 const GLuint ObjectCompositionShadow::ComputeLayerTexture(const CCompositionInfo *pInfo, CompositeFinalStats &stats)
 {
 	// DONE: allocate texture for background
-	const float previewSizeFactor = pInfo->GetPreviewSizeFactor();
+//	const float previewSizeFactor = pInfo->GetPreviewSizeFactor();
 	
 	mProcessingWidth = pInfo->GetRenderWidth();
 	mProcessingHeight = pInfo->GetRenderHeight();
@@ -928,7 +928,7 @@ void ObjectCompositionShadow::PrepShadowData(const CCompositionInfo *pInfo)
 {
 	ShadowData &data = mShadowData;
 
-	FBCamera *pCamera = ((CCompositionInfo*) pInfo)->GetRenderCamera();
+//	FBCamera *pCamera = ((CCompositionInfo*) pInfo)->GetRenderCamera();
 
 	// for Zone computing
 	data.zoneInfo.x = (float) ComputeNumberOfZoneModels();
@@ -1291,7 +1291,7 @@ bool ObjectCompositionShadow::RenderShadowZones(const CCompositionInfo *pInfo, c
 	mProcessingWidth = w;
 	mProcessingHeight = h;
 
-	const bool useMask = UseCompositeMask;
+//	const bool useMask = UseCompositeMask;
 
 	const int computeLocalX = 32;
 	const int computeLocalY = 32;

@@ -715,8 +715,8 @@ void ModelDecal::ComputeFinalProjectorMatrix()
 		clipMatrix[13] = 0.5 + texTranslation[1];
 		clipMatrix[14] = texTranslation[2];
 			
-		int lWidth = ResolutionWidth;
-		int lHeight = ResolutionHeight;
+//		int lWidth = ResolutionWidth;
+//		int lHeight = ResolutionHeight;
 		/*
 		if (data.ProjectorAspect)
 		{

@@ -789,8 +789,8 @@ bool CGPUFBScene::RenderModel(bool bindTextures, FBModel *pModel, const int mode
 
 	for (int i=0; i<patchCount; ++i)
 	{
-		int offset = pData->GetSubPatchIndexOffset(i);
-		int size = pData->GetSubPatchIndexSize(i);
+//		int offset = pData->GetSubPatchIndexOffset(i);
+//		int size = pData->GetSubPatchIndexSize(i);
 
 		mMaterialShaders->UpdateMeshIndex(meshIndex + i);
 		//mBufferMesh.BindAsAttribute( 5, sizeof(MeshGLSL)*(meshIndex+i) );
@@ -937,7 +937,7 @@ void CGPUFBScene::ChangeContextForShaderGroups(FBRenderOptions *pFBRenderOptions
 void CGPUFBScene::RenderSceneShaderGroups(const CRenderOptions &options, FBRenderOptions *pFBRenderOptions, RenderingStats &stats)
 {
 
-	const int intpass = (int) options.GetPass();
+//	const int intpass = (int) options.GetPass();
 	const int intgoal = (int) options.GetGoal();
 	
 	const auto &shaderGroups = mShadersFactory.GetShaderTypesVector();
@@ -1148,7 +1148,7 @@ bool CGPUFBScene::PrepRenderForFBModel(FBModel *pModel)
 	}
 
 	//const int regionCount = pData->GetSubRegionCount();
-	const int patchCount = pData->GetSubPatchCount();
+//	const int patchCount = pData->GetSubPatchCount();
 
 	// needed for primitives indices
 	pData->VertexArrayMappingRelease();
@@ -1197,8 +1197,8 @@ bool CGPUFBScene::RenderPassModelDraw(CBaseShaderCallback *pCallback, const CRen
 	//
 	for (int i=0; i<patchCount; ++i)
 	{
-		int indexOffset = pData->GetSubPatchIndexOffset(i);
-		int indexSize = pData->GetSubPatchIndexSize(i);
+//		int indexOffset = pData->GetSubPatchIndexOffset(i);
+//		int indexSize = pData->GetSubPatchIndexSize(i);
 
 		mMaterialShaders->UpdateMeshIndex(meshIndex + i);
 		//mBufferMesh.BindAsAttribute( 5, sizeof(MeshGLSL)*(meshIndex+i) );

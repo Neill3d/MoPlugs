@@ -301,7 +301,7 @@ void CShaderGPUCacheCallback::OnInstanceEnd(const CRenderOptions &options, FBSha
 		return;
 
 	const ERenderGoal goal = options.GetGoal();
-	const EShaderPass pass = options.GetPass();
+	//const EShaderPass pass = options.GetPass();
 
 	const bool isEarlyZ = (eRenderGoalSelectionId == goal && eRenderGoalShadows != goal);
 

@@ -136,7 +136,7 @@ void ObjectFilter3dShadow::PrepShadowData(const CCompositionInfo *pInfo)
 {
 	ShadowData &data = mShadowData;
 
-	FBCamera *pCamera = ((CCompositionInfo*) pInfo)->GetRenderCamera();
+	//FBCamera *pCamera = ((CCompositionInfo*) pInfo)->GetRenderCamera();
 
 	FBColor vColor;
 	vColor = Color;

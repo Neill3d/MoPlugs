@@ -51,8 +51,8 @@ void ProjTexLayout::FBDestroy()
 ************************************************/
 void ProjTexLayout::UICreate()
 {
-	int lB = 10;
-    int lS = 4;
+//	int lB = 10;
+//    int lS = 4;
     int lW = 100;
     int lH = 28;
 
@@ -169,7 +169,7 @@ void ProjTexLayout::UICreateCommon()
 void ProjTexLayout::UICreateProjectors()
 {
 	int lB = 10;
-    int lS = 4;
+//    int lS = 4;
     int lW = 100;
     int lH = 18;
 	int lT = 20;
@@ -350,7 +350,7 @@ void ProjTexLayout::UICreateProjectors()
 void ProjTexLayout::UICreateShading()
 {
 	int lB = 10;
-    int lS = 4;
+//    int lS = 4;
     int lW = 100;
     int lH = 18;
 
@@ -449,9 +449,9 @@ void ProjTexLayout::UICreateShading()
 void ProjTexLayout::UICreateInfo()
 {
 	int lB = 10;
-    int lS = 4;
-    int lW = 100;
-    int lH = 18;
+//    int lS = 4;
+//    int lW = 100;
+//    int lH = 18;
 
 	mLayoutInfo.AddRegion("Info","Info",
         lB,		kFBAttachLeft,	"",		1.00,

@@ -29,6 +29,10 @@ buttonAddDir = FBButton()
 buttonRemove = FBButton()
 buttonClear = FBButton()
 buttonAbout = FBButton()
+buttonStoreCamera = FBButton()
+
+global gCameraMatrix
+gCameraMatrix = FBMatrix()
 
 def EventButtonAdd(control, event):
 
@@ -101,6 +105,12 @@ def EventButtonClear(control, event):
 def EventButtonAbout(control, event):
     FBMessageBox( "About Batch Render Tool", "Author Sergey Solohin (Neill3d) 2013\n\te-mail to: s@neill3d.com\n\t\twww.neill3d.com", "OK" )
 
+def EventButtonStoreCamera(control, event):
+    global gCameraMatrix
+    cam = gSystem.Renderer.CurrentCamera
+    if cam is not None:
+        cam.GetMatrix(gCameraMatrix)
+
 def EventButtonBatch(control, event):
     # Creating all the Constructors
     lScene = gSystem.Scene
@@ -113,6 +123,11 @@ def EventButtonBatch(control, event):
             
             # Opening the file in MotionBuilder, this replaces the current scene
             gApp.FileOpen(fname)
+
+            if gCameraMatrix[12] != 0.0:
+                cam = gSystem.Renderer.CurrentCamera
+                if cam is not None:
+                    cam.SetMatrix(gCameraMatrix)
                     
             #
             # Do the render
@@ -126,17 +141,18 @@ def EventButtonBatch(control, event):
             VideoManager = FBVideoCodecManager()
             VideoManager.VideoCodecMode = FBVideoCodecMode.FBVideoCodecStored
             
-            #codeclist = FBStringList()
-            #codellist = VideoManager.GetCodecIdList('AVI');
-            #for item in codeclist:
-            #    if item.find('XVID') >= 0: VideoManager.SetDefaultCodec('AVI', item)
+            codeclist = FBStringList()
+            codellist = VideoManager.GetCodecIdList('AVI');
+            for item in codeclist:
+                if item.find('XVID') >= 0: VideoManager.SetDefaultCodec('AVI', item)
             
             # Set the name of the rendered file.
             #lDstFileName = "c:\\" + newFileName
-            #base = os.path.splitext(lDstFileName)[0]
-            #lDstFileName = base + ".avi"
-            #lOptions.OutputFileName = lDstFileName
-            #lOptions.CameraResolution = FBCameraResolutionMode.kFBResolutionHD
+            base = os.path.splitext(fname)[0]
+            lDstFileName = base + ".avi"
+            lOptions.OutputFileName = lDstFileName
+            lOptions.CameraResolution = FBCameraResolutionMode.kFBResolutionD1PAL
+            lOptions.ViewingMode = FBVideoRenderViewingMode().FBViewingModeCurrent
             #lOptions.AntiAliasing = False
             # for 60 fps lets white video in half frame rate
             #lOptions.TimeSpan = FBTimeSpan(FBTime(0,0,0,0), FBTime(0,0,0,0))
@@ -215,7 +231,16 @@ def PopulateLayout(mainLyt):
     main.SetControl("buttonClear", buttonClear)
     
     x = FBAddRegionParam(5,FBAttachType.kFBAttachRight,"list")
-    y = FBAddRegionParam(15,FBAttachType.kFBAttachBottom,"buttonClear")
+    y = FBAddRegionParam(5,FBAttachType.kFBAttachBottom,"buttonClear")
+    w = FBAddRegionParam(-5,FBAttachType.kFBAttachRight,"")
+    h = FBAddRegionParam(25,FBAttachType.kFBAttachNone,"")
+    buttonStoreCamera.Caption = "Store Camera"
+    buttonStoreCamera.OnClick.Add(EventButtonStoreCamera)
+    main.AddRegion("buttonStoreCamera", "buttonStoreCamera", x, y, w, h)
+    main.SetControl("buttonStoreCamera", buttonStoreCamera)
+    
+    x = FBAddRegionParam(5,FBAttachType.kFBAttachRight,"list")
+    y = FBAddRegionParam(15,FBAttachType.kFBAttachBottom,"buttonStoreCamera")
     w = FBAddRegionParam(-5,FBAttachType.kFBAttachRight,"")
     h = FBAddRegionParam(25,FBAttachType.kFBAttachNone,"")
     buttonRender.Caption = "Render!"

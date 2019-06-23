@@ -54,8 +54,8 @@ kLongLong InitializeFrameDataAndBuffers( FBRenderOptions *pFBRenderOptions, FBCa
 	const bool processCompositions, FBComponent *pCompositionComponent, const int shadowResolution)
 {
 
-	FBSystem &lSystem = FBSystem::TheOne();
 #ifdef _DEBUG
+	FBSystem &lSystem = FBSystem::TheOne();
 	FBTime systemTime = lSystem.SystemTime;
 	kLongLong msBeginTime = systemTime.GetMilliSeconds();
 #endif

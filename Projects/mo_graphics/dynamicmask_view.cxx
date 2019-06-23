@@ -521,7 +521,7 @@ void BaseGraphManipulator::MoveChannelDown(ObjectChannel *channel, bool &hasSele
 	for (int i=0; i<channel->Components.GetCount(); ++i)
 	{
 		FBComponent *pComp = channel->Components[i];
-		ObjectShape *shape = (ObjectShape*) pComp;
+		//ObjectShape *shape = (ObjectShape*) pComp;
 
 		if (pComp->Components.GetCount() )	
 		{

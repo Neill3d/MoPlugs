@@ -92,7 +92,9 @@ ParticleShaderFX::ParticleShaderFX()
 	fx_TechRenderQuads = nullptr;
 	fx_TechRenderBillboards = nullptr;
 	fx_TechRenderStretchedBillboards = nullptr;
-	fx_TechRenderInstances = nullptr;
+	fx_TechRenderInstancesSimple = nullptr;
+	fx_TechRenderInstancesFlat = nullptr;
+	fx_TechRenderInstancesDynamic = nullptr;
 	fx_passRender = nullptr;
 
 	fx_gTime = nullptr;
@@ -197,9 +199,6 @@ bool ParticleShaderFX::Initialize()
 
 		if (false == lSuccess)
 			throw std::exception( "failed to load particles effect" );
-
-
-
 
 		//
 		programCompute = loadComputeShader(fx_computeLocation);
@@ -434,10 +433,18 @@ bool ParticleShaderFX::loadEffect(const char *effectFileName)
 	if(fx_TechRenderStretchedBillboards && (!fx_TechRenderStretchedBillboards->validate()))
         return false;
 
-	fx_TechRenderInstances = fx_Effect->findTechnique("renderInstances");
-	if(fx_TechRenderInstances && (!fx_TechRenderInstances->validate()))
+	fx_TechRenderInstancesSimple = fx_Effect->findTechnique("renderInstancesSimple");
+	if(fx_TechRenderInstancesSimple && (!fx_TechRenderInstancesSimple->validate()))
         return false;
 	
+	fx_TechRenderInstancesFlat = fx_Effect->findTechnique("renderInstancesFlat");
+	if (fx_TechRenderInstancesFlat && (!fx_TechRenderInstancesFlat->validate()))
+		return false;
+
+	fx_TechRenderInstancesDynamic = fx_Effect->findTechnique("renderInstancesDynamic");
+	if (fx_TechRenderInstancesDynamic && (!fx_TechRenderInstancesDynamic->validate()))
+		return false;
+
 	fx_passRender = fx_TechRenderPoints->getPass(0);
 
 	// terrain shaders
@@ -775,9 +782,22 @@ void ParticleShaderFX::UnBindRenderStretchedBillboards()
 		fx_passRender->unbindProgram();
 }
 
-void ParticleShaderFX::BindRenderInstances()
+void ParticleShaderFX::BindRenderInstances(const int lighting)
 {
-	fx_passRender = (fx_TechRenderInstances) ? fx_TechRenderInstances->getPass(0) : nullptr;
+	switch (lighting)
+	{
+	case 0:
+		fx_passRender = (fx_TechRenderInstancesSimple) ? fx_TechRenderInstancesSimple->getPass(0) : nullptr;
+		break;
+	case 1:
+		fx_passRender = (fx_TechRenderInstancesFlat) ? fx_TechRenderInstancesFlat->getPass(0) : nullptr;
+		break;
+	case 2:
+		fx_passRender = (fx_TechRenderInstancesDynamic) ? fx_TechRenderInstancesDynamic->getPass(0) : nullptr;
+		break;
+	default:
+		fx_passRender = nullptr;
+	}
 
 	if (fx_passRender)
 		fx_passRender->execute();

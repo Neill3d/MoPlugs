@@ -226,7 +226,7 @@ bool ShaderBlurSystem::ApplyFilter(const CCompositionInfo *pInfo, const Data &da
 	const int w = data.w;
 	const int h = data.h;
 
-	const bool useMask = (data.compositeMaskId > 0);
+	//const bool useMask = (data.compositeMaskId > 0);
 
 	const double horz = data.horzFactor;
 	double vert = data.vertFactor;

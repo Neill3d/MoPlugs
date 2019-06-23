@@ -131,12 +131,12 @@ void ORModelGPUCache::CustomModelDisplay( FBCamera* pCamera, FBModelShadingMode 
 
 	ORShaderGPUCache *pCacheShader = (ORShaderGPUCache*) pShader;
 
-    FBMatrix		 MatrixView;
-    FBMatrix		 MatrixProjection;
+ //   FBMatrix		 MatrixView;
+ //   FBMatrix		 MatrixProjection;
 
-    FBViewingOptions* lViewingOptions = FBSystem::TheOne().Renderer->GetViewingOptions();
-    bool lIsSelectBufferPicking = lViewingOptions->IsInSelectionBufferPicking();
-    bool lIsColorBufferPicking  = lViewingOptions->IsInColorBufferPicking();
+//    FBViewingOptions* lViewingOptions = FBSystem::TheOne().Renderer->GetViewingOptions();
+//    bool lIsSelectBufferPicking = lViewingOptions->IsInSelectionBufferPicking();
+//    bool lIsColorBufferPicking  = lViewingOptions->IsInColorBufferPicking();
 
 	pCacheShader->CustomDisplay( mPickedSubItem, pCamera, pShadingMode, pRenderPass, pPickingAreaWidth, pPickingAreaHeight );
 }
@@ -166,8 +166,8 @@ bool ORModelGPUCache::CustomModelPicking(int pNbHits, unsigned int *pSelectBuffe
         *   see http://www.opengl.org/archives/resources/faq/technical/selection.htm
         */
 
-        unsigned int NameCount = *pSelectBuffer++;
-        assert(NameCount == 1); 
+//        unsigned int NameCount = *pSelectBuffer++;
+ //       assert(NameCount == 1); 
 
         // Skip two items  (Min & Max Depth)
         pSelectBuffer+=2; 

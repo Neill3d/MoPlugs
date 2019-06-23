@@ -183,7 +183,7 @@ void CRenderLayerArray::EventDataNotify(HISender pSender, HKEvent pEvent)
 			ERenderLayer layerId = eRenderLayerMain;
 			if (nullptr != pProperty)
 			{
-				const ERenderLayer layerId = (ERenderLayer) pProperty->AsInt();
+//				const ERenderLayer layerId = (ERenderLayer) pProperty->AsInt();
 			}
 
 			if (lPlug == pProperty)

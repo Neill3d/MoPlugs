@@ -387,7 +387,7 @@ bool ParticleSystem::ReadSurfaceTextureData()
 	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_COMPRESSED, &compressed );
 
 	format = (mSurfaceTextureInfo.alpha>0) ? GL_RGBA : GL_RGB;
-	int pixelMemorySize = mSurfaceTextureInfo.GetPixelMemorySize();
+//	int pixelMemorySize = mSurfaceTextureInfo.GetPixelMemorySize();
 	
 	if (compressed == GL_TRUE || mSurfaceTextureInfo.width <= 0 || mSurfaceTextureInfo.height <= 0)
 	{

@@ -75,7 +75,7 @@ void CGPUFBScene::InitShadowTexture( const int texture_size, const int numberOfS
 	GLenum target = (enableMS) ? GL_TEXTURE_2D_MULTISAMPLE_ARRAY : GL_TEXTURE_2D_ARRAY;
 	const int numberOfSamples = samples;
 
-	const float BORDER_COLOR[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+//	const float BORDER_COLOR[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	glBindTexture(target, mTextureShadowArray);
 
@@ -491,7 +491,7 @@ void CGPUFBScene::PostRenderingShadows()
 	FBCamera *pCamera = GetCamera();
 	const int width = pCamera->CameraViewportWidth;
 	const int height = pCamera->CameraViewportHeight;
-	const float aspect = 1.0f * width / height;
+//	const float aspect = 1.0f * width / height;
 
 	glm::mat4 projection = glm::ortho( 0.0f, (float) width, 0.0f, (float) height, -1.0f, 1.0f );
 
@@ -629,9 +629,10 @@ bool CGPUFBScene::ComputeShadowSpotLightMatrices( FBLight *pLight, FBModel *pVol
 	float spotAngle = (float) cosAngle;
 
 	// Ok .. now we just need a projection matrix ...
-	float fov = 1.2f * spotAngle / 2.0f;
+//	float fov = 1.2f * spotAngle / 2.0f;
 	float fFar = data.farPlane; // lightData.radius * 2.0f; // scl[1] 
 	float fNear = data.nearPlane;
+	/*
 	float top = tan(fov*3.14159f/360.0f) * fNear;
 	float bottom = -top;
 	float left = bottom;
@@ -643,8 +644,7 @@ bool CGPUFBScene::ComputeShadowSpotLightMatrices( FBLight *pLight, FBModel *pVol
             0,                         0,                           -(fFar+fNear)/(fFar-fNear), -(2.0f*fFar*fNear)/(fFar-fNear),
             0,                         0,                           -1.0f,                      0
         };
-
-	
+	*/
 	perspective( data.proj, spotAngle, 1.0f, fNear, fFar );
 
 	return true;

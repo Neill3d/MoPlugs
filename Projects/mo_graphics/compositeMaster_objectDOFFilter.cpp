@@ -133,7 +133,7 @@ void ObjectFilter3dDOF::PrepData(const CCompositionInfo *pInfo)
 	bool autofocus = false;
 	AutoFocus.GetData( &autofocus, sizeof(bool) );
 
-	FBCamera *pCamera = ((CCompositionInfo*)pInfo)->GetRenderCamera();
+	//FBCamera *pCamera = ((CCompositionInfo*)pInfo)->GetRenderCamera();
 
 	if (UseCameraDOFProperties && pInfo->UseCameraDOFSettings() )
 	{

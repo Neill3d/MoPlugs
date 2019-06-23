@@ -267,8 +267,8 @@ void GraphView::BeginViewExpose(bool predraw)
 
 	glLineWidth(1.0);
 
-	int lWidth = CalcWidth();
-	int lHeight = CalcHeight();
+//	int lWidth = CalcWidth();
+//	int lHeight = CalcHeight();
 
 //	Push2dViewport(lWidth, lHeight);
 

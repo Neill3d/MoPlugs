@@ -1131,7 +1131,7 @@ void ObjectComposition::Render()
 void ObjectComposition::RenderLayers(bool allowToReturnDirectTextureId)
 {
 	
-	bool shaderOk = true;
+	//bool shaderOk = true;
 	GLuint backgroundId = mBackground->ComputeTexture( mInfo.get(), mStats, mTextureBuffer.GetCurrentTextureId(), allowToReturnDirectTextureId );
 	
 	CHECK_GL_ERROR_MOBU();
@@ -1153,7 +1153,7 @@ void ObjectComposition::RenderLayers(bool allowToReturnDirectTextureId)
 				continue;
 
 			const GLuint operand1 = (backgroundId > 0) ? backgroundId : mTextureBuffer.GetCurrentTextureId();
-			const GLuint operand2 = pLayer->ComputeLayerTexture(mInfo.get(), mStats);
+//			const GLuint operand2 = pLayer->ComputeLayerTexture(mInfo.get(), mStats);
 			const GLuint result = mTextureBuffer.QueryATextureBuffer();
 
 			pLayer->BlendLayers(mInfo.get(), prInfo, mStats, operand1, result);
@@ -1203,7 +1203,7 @@ void ObjectComposition::RenderVideoBatches()
 	if (Active == false || UseForBatchProcessing == false)
 		return;
 
-	const bool useMask = UseCompositeMask;
+//	const bool useMask = UseCompositeMask;
 
 	for (int nBatch=0; nBatch < BatchInput.GetCount(); ++nBatch)
 	{

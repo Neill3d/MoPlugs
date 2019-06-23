@@ -231,7 +231,7 @@ void GPUshader_ParticlesLayout::UICreateProps(FBLayout &layout, const int count,
 	FBAttachType lastType = kFBAttachNone;
 
 	//int layoutX, layoutY, layoutwidth, layoutheight;
-	int layoutwidth = 400;
+//	int layoutwidth = 400;
 	int layoutheight = 400;
 	
 	int accH = lS;
@@ -372,7 +372,7 @@ void GPUshader_ParticlesLayout::UIResizeProps(FBLayout &layout, const int count,
 
 	// compute number of columns
 
-	const int layoutwidth = (mLayoutWidth > 0) ? mLayoutWidth : 400;
+//	const int layoutwidth = (mLayoutWidth > 0) ? mLayoutWidth : 400;
 	const int layoutheight = (mLayoutHeight > 0) ? mLayoutHeight : 400;
 
 	int accH = lS * 2 + lH;

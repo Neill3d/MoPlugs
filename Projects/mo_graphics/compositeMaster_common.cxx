@@ -229,7 +229,7 @@ bool AnyCompositionWithRender()
 	for (int i=0; i<count; ++i)
 		if ( FBIS(pScene->UserObjects[i], ObjectComposition) )
 		{
-			ObjectComposition *pFinal = (ObjectComposition*) pScene->UserObjects[i];
+			//ObjectComposition *pFinal = (ObjectComposition*) pScene->UserObjects[i];
 			/*
 			if (pFinal->IsRenderNodeExist() )
 			{
@@ -520,7 +520,7 @@ GLuint FindDepthId(FBComponent *root)
 {
 	GLuint depthId = 0;
 
-	auto renderNode = FindRenderNodePtr(root);
+//	auto renderNode = FindRenderNodePtr(root);
 //	if (renderNode) depthId = renderNode->getDepthTextureId();
 
 	return depthId;
@@ -530,7 +530,7 @@ GLuint FindNormalsId(FBComponent *root)
 {
 	GLuint normalsId = 0;
 
-	auto renderNode = FindRenderNodePtr(root);
+//	auto renderNode = FindRenderNodePtr(root);
 //	if (renderNode) normalsId = renderNode->getNormalsTextureId();
 
 	return normalsId;
@@ -540,7 +540,7 @@ GLuint FindPosId(FBComponent *root)
 {
 	GLuint posId = 0;
 
-	auto renderNode = FindRenderNodePtr(root);
+//	auto renderNode = FindRenderNodePtr(root);
 //	if (renderNode) posId = renderNode->getPosTextureId();
 
 	return posId;

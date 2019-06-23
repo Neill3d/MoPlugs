@@ -25,15 +25,15 @@ bool MoGraphicsAssociation::IsValidSrc( FBComponent *pSrc)
 	if (pSrc == nullptr) 
 		return false;
 
-	const char *modelName = pSrc->Name;
+	//const char *modelName = pSrc->Name;
 
 	return false;
 }
 
 bool MoGraphicsAssociation::IsValidConnection( FBComponent* pSrc, FBComponent*& pDst, bool& pAllowMultiple) 
 { 
-	const char *srcName = pSrc->Name;
-	const char *dstName = pDst->Name;
+//	const char *srcName = pSrc->Name;
+//	const char *dstName = pDst->Name;
 
 	return false;
 }

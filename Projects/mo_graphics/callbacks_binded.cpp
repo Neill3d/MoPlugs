@@ -677,7 +677,7 @@ void CProjTexBindedCallback::PrepareInstance(const CRenderOptions &options, FBSh
 	if (nullptr == mShader || false == mShader->Enable )
 		return;
 
-	const unsigned int uniqueFrameId = options.GetUniqueFrameId();
+//	const unsigned int uniqueFrameId = options.GetUniqueFrameId();
 
 	if (FBIS(mShader, ProjTexShader) )
 	{
@@ -709,7 +709,7 @@ void CProjTexBindedCallback::PrepareInstance(const CRenderOptions &options, FBSh
 
 void CProjTexBindedCallback::PrepareModel(const CRenderOptions &options, FBModel *pModel, FBShader *pShader)
 {
-	const unsigned int uniqueFrameId = options.GetUniqueFrameId();
+//	const unsigned int uniqueFrameId = options.GetUniqueFrameId();
 
 	// check if we should update FX shader here as well
 	// TODO: update only once (could be assigned to many of models)

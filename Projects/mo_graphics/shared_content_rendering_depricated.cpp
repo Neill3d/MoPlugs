@@ -18,7 +18,7 @@
 void CGPUFBScene::RenderSceneShaderGroups2(const CRenderOptions &options, FBRenderOptions *pFBRenderOptions)
 {
 
-	const int intpass = (int) options.GetPass();
+//	const int intpass = (int) options.GetPass();
 	const int intgoal = (int) options.GetGoal();
 	const auto &shaderGroups = mShadersFactory.GetShaderTypesVector();
 
@@ -318,8 +318,8 @@ bool CGPUFBScene::RenderPassModelDraw2(CBaseShaderCallback *pCallback, const CRe
 	//
 	for (int i=0; i<patchCount; ++i)
 	{
-		int offset = pData->GetSubPatchIndexOffset(i);
-		int size = pData->GetSubPatchIndexSize(i);
+//		int offset = pData->GetSubPatchIndexOffset(i);
+//		int size = pData->GetSubPatchIndexSize(i);
 
 		// TODO: mesh index is a vertex attribute !
 		//mUberShader->UpdateMeshIndex(meshIndex + i);

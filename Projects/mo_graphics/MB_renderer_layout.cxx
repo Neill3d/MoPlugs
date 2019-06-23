@@ -68,7 +68,7 @@ void MoRendererCallbackLayout::UICreate()
 {
 	const int lS=4;
 	const int lW=300;
-	const int lP=300;
+//	const int lP=300;
 	
 	AddRegion( "slider", "slider",
 			lW,		kFBAttachNone,		"",			1.0,
@@ -146,8 +146,8 @@ void MoRendererCallbackLayout::UICreateTools()
 
 	const int lS=4;
 	const int lH = 25;
-	const int lW=400;
-	const int lP=300;
+//	const int lW=400;
+//	const int lP=300;
 	
 	l.AddRegion( "buttonComposition", "buttonComposition",
 			lS,		kFBAttachLeft,		"",			1.0,
@@ -365,7 +365,7 @@ void MoRendererCallbackLayout::UICreateProps(FBLayout &layout, const int count, 
 	FBAttachType lastType = kFBAttachNone;
 
 	//int layoutX, layoutY, layoutwidth, layoutheight;
-	int layoutwidth = 400;
+//	int layoutwidth = 400;
 	int layoutheight = 400;
 	
 	int accH = lS;
@@ -414,7 +414,7 @@ void MoRendererCallbackLayout::UIResizeProps(FBLayout &layout, const int count, 
 
 	// compute number of columns
 
-	const int layoutwidth = (mLayoutWidth > 0) ? mLayoutWidth : 400;
+//	const int layoutwidth = (mLayoutWidth > 0) ? mLayoutWidth : 400;
 	const int layoutheight = (mLayoutHeight > 0) ? mLayoutHeight + 100 : 400;
 
 	int accH = lS * 2;

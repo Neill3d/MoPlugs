@@ -1704,7 +1704,7 @@ void linSolve(unsigned m, double *&A, double *&B, double *&c)
 			B[j] = B[j] - B[i] * d;
 		}
 	// backward
-	for (int j=0; j<m; j++)
+	for (unsigned int j=0; j<m; j++)
 	{
 		assert( A[j*m+j] != 0.0 );
 		c[j] = B[j] / A[j*m+j];

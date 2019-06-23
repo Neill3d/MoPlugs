@@ -45,7 +45,7 @@ void CMoBuVisitor::DynamicTexturesImage1(const ImageHeader *header, const size_t
 	stream += sizeof(ImageHeader);
 
 	int components = (header->format==GL_RGBA) ? 4 : 3;
-	int d = (header->format==GL_RGBA) ? 32 : 24;
+//	int d = (header->format==GL_RGBA) ? 32 : 24;
 
 	GLuint texId=0;
 	glGenTextures(1, &texId); 
@@ -146,7 +146,7 @@ void CMoBuVisitor::DynamicTexturesImage2(const BYTE type, const ImageHeader2 *he
 		stream += sizeof(ImageHeader2);
 	
 		int components = (header->format==GL_RGBA) ? 4 : 3;
-		int d = (header->format==GL_RGBA) ? 32 : 24;
+//		int d = (header->format==GL_RGBA) ? 32 : 24;
 
 		
 		glGenTextures(1, &texId); 

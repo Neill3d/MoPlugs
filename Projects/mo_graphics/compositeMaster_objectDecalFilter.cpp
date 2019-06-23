@@ -293,7 +293,7 @@ void ObjectFilter3dDecal::DoSaveTextureToFile(const GLuint texId, const char *fi
 	TextureObjectGetData(GL_TEXTURE_2D, buffer, width, height, internalFormat, format, isCompressed, pixelMemorySize, imageSize, numberOfLods);
 
 	// DONE: save as TGA
-	unsigned char pixelDepth = pixelMemorySize * 8;	// number of bits
+	//unsigned char pixelDepth = pixelMemorySize * 8;	// number of bits
 	//tgaSave(filename, width, height, pixelDepth, buffer);
 
 	FBImage	image(filename);
@@ -445,7 +445,7 @@ FBComponent *ObjectFilter3dDecal::GetRealDecal(const int index)
 
 void ObjectFilter3dDecal::ConnectOrUpdateDecal(const char *imageName)
 {
-	const int decalCount = ComputeRealDecalCount();
+//	const int decalCount = ComputeRealDecalCount();
 
 	ModelDecal *pDecal = nullptr;
 	/*

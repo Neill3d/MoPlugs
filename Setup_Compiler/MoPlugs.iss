@@ -2,10 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MoPlugs for Autodesk® MotionBuilder®"
-#define MyAppVersion "1.2.0a"
+#define MyAppVersion "2019.0.1"
 #define MyAppPublisher "Neill3d"
 #define MyAppURL "https://github.com/Neill3d/MoPlugs"
-#define MyAppExeName "Setup_MoPlugs_1_2_0a"
+#define MyAppExeName "Setup_MoPlugs_2019_0_1"
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"; InfoBeforeFile:"infoBefore_en.txt"; InfoAfterFile: "infoAfter_en.txt"
@@ -27,7 +27,7 @@ CreateAppDir=no
 OutputBaseFilename={#MyAppExeName}
 Compression=lzma
 SolidCompression=yes
-AppCopyright=Copyright (C) 2018 Neill3d
+AppCopyright=Copyright (C) 2019 Neill3d
 WizardImageFile=MoP.bmp
 WizardImageStretch=no
 WizardSmallImageFile=MoP_sm.bmp
@@ -40,6 +40,7 @@ Name: "2015"; Description: "MotionBuilder 2015"
 Name: "2016"; Description: "MotionBuilder 2016"
 Name: "2017"; Description: "MotionBuilder 2017"
 Name: "2018"; Description: "MotionBuilder 2018"
+Name: "2019"; Description: "MotionBuilder 2019"
 
 Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
@@ -49,6 +50,7 @@ Name: "MotionBuilder2015"; Description: "MotionBuilder 2015 plugins"; Types: ful
 Name: "MotionBuilder2016"; Description: "MotionBuilder 2016 plugins"; Types: full 2016 custom;
 Name: "MotionBuilder2017"; Description: "MotionBuilder 2017 plugins"; Types: full 2017 custom;
 Name: "MotionBuilder2018"; Description: "MotionBuilder 2018 plugins"; Types: full 2018 custom;
+Name: "MotionBuilder2019"; Description: "MotionBuilder 2019 plugins"; Types: full 2019 custom;
 
 [Files]
 
@@ -116,6 +118,19 @@ Source: "..\bin\System\*"; DestDir: "{code:MoBu_Path64|2018}\bin\system\"; Flags
 Source: "..\PythonScripts\Startup\*"; DestDir: "{userdocs}\MB\2018-x64\config\PythonStartup\"; Flags: ignoreversion; Components: MotionBuilder2018
 Source: "..\PythonScripts\Lib\*"; DestDir: "{userdocs}\MB\2018-x64\config\PythonStartup\"; Flags: ignoreversion; Components: MotionBuilder2018
 Source: "..\PythonScripts\Actions\*"; DestDir: "{code:MoBu_Path64|2018}\bin\config\Scripts\MoPlugs\"; Flags: ignoreversion; Components: MotionBuilder2018
+
+; 2019
+
+Source: "..\bin\x64\common\*.dll"; DestDir: "{code:MoBu_Path64|2019}\bin\x64\plugins\"; Flags: ignoreversion; Components: MotionBuilder2019
+Source: "..\bin\x64\plugins_2019\*.dll"; DestDir: "{code:MoBu_Path64|2019}\bin\x64\plugins\"; Flags: ignoreversion; Components: MotionBuilder2019
+Source: "..\bin\System\BlendShapeToolkit\*"; DestDir: "{code:MoBu_Path64|2019}\bin\system\BlendShapeToolkit"; Flags: ignoreversion; Components: MotionBuilder2019
+Source: "..\bin\System\GLSL\*"; DestDir: "{code:MoBu_Path64|2019}\bin\x64\plugins\GLSL\"; Flags: ignoreversion; Components: MotionBuilder2019
+Source: "..\bin\System\GLSL_CS\*"; DestDir: "{code:MoBu_Path64|2019}\bin\x64\plugins\GLSL_CS\"; Flags: ignoreversion; Components: MotionBuilder2019
+Source: "..\bin\System\GLSL_FX\*"; DestDir: "{code:MoBu_Path64|2019}\bin\x64\plugins\GLSL_FX\"; Flags: ignoreversion; Components: MotionBuilder2019
+Source: "..\bin\System\*"; DestDir: "{code:MoBu_Path64|2019}\bin\system\"; Flags: ignoreversion; Components: MotionBuilder2019
+Source: "..\PythonScripts\Startup\*"; DestDir: "{userdocs}\MB\2019-x64\config\PythonStartup\"; Flags: ignoreversion; Components: MotionBuilder2019
+Source: "..\PythonScripts\Lib\*"; DestDir: "{userdocs}\MB\2019-x64\config\PythonStartup\"; Flags: ignoreversion; Components: MotionBuilder2019
+Source: "..\PythonScripts\Actions\*"; DestDir: "{code:MoBu_Path64|2019}\bin\config\Scripts\MoPlugs\"; Flags: ignoreversion; Components: MotionBuilder2019
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

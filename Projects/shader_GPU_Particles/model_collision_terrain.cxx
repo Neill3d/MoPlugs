@@ -94,6 +94,7 @@ bool CollisionTerrain::FBCreate()
 #endif
 	*/
 	//
+	mShader = nullptr;
 	mShaderData.gTerrainFarPlane = 5.0f;
 	mShaderData.gTerrainOffset = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	mShaderData.gTerrainScale = vec4(1.0f, 1.0f, 1.0f, 1.0f);

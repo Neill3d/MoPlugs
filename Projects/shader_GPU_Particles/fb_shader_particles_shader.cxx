@@ -816,7 +816,7 @@ void GPUshader_Particles::ShaderBeginRender( FBRenderOptions* pRenderOptions, FB
 
 		if (renderFrameId <= mLastRenderFrameId)
 		{
-			FBTrace("[ShaderBeginRender] return: renderFrameId <= mLastRenderFrameId\n");
+			FBTrace("[ShaderBeginRender] return: renderFrameId %d <= mLastRenderFrameId %d\n", renderFrameId, mLastRenderFrameId);
 			return;
 		}
 		
@@ -837,7 +837,7 @@ void GPUshader_Particles::ShaderBeginRender( FBRenderOptions* pRenderOptions, FB
 
 	if (false == firstBeginRender)
 	{
-		printf("[ShaderBeginRender] firstBeginRender is false\n");
+		FBTrace("[ShaderBeginRender] firstBeginRender is false\n");
 		return;
 	}
 	
@@ -942,9 +942,7 @@ void GPUshader_Particles::ShadeModel( FBRenderOptions* pRenderOptions, FBShaderM
 	
 	if (false == firstShadeModel)
 	{
-
-
-		FBTrace("[ShadeModel] first shade model is empty!\n");
+		FBTrace("[ShadeModel, Pass %d] first shade model is empty!\n", (int)pPass);
 		return;
 	}
 		
@@ -1276,7 +1274,7 @@ void GPUshader_Particles::LocalShadeModel( FBRenderOptions* pRenderOptions, FBMo
 	if ( (particleIter == end(mParticleMap)) 
 		|| ( 0 == particleIter->second->GetTotalCycles() ) )
 	{
-		printf("[LocalShadeModel] particles not found for model %s\n", pModel->Name.AsString());
+		FBTrace("[LocalShadeModel] particles not found for model %s\n", pModel->Name.AsString());
 		return;
 	}
 	auto pParticles = particleIter->second;

@@ -1,3 +1,5 @@
+[![Downloads](https://img.shields.io/github/downloads/neill3d/moplugs/2019/total.svg)](https://github.com/neill3d/moplugs/releases/tag/2019)
+
 [![MoPlugs](https://github.com/Neill3d/MoPlugs/blob/master/docs/Images/MoP.jpg)]()
 
 MotionBuilder Extensions Pack

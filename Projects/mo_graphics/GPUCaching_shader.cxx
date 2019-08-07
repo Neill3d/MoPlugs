@@ -622,10 +622,15 @@ void ORShaderGPUCache::ShaderBeginRender( FBRenderOptions* pRenderOptions, FBSha
 // TODO: do we need to separate opaque and transparency passes here ?!
 void ORShaderGPUCache::ShadeModel( FBRenderOptions* pRenderOptions, FBShaderModelInfo* pShaderModelInfo, FBRenderingPass pPass )
 {
-	if (true == mGPUFBScene->IsWaiting() || nullptr == mCacheModel ) // || pRenderOptions->IsIDBufferRendering() )
+	if (true == mGPUFBScene->IsWaiting() || nullptr == mCacheModel || nullptr == pRenderOptions->GetRenderingCamera() ) // || pRenderOptions->IsIDBufferRendering() )
 		return;
 
 	FBCamera *pCamera = pRenderOptions->GetRenderingCamera();
+	if (FBIS(pCamera, FBCameraSwitcher))
+	{
+		pCamera = ((FBCameraSwitcher*)pCamera)->CurrentCamera;
+	}
+
 	InitializeFrameDataAndBuffers( pRenderOptions, pCamera, 
 		FBGetDisplayInfo(), 
 		pRenderOptions->GetRenderFrameId(),

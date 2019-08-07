@@ -7,7 +7,7 @@
     <LocalDebuggerCommand>$(ADSK_MOBU_2015_64)\bin\$(Platform)\motionbuilder.exe</LocalDebuggerCommand>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug 2017|x64'">
-    <LocalDebuggerCommand>$(ADSK_MOBU_2015_64)\bin\$(Platform)\motionbuilder.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>$(ADSK_MOBU_2017_64)\bin\$(Platform)\motionbuilder.exe</LocalDebuggerCommand>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerCommandArguments>-console</LocalDebuggerCommandArguments>

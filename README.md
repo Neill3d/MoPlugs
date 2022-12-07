@@ -1,5 +1,5 @@
 [![Downloads](https://img.shields.io/github/downloads/neill3d/moplugs/2019/total.svg)](https://github.com/neill3d/moplugs/releases/tag/2019)
-[<img src="https://discord.com/assets/ff41b628a47ef3141164bfedb04fb220.png" width=10% height=10%>](https://discord.gg/Uqe2UQxq)
+[<img src="https://discord.com/assets/ff41b628a47ef3141164bfedb04fb220.png" width=10% height=10%>](https://discord.gg/nqPZxmhW)
 
 [![MoPlugs](https://github.com/Neill3d/MoPlugs/blob/master/docs/Images/MoP.jpg)]()
 

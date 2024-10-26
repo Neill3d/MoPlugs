@@ -1,6 +1,4 @@
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/neill3d)
-
 **Note!** The extensions are under construction, they could cause a crash, unstable behaviour and could eat your performance.
 
 # Content
